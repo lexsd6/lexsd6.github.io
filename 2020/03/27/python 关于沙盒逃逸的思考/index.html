@@ -22,12 +22,12 @@
 <meta property="og:site_name" content="lexsd6&#39;s home">
 <meta property="og:description" content="0x1关于ssti的讲解1.什么是ssti? SSTI就是服务器端模板注入(Server-Side Template Injection).在一般的ctf中主要考查python比较多，故这篇文章主要是分析python下的ssti。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/.%5Cimage-20200327224713117.png">
+<meta property="og:image" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/image-20200327224713117.png">
 <meta property="article:published_time" content="2020-03-27T01:51:37.734Z">
-<meta property="article:modified_time" content="2020-05-01T06:38:30.399Z">
+<meta property="article:modified_time" content="2020-05-01T06:42:27.266Z">
 <meta property="article:author" content="lexsd6">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/.%5Cimage-20200327224713117.png">
+<meta name="twitter:image" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/image-20200327224713117.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -308,7 +308,7 @@
 <p>ssti起因是在通过与服务端模板的输入输出交互时,服务器端把用户提交的数据处理,当成了代码来执行.从而让恶意用户通过构建了恶意代码,来读取了服务器上的信息或得到了服务器的shell.例如：在python的flask中，会把<code>{ {</code> <code>} }</code>号里面的参数当成代码来执行，如<code>{ {1+1} }</code>会被执行成为<code>{ {2} }</code>。</p>
 <p>3.ssti漏洞的发现</p>
 <p>对目标机构造payload来分析，如<code>{ {7+7} }</code>，<code>{ {&#39;7&#39;+&#39;7&#39;} }</code>等。看是否有ssti。再参考下图分析是何种模板的ssti</p>
-<p><img src=".%5Cimage-20200327224713117.png" alt="image-20200327224713117"></p>
+<p><img src="image-20200327224713117.png" alt="image-20200327224713117"></p>
 <p>​    </p>
 <h2 id="0x2python基础"><a href="#0x2python基础" class="headerlink" title="0x2python基础"></a>0x2python基础</h2><h4 id="01-python魔术方法"><a href="#01-python魔术方法" class="headerlink" title="01.python魔术方法"></a>01.python魔术方法</h4><p>由于python的语法一贯奉行“一切皆是对象”的原则，所以python的一切变量都由类实例而来同时python有很多管理这些类与对象的内置魔术方法或函数。下面介绍几个常用的与类有关的魔术方法。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>） __class__</span><br><span class="line"><span class="comment">#__class__功能和type()函数一样，都是查看对象所在的类（子实例找父实例）。</span></span><br><span class="line"><span class="number">2</span>）__base__</span><br><span class="line"><span class="comment">#__base__的作用是查询一个类的父类。</span></span><br><span class="line"><span class="number">3</span>）__mro__</span><br><span class="line"><span class="comment">#返回包含回朔一个类所由继承过的父类的元组。</span></span><br><span class="line"><span class="number">4</span>）__subclasses__()</span><br><span class="line"><span class="comment">#返回包含一个类的所有子类的列表。</span></span><br><span class="line"><span class="number">5</span>）__builtins__()</span><br><span class="line"><span class="comment">#builtins就是内置模块的一个引用。像__import__()、open、eval等内置函数所在的模块就内置模块。大多数模块都将名称 __builtins__ 作为其全局变量的一部分.</span></span><br><span class="line"><span class="number">6</span>）__init__</span><br><span class="line"><span class="comment">#类实例化出一个对象时进行初始化方法。</span></span><br><span class="line"><span class="number">7</span>）__globals__</span><br><span class="line"><span class="comment">#返回一个函数所在空间的所有类、属性、子模块与方法的字典。</span></span><br><span class="line"><span class="number">8</span>）__dict__</span><br><span class="line"><span class="comment">#返回包含一个模块所拥有类、属性、子模块与方法的字典。</span></span><br><span class="line"><span class="number">9</span>）__getattribute__</span><br><span class="line"><span class="comment">#虽然这个魔术方法该方法可以拦截对对象属性的所有访问企图。但也有访问对象属性的功能。可以用来进行一些绕过。</span></span><br></pre></td></tr></table></figure>
@@ -487,7 +487,7 @@
         <p><span>本文标题:</span><a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python沙盒逃逸的思考</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
         <p><span>发布时间:</span>2020-03-27, 09:51:37</p>
-        <p><span>最后更新:</span>2020-05-01, 14:38:30</p>
+        <p><span>最后更新:</span>2020-05-01, 14:42:27</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="关于python沙盒逃逸的思考">lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/</a>
             <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
