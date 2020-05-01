@@ -297,7 +297,7 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h1 id="关于python的ssti模板注入思考"><a href="#关于python的ssti模板注入思考" class="headerlink" title="关于python的ssti模板注入思考"></a>关于python的ssti模板注入思考</h1><h2 id="0x1关于ssti的讲解"><a href="#0x1关于ssti的讲解" class="headerlink" title="0x1关于ssti的讲解"></a>0x1关于ssti的讲解</h2><p>1.什么是ssti?</p>
+        <h2 id="0x1关于ssti的讲解"><a href="#0x1关于ssti的讲解" class="headerlink" title="0x1关于ssti的讲解"></a>0x1关于ssti的讲解</h2><p>1.什么是ssti?</p>
 <p>SSTI就是服务器端模板注入(Server-Side Template Injection).在一般的ctf中主要考查python比较多，故这篇文章主要是分析python下的ssti。</p>
 <p>2.ssti出现的原因</p>
 <p>ssti起因是在通过与服务端模板的输入输出交互时,服务器端把用户提交的数据处理,当成了代码来执行.从而让恶意用户通过构建了恶意代码,来读取了服务器上的信息或得到了服务器的shell.例如：在python的flask中，会把<code>{``{</code> <code>}``}</code>号里面的参数当成代码来执行，如<code>2</code>会被执行成为<code>2</code>。</p>
