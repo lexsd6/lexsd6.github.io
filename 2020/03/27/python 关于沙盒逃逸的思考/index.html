@@ -14,19 +14,20 @@
 <meta name="author" content="lexsd6" />
 
 
-    
-    
 
-
-<meta name="description" content="look look it">
-<meta property="og:type" content="website">
-<meta property="og:title" content="lexsd6&#39;s home">
-<meta property="og:url" content="lexsd6.github.io/index.html">
+<meta name="description" content="关于python的ssti模板注入思考0x1关于ssti的讲解1.什么是ssti? SSTI就是服务器端模板注入(Server-Side Template Injection).在一般的ctf中主要考查python比较多，故这篇文章主要是分析python下的ssti。 2.ssti出现的原因 ssti起因是在通过与服务端模板的输入输出交互时,服务器端把用户提交的数据处理,当成了代码来执行.从而让恶">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于python的ssti模板注入思考">
+<meta property="og:url" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="look look it">
+<meta property="og:description" content="关于python的ssti模板注入思考0x1关于ssti的讲解1.什么是ssti? SSTI就是服务器端模板注入(Server-Side Template Injection).在一般的ctf中主要考查python比较多，故这篇文章主要是分析python下的ssti。 2.ssti出现的原因 ssti起因是在通过与服务端模板的输入输出交互时,服务器端把用户提交的数据处理,当成了代码来执行.从而让恶">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="c:%5CUsers%5Clexs%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200327224713117.png">
+<meta property="article:published_time" content="2020-03-27T01:51:37.734Z">
+<meta property="article:modified_time" content="2020-05-01T04:16:34.697Z">
 <meta property="article:author" content="lexsd6">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:%5CUsers%5Clexs%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200327224713117.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -56,13 +57,11 @@
 
 
 
-    <style> .article { opacity: 0;} </style>
-
 
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>lexsd6&#39;s home</title>
+<title>关于python的ssti模板注入思考 | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -71,8 +70,8 @@
     var yiliaConfig = {
         fancybox: true,
         animate: true,
-        isHome: true,
-        isPost: false,
+        isHome: false,
+        isPost: true,
         isArchive: false,
         isTag: false,
         isCategory: false,
@@ -266,9 +265,7 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap">
-  
-    <article id="post-python 关于沙盒逃逸的思考" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-python 关于沙盒逃逸的思考" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
       <a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" class="article-date">
@@ -286,12 +283,19 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python的ssti模板注入思考</a>
+    <h1 class="article-title" itemprop="name">
+      关于python的ssti模板注入思考
     </h1>
   
 
       </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+        <div class="clearfix"></div>
+      </div>
       
     
     <div class="article-entry" itemprop="articleBody">
@@ -475,87 +479,85 @@
       
     </div>
     
-    <div class="article-info article-info-index">
-      
-      
-
-      
-      
-      <div class="clearfix"></div>
-    </div>
-    
   </div>
   
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2013/07/13/hello-world/" class="article-date">
-      <time datetime="2013-07-13T12:46:25.000Z" itemprop="datePublished">2013-07-13</time>
-</a>
-
-
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python的ssti模板注入思考</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2020-03-27, 09:51:37</p>
+        <p><span>最后更新:</span>2020-05-01, 12:16:34</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="关于python的ssti模板注入思考">lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
     </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
+
+
+
+    <nav id="article-nav">
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2013/07/13/hello-world/">Hello World</a>
-    </h1>
-  
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2013/07/13/hello-world/">
+                    Hello World
+                </a>
+            </div>
+        
+    </nav>
 
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-
-      
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
   
 </article>
 
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#关于python的ssti模板注入思考"><span class="toc-number">1.</span> <span class="toc-text">关于python的ssti模板注入思考</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x1关于ssti的讲解"><span class="toc-number">1.1.</span> <span class="toc-text">0x1关于ssti的讲解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x2python基础"><span class="toc-number">1.2.</span> <span class="toc-text">0x2python基础</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#01-python魔术方法"><span class="toc-number">1.2.0.1.</span> <span class="toc-text">01.python魔术方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#02-文件操作和命令执行相关的python模块"><span class="toc-number">1.2.0.2.</span> <span class="toc-text">02.文件操作和命令执行相关的python模块</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1-builtins模块"><span class="toc-number">1.2.0.2.0.1.</span> <span class="toc-text">1)builtins模块</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#2）os模块"><span class="toc-number">1.2.0.2.0.2.</span> <span class="toc-text">2）os模块</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#3-platform模块"><span class="toc-number">1.2.0.2.0.3.</span> <span class="toc-text">3)platform模块</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#4-timeit-模块"><span class="toc-number">1.2.0.2.0.4.</span> <span class="toc-text">4)timeit 模块</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#5-commands模块"><span class="toc-number">1.2.0.2.0.5.</span> <span class="toc-text">5)commands模块</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#6-subprocess模块"><span class="toc-number">1.2.0.2.0.6.</span> <span class="toc-text">6)subprocess模块</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#03-一些提高效率的函数"><span class="toc-number">1.2.0.3.</span> <span class="toc-text">03.一些提高效率的函数</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1-index"><span class="toc-number">1.2.0.3.0.1.</span> <span class="toc-text">1.index()</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#2-keys"><span class="toc-number">1.2.0.3.0.2.</span> <span class="toc-text">2.keys()</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x3ssti注入的一般攻击流程"><span class="toc-number">1.3.</span> <span class="toc-text">0x3ssti注入的一般攻击流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x4常见绕过方式"><span class="toc-number">1.4.</span> <span class="toc-text">0x4常见绕过方式</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1-过滤中括号"><span class="toc-number">1.4.0.0.0.1.</span> <span class="toc-text">1)过滤中括号</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#2-过滤双下划线"><span class="toc-number">1.4.0.0.0.2.</span> <span class="toc-text">2)过滤双下划线</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#3-过滤了’-’号"><span class="toc-number">1.4.0.0.0.3.</span> <span class="toc-text">3)过滤了’.’号</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#4-关键词字符过滤"><span class="toc-number">1.4.0.0.0.4.</span> <span class="toc-text">4)关键词字符过滤</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#5-过滤了‘-’or‘-’"><span class="toc-number">1.4.0.0.0.5.</span> <span class="toc-text">5)过滤了‘{ {’or‘} }’</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x0参考文献"><span class="toc-number">1.5.</span> <span class="toc-text">0x0参考文献</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"关于python的ssti模板注入思考　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
 
 
 
@@ -563,9 +565,33 @@
 
 
 
+    
 
-  
-  
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2013/07/13/hello-world/" title="下一篇: Hello World">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python的ssti模板注入思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2013/07/13/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
 </div>
       <footer id="footer">
     <div class="outer">
