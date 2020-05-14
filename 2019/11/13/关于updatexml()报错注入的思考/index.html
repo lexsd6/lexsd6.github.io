@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="lexsd6&#39;s home">
 <meta property="og:description" content="0x01updatexml()的正常作用updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/updatexml1.PNG">
+<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/updatexml1.png">
 <meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200320235648716.png">
 <meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321131351700.png">
 <meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321002711168.png">
@@ -30,11 +30,11 @@
 <meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321161640552.png">
 <meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200324151215694.png">
 <meta property="article:published_time" content="2019-11-13T01:23:36.000Z">
-<meta property="article:modified_time" content="2020-05-14T16:07:11.303Z">
+<meta property="article:modified_time" content="2020-05-14T16:19:29.607Z">
 <meta property="article:author" content="lexsd6">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/updatexml1.PNG">
+<meta name="twitter:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/updatexml1.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -322,7 +322,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE  xml1 (xxx VARCHAR(150));#创建一个表</span><br><span class="line">INSERT INTO xml1 VALUES</span><br><span class="line">(&#39;</span><br><span class="line">&lt;values&gt; </span><br><span class="line">&lt;name&gt;lexsd6&lt;&#x2F;name&gt;</span><br><span class="line">&lt;text&gt;frist xml date&lt;&#x2F;text&gt;</span><br><span class="line">&lt;&#x2F;values&gt;&#39;);#插入第一个数据</span><br><span class="line">INSERT INTO xml1 VALUES</span><br><span class="line">(&#39;</span><br><span class="line">&lt;values&gt; </span><br><span class="line">&lt;name&gt;lexs&lt;&#x2F;name&gt;</span><br><span class="line">&lt;text&gt;secend xml date&lt;&#x2F;text&gt;</span><br><span class="line">&lt;&#x2F;values&gt;&#39;);#插入第二个数据</span><br></pre></td></tr></table></figure>
 
 <p>(2) 使用<code>select * from xml1</code>查看</p>
-<p><img src="updatexml1.PNG" alt="updatexml1"></p>
+<p><img src="updatexml1.png" alt="updatexml1"></p>
 <p>（3）执行<code>SELECT updatexml(title,&#39;/values/text&#39;,&#39;one&#39;) FROM xml1;</code>语句。发现执行后，原来有<text>标签的地方连同标签里的内容都被替换成了‘one’。</p>
 <p><img src="image-20200320235648716.png" alt="image-20200320235648716"></p>
 <h2 id="0x02updatexml-报错注入的原因及注意点"><a href="#0x02updatexml-报错注入的原因及注意点" class="headerlink" title="0x02updatexml()报错注入的原因及注意点"></a>0x02updatexml()报错注入的原因及注意点</h2><p>由于updatexml的第二个参数需要<u><strong>Xpath</strong></u>格式的字符串,但如果在提交的不符合和Xpath格式,会用报错的形式将执行后的结果回显出了来.</p>
@@ -362,7 +362,7 @@
         <p><span>本文标题:</span><a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
         <p><span>发布时间:</span>2019-11-13, 09:23:36</p>
-        <p><span>最后更新:</span>2020-05-15, 00:07:11</p>
+        <p><span>最后更新:</span>2020-05-15, 00:19:29</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/" title="关于updatexml()报错注入的思考">lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/</a>
             <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
