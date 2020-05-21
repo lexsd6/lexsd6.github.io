@@ -17,14 +17,14 @@
 
 <meta name="description" content="0x1关于ssti的讲解1.什么是ssti? SSTI就是服务器端模板注入(Server-Side Template Injection).在一般的ctf中主要考查python比较多，故这篇文章主要是分析python下的ssti。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="关于python沙盒逃逸的思考">
+<meta property="og:title" content="关于python ssti的思考">
 <meta property="og:url" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
 <meta property="og:description" content="0x1关于ssti的讲解1.什么是ssti? SSTI就是服务器端模板注入(Server-Side Template Injection).在一般的ctf中主要考查python比较多，故这篇文章主要是分析python下的ssti。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/image-20200327224713117.png">
 <meta property="article:published_time" content="2020-03-27T01:51:37.734Z">
-<meta property="article:modified_time" content="2020-05-14T15:27:15.068Z">
+<meta property="article:modified_time" content="2020-05-21T15:48:57.785Z">
 <meta property="article:author" content="lexsd6">
 <meta property="article:tag" content="python">
 <meta property="article:tag" content="web">
@@ -63,7 +63,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>关于python沙盒逃逸的思考 | lexsd6&#39;s home</title>
+<title>关于python ssti的思考 | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -286,7 +286,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      关于python沙盒逃逸的思考
+      关于python ssti的思考
     </h1>
   
 
@@ -496,12 +496,12 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python沙盒逃逸的思考</a></p>
+        <p><span>本文标题:</span><a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
         <p><span>发布时间:</span>2020-03-27, 09:51:37</p>
-        <p><span>最后更新:</span>2020-05-14, 23:27:15</p>
+        <p><span>最后更新:</span>2020-05-21, 23:48:57</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="关于python沙盒逃逸的思考">lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/</a>
+            <span>原始链接:</span><a class="post-url" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="关于python ssti的思考">lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/</a>
             <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
@@ -571,7 +571,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"关于python沙盒逃逸的思考　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"关于python ssti的思考　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -605,7 +605,7 @@
         
     </div>
 
-    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python沙盒逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/hello-world/">Hello World</a></li></ul>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/hello-world/">Hello World</a></li></ul>
 
 
 
