@@ -24,7 +24,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/image-20200327224713117.png">
 <meta property="article:published_time" content="2020-03-27T01:51:37.734Z">
-<meta property="article:modified_time" content="2020-05-24T15:59:29.557Z">
+<meta property="article:modified_time" content="2020-06-22T02:20:27.797Z">
 <meta property="article:author" content="lexsd6">
 <meta property="article:tag" content="python">
 <meta property="article:tag" content="web">
@@ -190,7 +190,7 @@
                 
                 <section class="switch-part switch-part2">
                     <div class="widget tagcloud" id="js-tagcloud">
-                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
                     </div>
                 </section>
                 
@@ -443,7 +443,13 @@
 </li>
 </ol>
 <ol start="4">
-<li>利用格式化字符串特性。用<code>&#39;{0:c}&#39;[&#39;format&#39;](95)</code>或<code>&quot;%c&quot;%(95)</code></li>
+<li><p>利用格式化字符串特性。用<code>&#39;{0:c}&#39;[&#39;format&#39;](95)</code>或<code>&quot;%c&quot;%(95)</code></p>
+<p>以<code>&#39;&#39;.__class__</code>例:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;<span class="string">''</span>[<span class="string">'&#123;0:c&#125;'</span>[<span class="string">'format'</span>](<span class="number">95</span>)+<span class="string">'&#123;0:c&#125;'</span>[<span class="string">'format'</span>](<span class="number">95</span>)+<span class="string">'class'</span>+<span class="string">'&#123;0:c&#125;'</span>[<span class="string">'format'</span>](<span class="number">95</span>)+<span class="string">'&#123;0:c&#125;'</span>[<span class="string">'format'</span>](<span class="number">95</span>)]&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
 </ol>
 <h6 id="3-过滤了’-’号"><a href="#3-过滤了’-’号" class="headerlink" title="3)过滤了’.’号"></a>3)过滤了’.’号</h6><ol>
 <li><p>用中括号来代替。</p>
@@ -492,6 +498,15 @@
 
 <p>同理还可以进行rot13、16进制编码等.</p>
 </li>
+<li><p>利用request.args，request.values进行传参.</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;""[request.args.class][request.args.x1][request.args.x2][request.args.x3]()[40]&#125;&#125;?class=__class__&amp;x1=__base__&amp;x2=__base__&amp;x3=__subclasses__</span><br></pre></td></tr></table></figure>
+
+<p>若’.’也被过滤可以用’[]’套娃方式代替</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;""[request['args']['c']]&#125;&#125;?c=__class__</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
 </ol>
 <h6 id="5-过滤了‘-’or‘-’"><a href="#5-过滤了‘-’or‘-’" class="headerlink" title="5)过滤了‘{ {’or‘} }’"></a>5)过滤了‘{ {’or‘} }’</h6><p>可以用<code>{ % % }</code>来代替<code>{ {} }</code>，但要注意两者区别： <code>{ {} }</code>是用来变量取值，<code>{ { % % } }</code>是用来控制结构。 </p>
 <h2 id="0x0参考文献"><a href="#0x0参考文献" class="headerlink" title="0x0参考文献"></a>0x0参考文献</h2><p>1.<a href="https://blog.csdn.net/answer3lin/article/details/86572575" target="_blank" rel="noopener">https://blog.csdn.net/answer3lin/article/details/86572575</a></p>
@@ -508,7 +523,7 @@
         <p><span>本文标题:</span><a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
         <p><span>发布时间:</span>2020-03-27, 09:51:37</p>
-        <p><span>最后更新:</span>2020-05-24, 23:59:29</p>
+        <p><span>最后更新:</span>2020-06-22, 10:20:27</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="关于python ssti的思考">lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/</a>
             <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -614,7 +629,7 @@
         
     </div>
 
-    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/hello-world/">Hello World</a></li></ul>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/06/22/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/hello-world/">Hello World</a></li></ul>
 
 
 
