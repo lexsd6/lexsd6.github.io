@@ -23,7 +23,7 @@
 <meta property="og:description" content="sql注入产生的原因是未对用户输入进行处理，导致输入的恶意信息与后端设定的sql语句进行拼接时产生了歧义，使得用户可以控制该条sql语句与数据库进行通信。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-08-12T03:49:06.454Z">
-<meta property="article:modified_time" content="2020-08-31T09:50:31.780Z">
+<meta property="article:modified_time" content="2020-08-31T09:56:19.304Z">
 <meta property="article:author" content="lexsd6">
 <meta property="article:tag" content="web">
 <meta property="article:tag" content="sql">
@@ -356,7 +356,8 @@
 <p>前提：服务器开启报错信息返回，也就是发生错误时返回报错信息。</p>
 <p>常见的利用函数有：exp()、floor()+rand()、updatexml()、extractvalue()等</p>
 <p><a href="https://lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入</a></p>
-<p>报错函数通常尤其最长报错输出的限制，面对这种情况，可以进行分割输出。特殊函数的特殊参数进运行一个字段、一行数据的返回，使用group_concat等函数聚合数据即可。</p>
+<p>updatexml()等函数报错通常有报错输出长度的限制，可以进行用substr等函数分割输出。</p>
+<p>有的报错函数要求输出一行数据或只一次查询一个字段,可以使用group_concat等函数聚合数据即可。</p>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://xz.aliyun.com/t/7169#toc-53" target="_blank" rel="noopener">对MYSQL注入相关内容及部分Trick的归类小结</a></p>
 <p><a href="https://xz.aliyun.com/t/2869" target="_blank" rel="noopener">SQL 注入绕过</a></p>
 
@@ -370,7 +371,7 @@
         <p><span>本文标题:</span><a href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
         <p><span>发布时间:</span>2020-08-12, 11:49:06</p>
-        <p><span>最后更新:</span>2020-08-31, 17:50:31</p>
+        <p><span>最后更新:</span>2020-08-31, 17:56:19</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/" title="关于SQL注入小记">lexsd6.github.io/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/</a>
             <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
