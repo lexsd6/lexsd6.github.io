@@ -24,7 +24,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/image-20200327224713117.png">
 <meta property="article:published_time" content="2020-03-27T01:51:37.734Z">
-<meta property="article:modified_time" content="2020-11-24T01:46:53.338Z">
+<meta property="article:modified_time" content="2020-11-24T03:22:24.885Z">
 <meta property="article:author" content="lexsd6">
 <meta property="article:tag" content="python">
 <meta property="article:tag" content="web">
@@ -501,7 +501,7 @@
 </li>
 </ol>
 <ol start="4">
-<li><p>进行编码绕过。</p>
+<li><p>进行decode解编码绕过。</p>
 <p>例:1.进行base64处理<code>__class__</code></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">''</span>[<span class="string">'X19jbGFzc19f'</span>.decode(<span class="string">'base64'</span>)]</span><br></pre></td></tr></table></figure>
 
@@ -522,8 +522,18 @@
 <p>若’.’也被过滤可以用’[]’套娃方式代替</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;""[request['args']['c']]&#125;&#125;?c=__class__</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>利用全角符号来绕过字母过滤(大多数非字母字符不能绕过)</p>
+<li><p>利用全角符号来绕过字母过滤(大多数非字母字符不能绕过,python3环境?)</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>ｏｐｅｎ</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>&lt;function io.open(file, mode=<span class="string">'r'</span>, buffering=<span class="number">-1</span>, encoding=<span class="literal">None</span>, errors=<span class="literal">None</span>, newline=<span class="literal">None</span>, closefd=<span class="literal">True</span>, opener=<span class="literal">None</span>)&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>＿＿ｉｍｐｏｒｔ</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span> File <span class="string">"&lt;ipython-input-2-78bf7df85c1c&gt;"</span>, line <span class="number">1</span></span><br><span class="line">    ＿＿ｉｍｐｏｒｔ</span><br><span class="line">           ^</span><br><span class="line">SyntaxError: invalid character <span class="keyword">in</span> identifier</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>__ｉｍｐｏｒｔ__</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span> &lt;function __import__&gt;</span><br></pre></td></tr></table></figure>
+
+<p>7.利用模板渲染编码绕过：（部分版本）</p>
+<p>​     7.1：16进制（<code>\xXX</code>）绕过。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">''</span>[<span class="string">'\x5F\x5F\x63\x6C\x61\x73\x73\x5F\x5F'</span>]  <span class="comment">#''.__class__</span></span><br></pre></td></tr></table></figure>
+
+<p>​     7.2：8进制（<code>\OOO</code>）绕过。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">''</span>[<span class="string">'\137\137\143\154\141\163\163\137\137'</span>]  <span class="comment">#''.__class__</span></span><br></pre></td></tr></table></figure>
+
+<p>​     7.3：unicode（<code>\uXXXX</code>or<code>\UXXXXXXXX</code>）绕过。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">\uXXXX:</span><br><span class="line">    <span class="string">''</span>[<span class="string">'\137\137\143\154\141\163\163\137\137'</span>]  <span class="comment">#''.__class__</span></span><br><span class="line">\UXXXXXXXX:</span><br><span class="line">    <span class="string">''</span>[<span class="string">'\U0000005F\U0000005F\U00000063\U0000006C\U00000061\U00000073\U00000073\U0000005F\U0000005F'</span>]  <span class="comment">#''.__class__</span></span><br></pre></td></tr></table></figure>
 
 
 
@@ -548,7 +558,7 @@
         <p><span>本文标题:</span><a href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
         <p><span>发布时间:</span>2020-03-27, 09:51:37</p>
-        <p><span>最后更新:</span>2020-11-24, 09:46:53</p>
+        <p><span>最后更新:</span>2020-11-24, 11:22:24</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="关于python ssti的思考">lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/</a>
             <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
