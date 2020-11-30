@@ -293,7 +293,7 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-              <p>之前写了一篇关于<a href="https://lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">python ssti</a>的文章,但在分析时过于肤浅地将重心放在python与flask上,从而完全忽视了对jinja2的深入探讨。实际上我们在flask中用<code>{ {</code>与<code>{ %</code>在进行执行python逃逸时并不是直接给python引擎处理,而是要先经过jinja2’渲染’一道.
+              <p>之前写了一篇关于<a href="https://lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">python ssti</a>的文章,但在分析时过于肤浅地将重心放在python与flask上,从而完全忽视了对jinja2的深入探讨。实际上我们在flask中用<code>{ {</code>与<code>{ %</code>在进行执行python逃逸时并不是直接给python引擎处理,而是要先经过jinja2’渲染’一道.因此这是对之前不足的整理.
           
       
     </div>
