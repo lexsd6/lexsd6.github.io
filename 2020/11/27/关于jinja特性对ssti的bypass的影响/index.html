@@ -22,14 +22,14 @@
 <meta property="og:site_name" content="lexsd6&#39;s home">
 <meta property="og:description" content="之前写了一篇关于python ssti的文章,但在分析时过于肤浅地将重心放在python与flask上,从而完全忽视了对jinja2的深入探讨。实际上我们在flask中用{ {与{ %在进行执行python逃逸时并不是直接给python引擎处理,而是要先经过jinja2’渲染’一道.因此这是对之前不足的整理.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/%5Cimage-20201127153310543.jpg">
+<meta property="og:image" content="lexsd6.github.io/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/%5Cimage-20.jpg">
 <meta property="article:published_time" content="2020-11-27T02:08:56.656Z">
-<meta property="article:modified_time" content="2020-12-30T09:05:43.331Z">
+<meta property="article:modified_time" content="2020-12-30T09:11:38.080Z">
 <meta property="article:author" content="lexsd6">
 <meta property="article:tag" content="python">
 <meta property="article:tag" content="web">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/%5Cimage-20201127153310543.jpg">
+<meta name="twitter:image" content="lexsd6.github.io/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/%5Cimage-20.jpg">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -308,7 +308,7 @@
       
           
         <p>之前写了一篇关于<a href="https://lexsd6.github.io/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">python ssti</a>的文章,但在分析时过于肤浅地将重心放在python与flask上,从而完全忽视了对jinja2的深入探讨。实际上我们在flask中用<code>{ {</code>与<code>{ %</code>在进行执行python逃逸时并不是直接给python引擎处理,而是要先经过jinja2’渲染’一道.因此这是对之前不足的整理.<a id="more"></a></p>
-<p><img src="%5Cimage-20201127153310543.jpg" alt="image-20201127153310543"></p>
+<p><img src="%5Cimage-20.jpg" alt="image-20201127153310543"></p>
 <h1 id="jinja2特性"><a href="#jinja2特性" class="headerlink" title="jinja2特性"></a>jinja2特性</h1><h2 id="变量属性"><a href="#变量属性" class="headerlink" title="变量属性"></a>变量属性</h2><p>在python中,我们常常是通过<code>.</code>来获取变量的属性的.例如<code>().__class__</code>.</p>
 <p>但jinja2给我们提供了另外两种思路：<code>[]</code>与<code>|attr</code></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#[]用法</span></span><br><span class="line">()[<span class="string">'__class__'</span>]</span><br><span class="line"><span class="comment">#|attr用法</span></span><br><span class="line">()|attr(<span class="string">'__class__'</span>)</span><br></pre></td></tr></table></figure>
@@ -436,7 +436,7 @@
         <p><span>本文标题:</span><a href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
         <p><span>发布时间:</span>2020-11-27, 10:08:56</p>
-        <p><span>最后更新:</span>2020-12-30, 17:05:43</p>
+        <p><span>最后更新:</span>2020-12-30, 17:11:38</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/" title="关于jinja2特性对ssti的bypass的影响">lexsd6.github.io/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/</a>
             <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
