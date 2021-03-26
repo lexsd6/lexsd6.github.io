@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>修改ELF文件libc为指定版本</title>
+      <link href="2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/"/>
+      <url>2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/</url>
+      
+        <content type="html"><![CDATA[<p>最近在学习堆时,常常遇到本地libc与题目libc不匹配导致一些骚套路无法在本地调试和利用.要想gdb,不仅得要安个符合版本的虚拟机或起一个docker还有部署一边pwn环境,这一点很烦(#`Д´).于是想找下有没有更方便的方法.  于是找到了patchelf更换libc的方法。</p><a id="more"></a><h3 id="glibc-all-in-one与patchelf安装"><a href="#glibc-all-in-one与patchelf安装" class="headerlink" title="glibc-all-in-one与patchelf安装"></a>glibc-all-in-one与patchelf安装</h3><p>glibc-all-in-one，正如其名是一个多版本libc的下载安装管理工具，主要支持2.19，2.23-2.29版本的libc和i686, amd64的架构。这是github一个开源项目因此我们git它既可。</p><p>安装命令：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/matrix1001/glibc-all-in-one.git </span><br><span class="line">cd glibc-all-in-one </span><br><span class="line">chmod a+x build download extract</span><br></pre></td></tr></table></figure><p>patchelf在ubuntu直接<code>apt install patchelf</code>即可。</p><h3 id="对应libc编译"><a href="#对应libc编译" class="headerlink" title="对应libc编译"></a>对应libc编译</h3><p>我们可以通过在glibc-all-in-one目录下执行<code>./build</code>即可获对应版本的libc和ld.so</p><p>例如：<code>./build 2.29 i686</code></p><p>下载安装编译 32位的2.29 版本libc。</p><h3 id="patchelf更改程序libc"><a href="#patchelf更改程序libc" class="headerlink" title="patchelf更改程序libc"></a>patchelf更改程序libc</h3><p>执行<code>patchelf --set-interpreter ld.so  elf</code>    来修改文件ld.so</p><p>执行<code>patchelf --replace-needed   old_libc.so  new_libc.so elf</code>来修改文件libc.so</p><p>以更改gundam文件为例,例如：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo patchelf --set-interpreter /glibc/2.26/amd64/lib/ld-2.26.so --set-rpath /glibc/2.26/amd64/lib/ ~/Desktop/pwn/buu/gumad/gundam</span><br><span class="line"></span><br><span class="line">patchelf --replace-needed /glibc/2.23/amd64/lib/libc-2.23.so /glibc/2.26/amd64/lib/libc-2.26.so ~/Desktop/pwn/buu/gumad/gundam</span><br></pre></td></tr></table></figure><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.nopnoping.xyz/2020/04/17/%E4%BF%AE%E6%94%B9%E7%A8%8B%E5%BA%8F%E4%B8%BA%E6%8C%87%E5%AE%9Alibc%E7%89%88%E6%9C%AC-pwndbg%E5%AE%89%E8%A3%85/" target="_blank" rel="noopener">https://www.nopnoping.xyz/2020/04/17/%E4%BF%AE%E6%94%B9%E7%A8%8B%E5%BA%8F%E4%B8%BA%E6%8C%87%E5%AE%9Alibc%E7%89%88%E6%9C%AC-pwndbg%E5%AE%89%E8%A3%85/</a></p><p><a href="https://blog.csdn.net/github_36788573/article/details/103291343" target="_blank" rel="noopener">https://blog.csdn.net/github_36788573/article/details/103291343</a></p><p><a href="https://blog.csdn.net/qq_41560595/article/details/114597342" target="_blank" rel="noopener">https://blog.csdn.net/qq_41560595/article/details/114597342</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> pwn </tag>
+            
+            <tag> Linux </tag>
+            
+            <tag> libc </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>劫持hook函数——学pwn小记(6)</title>
       <link href="2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/"/>
       <url>2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/</url>

