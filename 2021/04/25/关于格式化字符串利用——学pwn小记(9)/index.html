@@ -15,30 +15,18 @@
 
 
 
-<meta name="description" content="按照一般植入webshell的方法通常是上传一段包含恶意代码文件，然后让服务器解析文件里的恶意代码从而得到get shell的目的。那么问题来了,文件中什么的字符会被当成php代码来解析？PHP代码中指令怎么分割？什么样的文件服务器会去解析？(本文章默认要执行的文件已在网站目录下的情况)">
+<meta name="description" content="格式化字符是格式化字符串函数根据某一字符串参数的内容来进行解析,根据其值来处理解析的其他参数的个数和值的情形。换句话说,一个函数第一个参数作为格式化字符串，根据其来解析之后的参数的过程就是格式化字符串的过程。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何让文件里PHP代码被服务器解析执行">
-<meta property="og:url" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/index.html">
+<meta property="og:title" content="关于格式化字符串利用——学pwn小记(9)">
+<meta property="og:url" content="lexsd6.github.io/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="按照一般植入webshell的方法通常是上传一段包含恶意代码文件，然后让服务器解析文件里的恶意代码从而得到get shell的目的。那么问题来了,文件中什么的字符会被当成php代码来解析？PHP代码中指令怎么分割？什么样的文件服务器会去解析？(本文章默认要执行的文件已在网站目录下的情况)">
+<meta property="og:description" content="格式化字符是格式化字符串函数根据某一字符串参数的内容来进行解析,根据其值来处理解析的其他参数的个数和值的情形。换句话说,一个函数第一个参数作为格式化字符串，根据其来解析之后的参数的过程就是格式化字符串的过程。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200515224849956.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200517152606197.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200517152713360.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200517171022134.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200517170537530.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200517172127721.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200517172408752.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200517224034769.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200612215358056.png">
-<meta property="og:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20210222153140326.png">
-<meta property="article:published_time" content="2020-04-23T09:06:16.904Z">
-<meta property="article:modified_time" content="2021-02-22T07:32:30.372Z">
+<meta property="article:published_time" content="2021-04-25T08:50:53.439Z">
+<meta property="article:modified_time" content="2021-04-25T12:14:26.074Z">
 <meta property="article:author" content="lexsd6">
-<meta property="article:tag" content="web">
-<meta property="article:tag" content="php">
+<meta property="article:tag" content="pwn">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/image-20200515224849956.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -72,7 +60,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>如何让文件里PHP代码被服务器解析执行 | lexsd6&#39;s home</title>
+<title>关于格式化字符串利用——学pwn小记(9) | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -279,11 +267,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-如何让文件里PHP代码被服务器解析执行" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-关于格式化字符串利用——学pwn小记(9)" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/" class="article-date">
-      <time datetime="2020-04-23T09:06:16.904Z" itemprop="datePublished">2020-04-23</time>
+      <a href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/" class="article-date">
+      <time datetime="2021-04-25T08:50:53.439Z" itemprop="datePublished">2021-04-25</time>
 </a>
 
 
@@ -298,7 +286,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      如何让文件里PHP代码被服务器解析执行
+      关于格式化字符串利用——学pwn小记(9)
     </h1>
   
 
@@ -308,7 +296,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">2.2k字</span>
+        <span class="post-count">1k字</span>
       </span>
     </span>
 
@@ -317,7 +305,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">8分</span>
+        <span class="post-count">4分</span>
       </span>
     </span>
 </div>
@@ -334,7 +322,7 @@
 
         
     <div class="article-tag tagcloud" >
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web/" rel="tag">web</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
 
     </div>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
@@ -345,93 +333,32 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <p>按照一般植入webshell的方法通常是上传一段包含恶意代码文件，然后让服务器解析文件里的恶意代码从而得到get shell的目的。那么问题来了,文件中什么的字符会被当成php代码来解析？PHP代码中指令怎么分割？什么样的文件服务器会去解析？(本文章默认要执行的文件已在网站目录下的情况)</p>
-<a id="more"></a>
-<h2 id="0x01PHP代码的特征"><a href="#0x01PHP代码的特征" class="headerlink" title="0x01PHP代码的特征"></a>0x01PHP代码的特征</h2><p>当然一个文件被php解析时不会全部都拿去执行，而是将具有php代码特征的部分拿去执行。而那特征就是php的开始与结束标记。</p>
-<p>按照官方的说法：PHP解析器当解析一个文件时，PHP 会寻找起始和结束标记，这告诉 PHP 二者标记之间的是要解析的php代码。此种解析方式使得 PHP 可以被嵌入到各种不同的文档中去，而任何起始和结束标记之外的部分都会被 PHP 解析器忽略。</p>
-<p>在官方文档中，给我们提供以下几种php起始和结束标记：</p>
-<h3 id="1-’-lt-php’-与’-gt-‘"><a href="#1-’-lt-php’-与’-gt-‘" class="headerlink" title="(1)’&lt; ?php’ 与’? &gt;‘"></a>(1)’&lt; ?php’ 与’? &gt;‘</h3><p>这种标记用法是最常见的用法，也被称为长标签：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>   <span class="comment">#起始标记,php可以大小写混用</span></span><br><span class="line"> <span class="keyword">echo</span> <span class="string">'this is php code'</span>;<span class="comment">#php代码部分</span></span><br><span class="line"><span class="meta">?&gt;</span><span class="comment">#结束标记</span></span><br></pre></td></tr></table></figure>
+        <p>格式化字符是格式化字符串函数根据某一字符串参数的内容来进行解析,根据其值来处理解析的其他参数的个数和值的情形。换句话说,一个函数第一个参数作为格式化字符串，根据其来解析之后的参数的过程就是格式化字符串的过程。<a id="more"></a></p>
+<h2 id="格式化字符串函数"><a href="#格式化字符串函数" class="headerlink" title="格式化字符串函数"></a>格式化字符串函数</h2><p>能进行格式化字符串操作的函数被称为格式化字符串函数。常见的格式化字符串函数有：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">printf</span><span class="params">(<span class="keyword">const</span> chr *format,...)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">fprintf</span><span class="params">(FILE *stream,<span class="keyword">const</span> chr *format,...)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">dprintf</span><span class="params">(<span class="keyword">int</span> fd,<span class="keyword">const</span> chr *format,...)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sprintf</span><span class="params">(<span class="keyword">char</span> *str,<span class="keyword">const</span> chr *format,....)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">snprintf</span><span class="params">(<span class="keyword">char</span> *str,<span class="keyword">size_t</span> <span class="built_in">size</span>,<span class="keyword">const</span> chr *format,....)</span></span>;  </span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdarg.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">vprintf</span><span class="params">(<span class="keyword">const</span> chr *format,va_list ap)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">vfprintf</span><span class="params">(FILE *stream,<span class="keyword">const</span> chr *format,va_list ap)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">vdprintf</span><span class="params">(<span class="keyword">int</span> fd,<span class="keyword">const</span> chr *format,va_list ap)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">vsprintf</span><span class="params">(<span class="keyword">char</span> *str,<span class="keyword">const</span> chr *format,va_list ap)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">vsnprintf</span><span class="params">(<span class="keyword">char</span> *str,<span class="keyword">size_t</span> <span class="built_in">size</span>,<span class="keyword">const</span> chr *format,va_list ap)</span></span>;</span><br></pre></td></tr></table></figure>
 
-
-
-<h3 id="2-lt-script-gt-标签标记"><a href="#2-lt-script-gt-标签标记" class="headerlink" title="(2)&lt;script&gt;标签标记"></a>(2)&lt;script&gt;标签标记</h3><p>用script标签来标记php代码,使用方法如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script language&#x3D;&quot;php&quot;&gt;#php可以大小写混用</span><br><span class="line">        echo &#39;this is php code by script&#39;;#php代码部分</span><br><span class="line">&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
-
-<p>注意的是在php 7.0.0 版本后，，默认不支持这种写法。</p>
-<h3 id="3-ASP-风格标记"><a href="#3-ASP-风格标记" class="headerlink" title="(3)ASP 风格标记"></a>(3)ASP 风格标记</h3><p>用&lt;%%&gt;来标记php,如要使用此种标记要php.ini 配置文件中的指令 asp_tags=On后才可用。 但要注意的是在7.0.0后的版本里移除了asp_tags.</p>
-<p>具体使用方法如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;% %&gt;标记用法：</span><br><span class="line">&lt;%  echo &#39;this is php code by ASP&#39;; %&gt;</span><br><span class="line">&lt;% %&gt;格式的 echo 标记用法：</span><br><span class="line">&lt;%&#x3D;&#39;text&#39;; %&gt;#类似&lt;% echo &#39;echo&#39;;%&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-使用短标签来标记"><a href="#4-使用短标签来标记" class="headerlink" title="(4)使用短标签来标记"></a>(4)使用短标签来标记</h3><p>短标记（&lt;? ?&gt;）仅在通过 php.ini 配置文件中的指令 short_open_tag =On后才可用，或者在 PHP 编译时加入了 –enable-short-tags 选项.具体使用方法如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;? echo&#39;this is php code by ASP&#39;; ?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>同时这种标签也有 echo 标记 ‘&lt;?=’:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;?&#x3D;&#39;text&#39;; ?&gt;#等价&lt;? echo &#39;echo&#39;;?&gt;的使用方式</span><br></pre></td></tr></table></figure>
-
-<p>注意的是：PHP 5.4 起，短格式的 echo 标记 &lt;?= 总会被识别并且合法，而不管 short_open_tag 的设置是什么。</p>
-<h2 id="0x02如何分割PHP代码指令"><a href="#0x02如何分割PHP代码指令" class="headerlink" title="0x02如何分割PHP代码指令"></a>0x02如何分割PHP代码指令</h2><p>同 C 或 Perl 一样，PHP 需要在每个语句后用分号结束指令。一段 PHP 代码中的结束标记隐含表示了一个分号；在一个 PHP 代码段中的最后一行可以不用分号结束。如果后面还有新行，则代码段的结束标记包含了行结束。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;单行代码可以省略;</span><br><span class="line">&lt;?php</span><br><span class="line">  echo &#39;this one commod&#39; </span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;多行代码，1句代码后要加;号,最后一行可以不用分号结束</span><br><span class="line">&lt;?php</span><br><span class="line">      echo &#39;this one commod&#39;;</span><br><span class="line">      echo &#39;this one commod&#39; </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>除了用；号分割外，也可以用php标记来分隔：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">   $a&#x3D;&#39;this a code&#39;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;?&#x3D;$a ?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>执行效果：</p>
-<p><img src="image-20200515224849956.png" alt=""></p>
-<h2 id="0x03让文件被服务器解析"><a href="#0x03让文件被服务器解析" class="headerlink" title="0x03让文件被服务器解析"></a>0x03让文件被服务器解析</h2><p>我们一般在初学php时，一般都是用phpstudy 或者Wampserver 来一件搭建php环境的。但在搭建后，就会发现一个问题。只有后缀名为php的文件里面的php代码被执行了,而其他后缀名的文件就算里面有php特征标记的php代码也没有被执行。</p>
-<p><img src="image-20200517152606197.png" alt="image-20200517152606197"></p>
-<p><img src="image-20200517152713360.png" alt="image-20200517152713360"></p>
-<p>可见网站的服务器并未让非php文件里代码被执行。这是为什么？</p>
-<p>这是因为网站的服务器在处理这个非php文件时，并未让它进入php解释器处理，而直接将数据传送过来。</p>
-<p>那么问题来了如让服务器把文件送入php解释器？</p>
-<h3 id="1-更改服务器的httpd-conf配置"><a href="#1-更改服务器的httpd-conf配置" class="headerlink" title="1.更改服务器的httpd.conf配置"></a>1.更改服务器的httpd.conf配置</h3><p>这里改法又有两种方法</p>
-<h4 id="（1）使用AddHandler-指令："><a href="#（1）使用AddHandler-指令：" class="headerlink" title="（1）使用AddHandler 指令："></a>（1）使用AddHandler 指令：</h4><p>AddHandler 说明什么样的扩展名使用什么样的程序来处理，描述的是扩展名与处理程序之间的关系。具体用法如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">AddHandler php5-script  .extension</span><br><span class="line">#或者</span><br><span class="line">AddHandler application&#x2F;x-httpd-php  .extension</span><br><span class="line"></span><br><span class="line">extension代表任意文件的后缀名</span><br></pre></td></tr></table></figure>
-
-<p><img src="image-20200517171022134.png" alt="image-20200517171022134"></p>
-<p><img src="image-20200517170537530.png" alt="image-20200517170537530"></p>
-<h4 id="（2）使用AddType指令："><a href="#（2）使用AddType指令：" class="headerlink" title="（2）使用AddType指令："></a>（2）使用AddType指令：</h4><p>AddType指令在给定的文件扩展名与特定的内容类型之间建立映射关系.也可以用来描述后缀名与php解释器之间的关系：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">AddType php5-script   .extension</span><br><span class="line">AddType application&#x2F;x-httpd-php  .extension</span><br></pre></td></tr></table></figure>
-
-<p><img src="image-20200517172127721.png" alt="image-20200517172127721"></p>
-<p><img src="image-20200517172408752.png" alt="image-20200517172408752"></p>
-<h3 id="2-更改-htaccess文件"><a href="#2-更改-htaccess文件" class="headerlink" title="2.更改.htaccess文件"></a>2.更改.htaccess文件</h3><p>概述来说，htaccess文件是Apache服务器中的一个配置文件，它负责相关目录下的网页配置。通过htaccess文件，可以帮我们实现：网页301重定向、自定义404错误页面、改变文件扩展名、允许/阻止特定的用户或者目录的访问、禁止目录列表、配置默认文档等功能。如果要用.htaccess以外的其他文件名，可以用AccessFileName指令来改变。例如，需要使用.config ，则可以在服务器配置文件中按以下方法配置：AccessFileName .config 。</p>
-<p>在/www/htdocs/example目录下的.htaccess文件中放置指令，与在主配置文件中&lt;Directory /www/htdocs/example&gt;段中放置相同指令，是完全等效的。</p>
-<p>另外, .htaccess文件中的配置指令作用于.htaccess文件所在的目录及其所有子目录，但要注意的是子目录中的 .htaccess中的指令会覆盖父目录的 .htaccess中的指令或者主配置文件中的指令。</p>
-<p>我们可以在.htaccess文件中写入配置命令来达成我们的目的，例如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AddHandler application&#x2F;x-httpd-php  .extension</span><br></pre></td></tr></table></figure>
-
-<p><img src="image-20200517224034769.png" alt="image-20200517224034769"></p>
-<h3 id="3-更改php-fpm-conf"><a href="#3-更改php-fpm-conf" class="headerlink" title="3.更改php-fpm.conf"></a>3.更改php-fpm.conf</h3><p>php-fpm中文名称php FastCGI 进程管理器。PHP FastCGI 进程管理器，用于管理PHP 进程池的软件，用于接受web服务器的请求。PHP-FPM提供了更好的PHP进程管理方式，可以有效控制内存和进程、可以平滑重载PHP配置。</p>
-<p>php-fpm.conf文件里的security.limit_extensions 选项的参数作用是限制 FPM 允许解析的脚本扩展名。 此设置可以预防 web 服务器配置的错误。 应当限制 FPM 仅仅解析 .php 扩展名，阻止恶意用户使用其他扩展名运行 php 代码。 默认值： .php .phar</p>
-<h3 id="4-利用文件包含来包含文件"><a href="#4-利用文件包含来包含文件" class="headerlink" title="4.利用文件包含来包含文件"></a>4.利用文件包含来包含文件</h3><h4 id="1-利用php函数包含代码执行"><a href="#1-利用php函数包含代码执行" class="headerlink" title="(1)利用php函数包含代码执行"></a>(1)利用php函数包含代码执行</h4><p>php在文件包含进行文件包含会执行php标记里代码。因此我们可以通过php的文件包含函数来通过一个执行的php页面来包含我们想要执行文件。</p>
-<p>常见的文件包含的函数有：</p>
-<p>1.include()  ：在包含文件没找到时会产生警告，并继续进行php代码。</p>
-<p>2.include_once() ：在include() 的特性下，多了只能包含一次的特性。</p>
-<p>3.require()：在包含文件没找到时会停止进行php代码。</p>
-<p>4.require_once()：在require() 的特性下，多了只能包含一次的特性。</p>
-<p>以上函数在执行时,会自动将要执行的脚本当成php来执行.</p>
-<h4 id="2-利用-htaccess文件或php-ini文件来文件包含"><a href="#2-利用-htaccess文件或php-ini文件来文件包含" class="headerlink" title="(2)利用 .htaccess文件或php.ini文件来文件包含"></a>(2)利用 .htaccess文件或php.ini文件来文件包含</h4><p>同时也可以通过修改 .htaccess文件或php.ini文件,来进行文件.</p>
-<p>php.ini中auto_prepend_file和auto_append_file分别可以在作用范围内的php文件在文件头/尾自动include指定文件并且可以支持php伪协议.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">auto_prepend_file 在页面顶部加载文件</span><br><span class="line">auto_append_file  在页面底部加载文件</span><br></pre></td></tr></table></figure>
-
-<p>注意：auto_prepend_file 与 auto_append_file 只能包含一个php文件，但这个php文件内可以包含多个其他的php文件。</p>
-<p>又 .htaccess文件中php_value 的设置可以设置php.ini里的选项。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">php_value auto_prepend_file  shell.php</span><br><span class="line">php_value auto_append_file &quot;php:&#x2F;&#x2F;filter&#x2F;convert.base64decode&#x2F;resource&#x3D;flag.php&quot;</span><br></pre></td></tr></table></figure>
-
-<p>故可以把代码入<code>.htaccess</code>文件中，再通过auto_prepend_file/auto_append_file包含。即：</p>
-<p><img src="image-20200612215358056.png" alt="image-20200612215358056"></p>
-<p>同时,我们可以直接写入<code>shell</code>到<code>htaccess</code>文件本身再包含.例如:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">php_value auto_prepend_file .htaccess</span><br><span class="line">#&lt;?php phpinfo();?&gt;\</span><br><span class="line">Hello, lexsd6</span><br></pre></td></tr></table></figure>
-
-<p>这里要注意的是,末尾有个符号\是必须写入的.我们注意到源代码中file_put_contents中的文件内容传入的变量$content末尾还连接上了\nHello, world这个字符串，而<code>\n</code>代表着换行，而我们再一个\，则会拼接成<code>\\n</code>，即转义掉了n前面的\，构不成换行。换句话来说，如果我们加入了<code>\</code>在服务器解析<code>.htaccess</code>时，<code>#&lt;?php phpinfo();?&gt;\\nHello, lexsd6</code>会被当一行注释。</p>
-<p><img src="image-20210222153140326.png" alt="image-20210222153140326"></p>
-<h2 id="0x00参考文献"><a href="#0x00参考文献" class="headerlink" title="0x00参考文献"></a>0x00参考文献</h2><p><a href="https://www.php.net/manual/zh/language.basic-syntax.phpmode.php" target="_blank" rel="noopener">PHP 代码分离</a></p>
-<p><a href="https://www.php.net/manual/zh/language.basic-syntax.instruction-separation.php" target="_blank" rel="noopener">php指令分割</a></p>
-<p><a href="https://www.php.net/manual/zh/security.hiding.php" target="_blank" rel="noopener"> PHP 的文件后缀</a></p>
-<p><a href="https://www.php.net/manual/zh/install.fpm.configuration.php" target="_blank" rel="noopener">FPM 的官方介绍</a></p>
-<p><a href="https://baike.baidu.com/item/htaccess/1645473?fr=aladdin" target="_blank" rel="noopener">htaccess文件的介绍</a></p>
-<p><a href="https://www.cnblogs.com/20175211lyz/p/11741348.html" target="_blank" rel="noopener">https://www.cnblogs.com/20175211lyz/p/11741348.html</a></p>
+<h2 id="格式化字符串参数"><a href="#格式化字符串参数" class="headerlink" title="格式化字符串参数"></a>格式化字符串参数</h2><h3 id="指示符"><a href="#指示符" class="headerlink" title="指示符"></a>指示符</h3><p>%c：输出字符，配上%n可用于向指定地址写数据。</p>
+<p>%d：输出十进制整数，配上%n可用于向指定地址写数据。</p>
+<p>%x：输出16进制数据，如%i$x表示要泄漏偏移i处4字节长的16进制数据，%i$lx表示要泄漏偏移i处8字节长的16进制数据，32bit和64bit环境下一样。</p>
+<p>%p：输出16进制数据，与%x基本一样，只是附加了前缀0x，在32bit下输出4字节，在64bit下输出8字节，可通过输出字节的长度来判断目标环境是32bit还是64bit。</p>
+<p>%s：输出的内容是字符串，即将偏移处指针指向的字符串输出，如%i$s表示输出偏移i处地址所指向的字符串，在32bit和64bit环境下一样，可用于读取GOT表等信息。</p>
+<p>%n：将%n之前printf已经打印的字符个数赋值给偏移处指针所指向的地址位置，如%100×10$n表示将0x64写入偏移10处保存的指针所指向的地址（4字节），而%$hn表示写入的地址空间为2字节，%$hhn表示写入的地址空间为1字节，%$lln表示写入的地址空间为8字节，在32bit和64bit环境下一样。有时，直接写4字节会导致程序崩溃或等候时间过长，可以通过%$hn或%$hhn来适时调整。</p>
+<p>%n是通过格式化字符串漏洞改变程序流程的关键方式，而其他格式化字符串参数可用于读取信息或配合%n写数据。</p>
+<h3 id="修饰符"><a href="#修饰符" class="headerlink" title="修饰符"></a>修饰符</h3><p>hh ： 类型  1-byte</p>
+<p>h   ： 类型  2-byte</p>
+<p>l    ： 类型  4-byte</p>
+<p>ll    :   类型  8-byte</p>
+<h3 id="格式化字符串利用"><a href="#格式化字符串利用" class="headerlink" title="格式化字符串利用"></a>格式化字符串利用</h3><h4 id="数据泄露"><a href="#数据泄露" class="headerlink" title="数据泄露"></a>数据泄露</h4><h5 id="栈数据泄露"><a href="#栈数据泄露" class="headerlink" title="栈数据泄露"></a>栈数据泄露</h5><p>我们可以利用多个<code>%08x.%08x.%08x.%08x</code>或<code>%p,%p,%p,%p</code>来泄露上面的信息.<br>        同时，如果我们知道了要泄露数据在栈上的位置我们可以通过<code>%(x)$p</code>来泄露第<code>（x）</code>个参数的信息。</p>
+<h5 id="任意地址数据泄露"><a href="#任意地址数据泄露" class="headerlink" title="任意地址数据泄露"></a>任意地址数据泄露</h5><p>类似”%s”的格式，我们可以用它泄露出参数指针所指向内存的数据。</p>
+<p>例如<code>&#39;%(x)$s’+hackaddress</code>,若第<code>（x）</code>个参数刚好存放的是hackaddress，则会读取hackaddress所指向的值。</p>
+<p>注意：类似”\x07”、“\x08”、”\x20”等不可见字符可能泄露不出来。</p>
+<h4 id="内存覆盖"><a href="#内存覆盖" class="headerlink" title="内存覆盖"></a>内存覆盖</h4><p>我们可以利用格式化字符串，对任意地址进行覆盖。</p>
+<p>我们可以通过<code>%n</code>将前面字符的数量写入特点地址中，例如：</p>
+<p><code>wwww%10$n</code>表将4写入第10个参数所对应的地址中（在使用中要注意，栈上数据对其，即32位4个字节一个单位,64位8个字节一个单位）</p>
+<p>同时我们可以利用修饰符来降低我们覆盖地址时工作，’%hhn’让我们一次只写入一个字节的数据，从而避免为改一字节而改变整个单位数据。</p>
+<p>我们也可以用<code>%（x）c%n</code>来代替（x）个’w’从而减短payload长度。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://ctf-wiki.org/pwn/linux/fmtstr/fmtstr_intro/" target="_blank" rel="noopener">https://ctf-wiki.org/pwn/linux/fmtstr/fmtstr_intro/</a></p>
+<p><a href="https://firmianay.gitbooks.io/ctf-all-in-one/content/doc/3.1.1_format_string.html" target="_blank" rel="noopener">https://firmianay.gitbooks.io/ctf-all-in-one/content/doc/3.1.1_format_string.html</a></p>
 
       
     </div>
@@ -440,13 +367,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></p>
+        <p><span>本文标题:</span><a href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
-        <p><span>发布时间:</span>2020-04-23, 17:06:16</p>
-        <p><span>最后更新:</span>2021-02-22, 15:32:30</p>
+        <p><span>发布时间:</span>2021-04-25, 16:50:53</p>
+        <p><span>最后更新:</span>2021-04-25, 20:14:26</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/" title="如何让文件里PHP代码被服务器解析执行">lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/</a>
-            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/" title="关于格式化字符串利用——学pwn小记(9)">lexsd6.github.io/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -458,16 +385,10 @@
 
     <nav id="article-nav">
         
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">
-                    关于php反序列化字符逃逸的思考
-                </a>
-            </div>
-        
         
             <div id="article-nav-older" class="article-nav-title">
-                <a href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">
-                    虎符CTF2020--EasyLogin WP
+                <a href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">
+                    Tcache attack初学习——学pwn小记(8)
                 </a>
             </div>
         
@@ -479,7 +400,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01PHP代码的特征"><span class="toc-text">0x01PHP代码的特征</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-’-lt-php’-与’-gt-‘"><span class="toc-text">(1)’&lt; ?php’ 与’? &gt;‘</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-lt-script-gt-标签标记"><span class="toc-text">(2)&lt;script&gt;标签标记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-ASP-风格标记"><span class="toc-text">(3)ASP 风格标记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-使用短标签来标记"><span class="toc-text">(4)使用短标签来标记</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02如何分割PHP代码指令"><span class="toc-text">0x02如何分割PHP代码指令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03让文件被服务器解析"><span class="toc-text">0x03让文件被服务器解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-更改服务器的httpd-conf配置"><span class="toc-text">1.更改服务器的httpd.conf配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#（1）使用AddHandler-指令："><span class="toc-text">（1）使用AddHandler 指令：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#（2）使用AddType指令："><span class="toc-text">（2）使用AddType指令：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-更改-htaccess文件"><span class="toc-text">2.更改.htaccess文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-更改php-fpm-conf"><span class="toc-text">3.更改php-fpm.conf</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-利用文件包含来包含文件"><span class="toc-text">4.利用文件包含来包含文件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-利用php函数包含代码执行"><span class="toc-text">(1)利用php函数包含代码执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-利用-htaccess文件或php-ini文件来文件包含"><span class="toc-text">(2)利用 .htaccess文件或php.ini文件来文件包含</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00参考文献"><span class="toc-text">0x00参考文献</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#格式化字符串函数"><span class="toc-text">格式化字符串函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#格式化字符串参数"><span class="toc-text">格式化字符串参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#指示符"><span class="toc-text">指示符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修饰符"><span class="toc-text">修饰符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#格式化字符串利用"><span class="toc-text">格式化字符串利用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#数据泄露"><span class="toc-text">数据泄露</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#栈数据泄露"><span class="toc-text">栈数据泄露</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#任意地址数据泄露"><span class="toc-text">任意地址数据泄露</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#内存覆盖"><span class="toc-text">内存覆盖</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol>
         
     </div>
     <style>
@@ -515,7 +436,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"如何让文件里PHP代码被服务器解析执行　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"关于格式化字符串利用——学pwn小记(9)　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -535,15 +456,13 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/" title="上一篇: 关于php反序列化字符逃逸的思考">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
 
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
         
-            <a href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/" title="下一篇: 虎符CTF2020--EasyLogin WP">
+            <a href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/" title="下一篇: Tcache attack初学习——学pwn小记(8)">
                 <i class="fa fa-angle-right"></i>
             </a>
         
