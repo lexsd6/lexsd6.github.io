@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</title>
+      <link href="2021/09/16/&#39;could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!&#39;%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/"/>
+      <url>2021/09/16/&#39;could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!&#39;%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/</url>
+      
+        <content type="html"><![CDATA[<p>额,之前一直被<code>could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!</code>这个报错恶心了很久,今天无意间终于找到了解决(补救方案)。<a id="more"></a></p><h2 id="报错状况描述"><a href="#报错状况描述" class="headerlink" title="报错状况描述"></a>报错状况描述</h2><p>在报错后，出现 <code>.plt.sec</code> 的segement。libc的symbols能被ida正常解析，但是并未被ida自动连接绑定上。本该解析libc symbols的地方，显示的是<code>.plt.sec</code>的值， 如图：</p><p><img src="image-20210916112022149.png" alt="image-20210916112022149"></p><h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>添加插件：pltresolver</p><p>项目地址：<a href="https://github.com/veritas501/pltresolver" target="_blank" rel="noopener">https://github.com/veritas501/pltresolver</a></p><p>在ida项目中的<code>plugins</code>倒入脚本：</p><p><img src="image-20210916113633798.png" alt="image-20210916113633798"></p><p>打开ida看到<code>pltResolver plugin has been loaded.Press Ctrl+Shift+J to resolve .plt.sec symbols.</code>即为倒入成功！</p><p><img src="image-20210916113730185.png" alt="image-20210916113730185"></p><h2 id="修复后效果"><a href="#修复后效果" class="headerlink" title="修复后效果"></a>修复后效果</h2><p>看到ida 把libc sysmbols用重新识别上了： </p><p><img src="image-20210916113420325.png" alt="image-20210916113420325"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> tools </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> ida </tag>
+            
+            <tag> problem_resolve </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>5种字符&#39;(^.9)&#39;构造php_shellcode</title>
       <link href="2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/"/>
       <url>2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/</url>
@@ -94,7 +121,7 @@
       
       <categories>
           
-          <category> tools </category>
+          <category> CTF </category>
           
       </categories>
       
