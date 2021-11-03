@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="在开始使用一个新的库或框架是很困难的，尤其是在有大量参考文献要阅读的情况下。虽然会忽略掉一些细节，但这篇文章将用很简洁快速地介绍cocos2d。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cocos2d官方文档汉化--Writing a cocos2d application">
+<meta property="og:url" content="lexsd6.github.io/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="在开始使用一个新的库或框架是很困难的，尤其是在有大量参考文献要阅读的情况下。虽然会忽略掉一些细节，但这篇文章将用很简洁快速地介绍cocos2d。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-04-10T05:23:54.000Z">
+<meta property="article:modified_time" content="2021-10-20T03:30:43.087Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="translate">
+<meta name="twitter:card" content="summary">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>cocos2d官方文档汉化--Writing a cocos2d application | lexsd6&#39;s home</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem-resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-cocos2d官方文档汉化--Writing a cocos2d application" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/" class="article-date">
+      <time datetime="2019-04-10T05:23:54.000Z" itemprop="datePublished">2019-04-10</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      cocos2d官方文档汉化--Writing a cocos2d application
+    </h1>
+  
+
+
+          <div style="margin-top:10px ;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">3.3k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">14分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/cocos/">cocos</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/translate/" rel="tag">translate</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>在开始使用一个新的库或框架是很困难的，尤其是在有大量参考文献要阅读的情况下。虽然会忽略掉一些细节，但这篇文章将用很简洁快速地介绍cocos2d。<a id="more"></a></p>
+<h2 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello, World"></a>Hello, World</h2><p>我们将从必要的“Hello, World”来开始介绍，这个例子将打开一个带有一些文字在上面的窗口并且在等待一段时间后会关闭这个窗口。</p>
+<h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><p>通过导入cocos库开始：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cocos</span><br></pre></td></tr></table></figure>
+
+<p>建立一个<code>Layer</code>（层）的子类，并定义在这里编写定义你的逻辑代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span><span class="params">(cocos.layer.Layer)</span>:</span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以在构造函数中通过<code>super()</code>来继承调用父类。从而总是在构造函数中调用<code>super()</code>来继承<code>Layer</code>.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">    super(HelloWorld, self).__init__()</span><br></pre></td></tr></table></figure>
+
+<p>为了设置展现文本，我们将通过<code>cocos.text.Label()</code>创建一个<code>Label</code>（标签）. <code>cocos.text.Label</code>的关键参数有font_name(自定义字体)、font_size(字体大小)、anchr_x(字体的x轴描点)、anchr_y(字体的y轴描点)：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">label = cocos.text.Label(</span><br><span class="line">    <span class="string">'Hello, world'</span>,</span><br><span class="line">    font_name=<span class="string">'Times New Roman'</span>,</span><br><span class="line">    font_size=<span class="number">32</span>,</span><br><span class="line">    anchor_x=<span class="string">'center'</span>, anchor_y=<span class="string">'center'</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>通过对<code>label.position</code>赋值让label在窗口的中心显现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">label.position = <span class="number">320</span>, <span class="number">240</span></span><br></pre></td></tr></table></figure>
+
+<p>由于<code>Label</code>是<code>CocosNode</code>的子类，Label能被添加在<code>CocosNode</code>作为子节点。所有的<code>CocosNode</code>对象能知道如何渲染、执行、转换他们。让我们为通过<code>add()</code>为<code>Layer</code>添加一个子节点。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.add(label)</span><br></pre></td></tr></table></figure>
+
+<p>之后为了定义<code>HelloWorld</code>类，我们需要初始化和创建一个窗口。我们在<code>Director</code>进行初始化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cocos.director.director.init()</span><br></pre></td></tr></table></figure>
+
+<p>之后我们创造一个<code>HelloWorld</code>类的实例</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hello_layer = HelloWorld()</span><br></pre></td></tr></table></figure>
+
+<p>再之后我们创建一个包含图层实例(hello_layer)的scene(场景)：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">main_scene = cocos.scene.Scene (hello_layer)</span><br></pre></td></tr></table></figure>
+
+<p>最后我们运行这个场景：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cocos.director.director.run(main_scene)</span><br></pre></td></tr></table></figure>
+
+<p>最好三步操作也可以简化为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cocos.director.director.run(cocos.scene.Scene(HelloWorld()))</span><br></pre></td></tr></table></figure>
+
+<h3 id="样例代码"><a href="#样例代码" class="headerlink" title="样例代码"></a>样例代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cocos</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span><span class="params">(cocos.layer.Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment">#继承调用cocos.layer.Layer父类的构造方法，来创建一个图层</span></span><br><span class="line">        super(HelloWorld, self).__init__()</span><br><span class="line">        <span class="comment">#设置展现文本</span></span><br><span class="line">        label = cocos.text.Label(</span><br><span class="line">            <span class="string">'Hello, world'</span>,</span><br><span class="line">            font_name=<span class="string">'Times New Roman'</span>,</span><br><span class="line">            font_size=<span class="number">32</span>,</span><br><span class="line">            anchor_x=<span class="string">'center'</span>, anchor_y=<span class="string">'center'</span>)</span><br><span class="line">        <span class="comment">#设置label的位置</span></span><br><span class="line">        label.position = <span class="number">0</span>, <span class="number">240</span></span><br><span class="line">        <span class="comment">#将文本添加在图层中</span></span><br><span class="line">        self.add(label)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    cocos.director.director.init()<span class="comment">#实例化directir 进行初始化</span></span><br><span class="line">    hello_layer = HelloWorld()<span class="comment">#实例化HelloWorld class</span></span><br><span class="line">    main_scene = cocos.scene.Scene (hello_layer)<span class="comment">#让场景包含图层</span></span><br><span class="line">    cocos.director.director.run(main_scene)<span class="comment">#运行显示场景</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<h2 id="Hello-Actions"><a href="#Hello-Actions" class="headerlink" title="Hello Actions"></a>Hello Actions</h2><p>这个例子和之前的例子1有点类似，不过不同之处在于它向我们展示了运动的世界。运动就像是命令，我们可以命令所有<code>CocosNode object</code>去执行一个动作，</p>
+<h3 id="步骤-1"><a href="#步骤-1" class="headerlink" title="步骤"></a>步骤</h3><p>比如想我们的例子，我们import package：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cocos</span><br></pre></td></tr></table></figure>
+
+<p>如果你想进行多个操作，你可以将命令空间导入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> cocos.actions <span class="keyword">import</span> *</span><br></pre></td></tr></table></figure>
+
+<p>我们可以通过创建一个<code>ColorLayer</code>的子类来创建一个有色彩的图层，并且通过super函数来设置颜色。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span><span class="params">(cocos.layer.ColorLayer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># blueish color</span></span><br><span class="line">        super( HelloWorld, self ).__init__( <span class="number">64</span>,<span class="number">64</span>,<span class="number">224</span>,<span class="number">255</span>)</span><br></pre></td></tr></table></figure>
+
+<p>与之前的例子相同，我们创造一个标签：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">label = cocos.text.Label(<span class="string">'Hello, World!'</span>,</span><br><span class="line">    font_name=<span class="string">'Times New Roman'</span>,</span><br><span class="line">    font_size=<span class="number">32</span>,</span><br><span class="line">    anchor_x=<span class="string">'center'</span>, anchor_y=<span class="string">'center'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># set the label in the center of the screen</span></span><br><span class="line">label.position = <span class="number">320</span>,<span class="number">240</span></span><br><span class="line">self.add( label )</span><br></pre></td></tr></table></figure>
+
+<p>在例子中，我们也创造和添加一个sprite（精灵）作为子节点。在cocos2d 中，精灵是sprite 对象。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sprite = cocos.sprite.Sprite(<span class="string">'grossini.png'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们把‘精灵’安放在屏幕的中间。sprite object 的默认位置是(0,0)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sprite.position = <span class="number">320</span>,<span class="number">240</span></span><br></pre></td></tr></table></figure>
+
+<p>我们通过将scale属性设置为3。这将会使我们的图像放的3倍。(默认的倍率是1)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sprite.scale = <span class="number">3</span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以通过设置z属性，来设置对象yue在图层z轴的位置，z值越在最前面显示。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.add( sprite, z=<span class="number">1</span> )</span><br></pre></td></tr></table></figure>
+
+<p>我们创建一个ScaleBy 动作，它会让对象在2s里按比例缩放。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scale = ScaleBy(<span class="number">3</span>, duration=<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<p>现在我们告诉标签将这么做：</p>
+<p>​    将图像在2s里放大三倍。</p>
+<p>​    然后再在2s里缩小三倍。</p>
+<p>​    最后反复循环动作。</p>
+<p>我们用‘+’号来链接两个动作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">label.do( Repeat( scale + Reverse( scale) ) )</span><br></pre></td></tr></table></figure>
+
+<p>然后我们告诉sprie做相同的动作不过是先缩小后放大：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sprite.do( Repeat( Reverse(scale) + scale ) )</span><br></pre></td></tr></table></figure>
+
+<p>然后我们依然利用director初始化：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cocos.director.director.init()</span><br><span class="line">hello_layer = HelloWorld ()</span><br></pre></td></tr></table></figure>
+
+<p>然后我们利用<code>RotateBy</code> action 让窗口在10s内进行360旋转。 </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hello_layer.do( RotateBy(<span class="number">360</span>, duration=<span class="number">10</span>) )</span><br></pre></td></tr></table></figure>
+
+<p>最后，添加上我们的执行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># A scene that contains the layer hello_layer</span></span><br><span class="line">main_scene = cocos.scene.Scene (hello_layer)</span><br><span class="line"></span><br><span class="line"><span class="comment"># And now, start the application, starting with main_scene</span></span><br><span class="line">cocos.director.director.run (main_scene)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="样例代码-1"><a href="#样例代码-1" class="headerlink" title="样例代码"></a>样例代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cocos</span><br><span class="line"><span class="keyword">from</span> cocos.actions <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> <span class="params">(cocos.layer.ColorLayer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment">#设置彩色图层</span></span><br><span class="line">        super(HelloWorld ,self).__init__(<span class="number">64</span>,<span class="number">64</span>,<span class="number">224</span>,<span class="number">255</span>)</span><br><span class="line">		<span class="comment">#设置文本label </span></span><br><span class="line">        label = cocos.text.Label(<span class="string">'Hello, World!'</span>,</span><br><span class="line">        font_name=<span class="string">'Times New Roman'</span>,</span><br><span class="line">        font_size=<span class="number">32</span>,</span><br><span class="line">        anchor_x=<span class="string">'center'</span>, anchor_y=<span class="string">'center'</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># set the label in the center of the screen</span></span><br><span class="line">        label.position = <span class="number">320</span>,<span class="number">240</span></span><br><span class="line">        self.add( label )</span><br><span class="line">        </span><br><span class="line">        <span class="comment">#添加图片</span></span><br><span class="line">        sprite = cocos.sprite.Sprite(<span class="string">'1.png'</span>)</span><br><span class="line">        <span class="comment">#图片位置</span></span><br><span class="line">        sprite.position = <span class="number">320</span>,<span class="number">240</span> </span><br><span class="line">        <span class="comment">#缩放，这里是原图的0.3倍，步骤里是原图3倍</span></span><br><span class="line">        sprite.scale = <span class="number">0.3</span></span><br><span class="line">        <span class="comment">#添加到图层高度为1（目前的顶层）</span></span><br><span class="line">        self.add( sprite, z=<span class="number">1</span> )</span><br><span class="line">        </span><br><span class="line">        <span class="comment">#添加缩放动画</span></span><br><span class="line">        scale = ScaleBy(<span class="number">3</span>, duration=<span class="number">2</span>)</span><br><span class="line">        label.do( Repeat( scale + Reverse( scale) ) )</span><br><span class="line">        sprite.do( Repeat( Reverse(scale) + scale ) )</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment">#初始化</span></span><br><span class="line">    cocos.director.director.init()</span><br><span class="line">    <span class="comment">#实例化图层</span></span><br><span class="line">    hello_layer = HelloWorld ()</span><br><span class="line">    <span class="comment">#对图层添加旋转动画</span></span><br><span class="line">    hello_layer.do( RotateBy(<span class="number">360</span>, duration=<span class="number">10</span>) )</span><br><span class="line">    <span class="comment"># A scene that contains the layer hello_layer</span></span><br><span class="line">    main_scene = cocos.scene.Scene (hello_layer)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># And now, start the application, starting with main_scene</span></span><br><span class="line">    cocos.director.director.run (main_scene)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Handling-Events"><a href="#Handling-Events" class="headerlink" title="Handling Events"></a>Handling Events</h2><p>在我们之前的所有例子都是没有交互的。它们都只是展示了一些东西，但是没有对用户的输入进行回响（除了当我们按下<code>ESC</code> or 点击window上的小框框时）.Cocos 通过监听<code>director.window evenets</code>来获取输入。同时，为了方便<code>cocos.layer</code>自动化监听director.window evenets.我们在图层(layer)子类中设置<code>is_event_handler</code> 类 来成员为<code>Ture</code> 然后cocos 会检查图片事件响应。</p>
+<p>在这一节中，我们将建立一步步地通过一个小项目来学习。这个小项目将展示那些键被按下那些鼠标的位置和点击。在运行这些项目前先阅读下面的代码来获得一个清晰的思路来思考我们如何来尝试写作代码。</p>
+<h3 id="键盘事件"><a href="#键盘事件" class="headerlink" title="键盘事件"></a>键盘事件</h3><p>我们开始定义<code>KeyDisplay layer</code>class.当然，我们在<code>__init__</code>做了一些初始化，在下面的代码中展示了我们的步骤：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">KeyDisplay</span><span class="params">(cocos.layer.Layer)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># If you want that your layer receives director.window events</span></span><br><span class="line">    <span class="comment"># you must set this variable to 'True'</span></span><br><span class="line">    is_event_handler = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line"></span><br><span class="line">        super( KeyDisplay, self ).__init__()</span><br><span class="line"></span><br><span class="line">        self.text = cocos.text.Label(<span class="string">""</span>, x=<span class="number">100</span>, y=<span class="number">280</span> )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># To keep track of which keys are pressed:</span></span><br><span class="line">        self.keys_pressed = set()</span><br><span class="line">        self.update_text()</span><br><span class="line">        self.add(self.text)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">update_text</span><span class="params">(self)</span>:</span></span><br><span class="line">        key_names = [pyglet.window.key.symbol_string (k) <span class="keyword">for</span> k <span class="keyword">in</span> self.keys_pressed]</span><br><span class="line">        text = <span class="string">'Keys: '</span>+<span class="string">','</span>.join (key_names)</span><br><span class="line">        <span class="comment"># Update self.text</span></span><br><span class="line">        self.text.element.text = text</span><br></pre></td></tr></table></figure>
+
+<p>这是一个定义<code>key_passed</code>的集，这应该是任何时候按下的一组键。然后，这些代码依然是没有作用的。我们应该告诉图层，当我们某键被按下或释放时要更新这一个字符集。换句话说，我们需要添加一个事件句柄在图层中。添加事件句柄在图层中仅仅需要在添加一个方法，让其被某个事件被调用。这里有俩个事件可以被我们选择 <code>on_key_press</code> and <code>on_key_release</code>:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_key_press</span> <span class="params">(self, key, modifiers)</span>:</span></span><br><span class="line">    <span class="string">"""This function is called when a key is pressed.</span></span><br><span class="line"><span class="string">    'key' is a constant indicating which key was pressed.</span></span><br><span class="line"><span class="string">    'modifiers' is a bitwise or of several constants indicating which</span></span><br><span class="line"><span class="string">        modifiers are active at the time of the press (ctrl, shift, capslock, etc.)</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    self.keys_pressed.add (key)</span><br><span class="line">    self.update_text()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_key_release</span> <span class="params">(self, key, modifiers)</span>:</span></span><br><span class="line">    <span class="string">"""This function is called when a key is released.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    'key' is a constant indicating which key was pressed.</span></span><br><span class="line"><span class="string">    'modifiers' is a bitwise or of several constants indicating which</span></span><br><span class="line"><span class="string">        modifiers are active at the time of the press (ctrl, shift, capslock, etc.)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Constants are the ones from pyglet.window.key</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    self.keys_pressed.remove (key)</span><br><span class="line">    self.update_text()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">update_text</span><span class="params">(self)</span>:</span></span><br><span class="line">    key_names = [pyglet.window.key.symbol_string (k) <span class="keyword">for</span> k <span class="keyword">in</span> self.keys_pressed]</span><br><span class="line">    text = <span class="string">'Keys: '</span>+<span class="string">','</span>.join (key_names)</span><br><span class="line">    <span class="comment"># Update self.text</span></span><br><span class="line">    self.text.element.text = text</span><br></pre></td></tr></table></figure>
+
+<p>通过这样的代码，图层现在已经能充分地工作。你看可以通过按下或松开键盘，将看到任何时候图层将会展示你操作的键。</p>
+<h3 id="键盘事件样码"><a href="#键盘事件样码" class="headerlink" title="键盘事件样码"></a>键盘事件样码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cocos</span><br><span class="line"><span class="keyword">from</span> cocos.actions <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> pyglet</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">KeyDisplay</span><span class="params">(cocos.layer.Layer)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># If you want that your layer receives director.window events</span></span><br><span class="line">    <span class="comment"># you must set this variable to 'True'</span></span><br><span class="line">    is_event_handler = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line"></span><br><span class="line">        super( KeyDisplay, self ).__init__()</span><br><span class="line"></span><br><span class="line">        self.text = cocos.text.Label(<span class="string">""</span>, x=<span class="number">100</span>, y=<span class="number">280</span> )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># To keep track of which keys are pressed:</span></span><br><span class="line">        self.keys_pressed = set()</span><br><span class="line">        self.update_text()</span><br><span class="line">        self.add(self.text)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">update_text</span><span class="params">(self)</span>:</span></span><br><span class="line">        key_names = [pyglet.window.key.symbol_string (k) <span class="keyword">for</span> k <span class="keyword">in</span> self.keys_pressed]</span><br><span class="line">        text = <span class="string">'Keys: '</span>+<span class="string">','</span>.join (key_names)</span><br><span class="line">        <span class="comment"># Update self.text</span></span><br><span class="line">        self.text.element.text = text</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_key_press</span> <span class="params">(self, key, modifiers)</span>:</span></span><br><span class="line">        <span class="string">"""This function is called when a key is pressed.</span></span><br><span class="line"><span class="string">    'key' is a constant indicating which key was pressed.</span></span><br><span class="line"><span class="string">    'modifiers' is a bitwise or of several constants indicating which</span></span><br><span class="line"><span class="string">        modifiers are active at the time of the press (ctrl, shift, capslock, etc.)</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line"></span><br><span class="line">        self.keys_pressed.add (key)</span><br><span class="line">        self.update_text()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_key_release</span> <span class="params">(self, key, modifiers)</span>:</span></span><br><span class="line">        <span class="string">"""This function is called when a key is released.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    'key' is a constant indicating which key was pressed.</span></span><br><span class="line"><span class="string">    'modifiers' is a bitwise or of several constants indicating which</span></span><br><span class="line"><span class="string">        modifiers are active at the time of the press (ctrl, shift, capslock, etc.)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Constants are the ones from pyglet.window.key</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line"></span><br><span class="line">        self.keys_pressed.remove (key)</span><br><span class="line">        self.update_text()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    cocos.director.director.init()</span><br><span class="line">    hello_layer =KeyDisplay( )</span><br><span class="line">    <span class="comment">#hello_layer.do( RotateBy(360, duration=10) )</span></span><br><span class="line">    <span class="comment"># A scene that contains the layer hello_layer</span></span><br><span class="line">    main_scene = cocos.scene.Scene (hello_layer)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># And now, start the application, starting with main_scene</span></span><br><span class="line">    cocos.director.director.run (main_scene)</span><br><span class="line">    cocos.director.event</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<h3 id="鼠标事件"><a href="#鼠标事件" class="headerlink" title="鼠标事件"></a>鼠标事件</h3><p>处理鼠标输入的过程是相似的。我们可以有三个事件来供我们选择：on_mouse_press, on_mouse_motion and on_mouse_drag。接着我们就可以定义我们的图层：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MouseDisplay</span><span class="params">(cocos.layer.Layer)</span>:</span></span><br><span class="line"></span><br><span class="line">    is_event_handler = <span class="literal">True</span>     <span class="comment">#: enable director.window events</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        super( MouseDisplay, self ).__init__()</span><br><span class="line"></span><br><span class="line">        self.posx = <span class="number">100</span></span><br><span class="line">        self.posy = <span class="number">240</span></span><br><span class="line">        self.text = cocos.text.Label(<span class="string">'No mouse events yet'</span>, font_size=<span class="number">18</span>, x=self.posx, y=self.posy )</span><br><span class="line">        self.add( self.text )</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">update_text</span> <span class="params">(self, x, y)</span>:</span></span><br><span class="line">        text = <span class="string">'Mouse @ %d,%d'</span> % (x, y)</span><br><span class="line">        self.text.element.text = text</span><br><span class="line">        self.text.element.x = self.posx</span><br><span class="line">        self.text.element.y = self.posy</span><br></pre></td></tr></table></figure>
+
+<p>然后我们添加事件句柄让其在我们text随着我们鼠标的移动而更新同时在我们按钮被点击时改变我们text的位置。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_mouse_motion</span> <span class="params">(self, x, y, dx, dy)</span>:</span></span><br><span class="line">    <span class="string">"""Called when the mouse moves over the app window with no button pressed</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    (x, y) are the physical coordinates of the mouse</span></span><br><span class="line"><span class="string">    (dx, dy) is the distance vector covered by the mouse pointer since the</span></span><br><span class="line"><span class="string">      last call.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    self.update_text (x, y)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_mouse_drag</span> <span class="params">(self, x, y, dx, dy, buttons, modifiers)</span>:</span></span><br><span class="line">    <span class="string">"""Called when the mouse moves over the app window with some button(s) pressed</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    (x, y) are the physical coordinates of the mouse</span></span><br><span class="line"><span class="string">    (dx, dy) is the distance vector covered by the mouse pointer since the</span></span><br><span class="line"><span class="string">      last call.</span></span><br><span class="line"><span class="string">    'buttons' is a bitwise or of pyglet.window.mouse constants LEFT, MIDDLE, RIGHT</span></span><br><span class="line"><span class="string">    'modifiers' is a bitwise or of pyglet.window.key modifier constants</span></span><br><span class="line"><span class="string">       (values like 'SHIFT', 'OPTION', 'ALT')</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    self.update_text (x, y)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_mouse_press</span> <span class="params">(self, x, y, buttons, modifiers)</span>:</span></span><br><span class="line">    <span class="string">"""This function is called when any mouse button is pressed</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    (x, y) are the physical coordinates of the mouse</span></span><br><span class="line"><span class="string">    'buttons' is a bitwise or of pyglet.window.mouse constants LEFT, MIDDLE, RIGHT</span></span><br><span class="line"><span class="string">    'modifiers' is a bitwise or of pyglet.window.key modifier constants</span></span><br><span class="line"><span class="string">       (values like 'SHIFT', 'OPTION', 'ALT')</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    self.posx, self.posy = director.get_virtual_coordinates (x, y)</span><br><span class="line">    self.update_text (x,y)</span><br></pre></td></tr></table></figure>
+
+<p>这有点不同的是这里调用了<code>director.get_virtual_coordinates (x, y)</code>.在解释这个之前，cocos已经有两个坐标参考系，一个是物理坐标参考系一个是虚拟坐标参考系。鼠标事件句柄（mouse event handlers）会依赖于pyglet在物理坐标参考系中获取参数。如果你在虚拟坐标系中获得参数或将物理坐标系映射在虚拟坐标系中，你可能需要借助<code>director.get_virtual_coordinates</code>来进行物理坐标系与虚拟坐标系之间的映射。假如你加载了<code>self.posx</code>,<code>self.posy</code>在<code>on_mouse_press handler</code>事件中，你可以查看查询似乎是在工作的，但是如果你改变窗口的大小，这个点击次数显示将会跑到一个错误的地方上去。</p>
+<p>对于我们已经使用的鼠标事件而言，它们是其他有用的鼠标事件：</p>
+<p>on_mouse_release : 在一个按钮被释放的时候被调用。</p>
+<p>on_mouse_scroll ：在鼠标滑轮移动时候被调用。</p>
+<p>on_mouse_leave : 在鼠标移出窗口时候被调用。</p>
+<p>on_mouse_enter：在鼠标移进窗口时被调用。</p>
+<p>这个演示没有更多的代码了，除了一个场景中包含了两个图层然后运行它：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">director.init(resizable=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># Run a scene with our event displayers:</span></span><br><span class="line">director.run( cocos.scene.Scene( KeyDisplay(), MouseDisplay() ) )</span><br></pre></td></tr></table></figure>
+
+<p>在这个场景中这些需求，可以去自己实现下：</p>
+<ul>
+<li>改变<code>on_mouse_press</code>句柄取消虚拟坐标系映射，注意改动后窗口大小后的奇怪变化</li>
+<li>注意屏幕上的鼠标坐标是物理坐标，所以在改变窗口大小时它们也会改变，修改演示以显示虚拟坐标。</li>
+<li>修改代码使拖动鼠标时可以移动鼠标坐标标签</li>
+<li>更改代码，以便键盘显示也显示每次设置的修饰符</li>
+</ul>
+<h2 id="Where-to-next"><a href="#Where-to-next" class="headerlink" title="Where to next?"></a>Where to next?</h2><p>本章中给出的例子应该给你足够的 开始编写简单的拱廊和point-and-click-based信息 游戏。</p>
+<p>本编程指南的其余部分进入技术细节 关于可可的一些特性。 开始时,推荐 你浏览每一章的开始而不是试图阅读 从开始到结束整个指南。</p>
+<p>实现2 d最优性能 你需要直接使用OpenGL应用程序。 规范化 OpenGL的引用 <a href="http://opengl.org/documentation/books/#the_opengl_programming_guide_the_official_guide_to_learning_opengl_version" target="_blank" rel="noopener">OpenGL编程指南 </a>和 <a href="http://opengl.org/documentation/books/#the_opengl_shading_language_2nd_edition" target="_blank" rel="noopener">OpenGL着色语言 </a>。</p>
+<p>因为是cocos2d使用pyglet您还应当检查 <a href="http://pyglet.org/doc/programming_guide/" target="_blank" rel="noopener">pyglet编程指南 </a>和 <a href="http://pyglet.org/doc/api/" target="_blank" rel="noopener">pyglet API参考</a></p>
+<p>有许多是cocos2d应用的例子 <code>样品/</code>目录的文档和源代码发行版。 保持检查 <a href="http://www.cocos2d.org/" target="_blank" rel="noopener">http://www.cocos2d.org/ </a>更多的例子和教程写的。</p>
+<p>文献来源：<a href="http://python.cocos2d.org/doc/programming_guide/quickstart.html" target="_blank" rel="noopener">http://python.cocos2d.org/doc/programming_guide/quickstart.html</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2019-04-10, 13:23:54</p>
+        <p><span>最后更新:</span>2021-10-20, 11:30:43</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/" title="cocos2d官方文档汉化--Writing a cocos2d application">lexsd6.github.io/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">
+                    关于updatexml()报错注入的思考
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/01/03/hello-world/">
+                    Hello World
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Hello-World"><span class="toc-text">Hello, World</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#步骤"><span class="toc-text">步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#样例代码"><span class="toc-text">样例代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hello-Actions"><span class="toc-text">Hello Actions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#步骤-1"><span class="toc-text">步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#样例代码-1"><span class="toc-text">样例代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Handling-Events"><span class="toc-text">Handling Events</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#键盘事件"><span class="toc-text">键盘事件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#键盘事件样码"><span class="toc-text">键盘事件样码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#鼠标事件"><span class="toc-text">鼠标事件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Where-to-next"><span class="toc-text">Where to next?</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"cocos2d官方文档汉化--Writing a cocos2d application　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/" title="上一篇: 关于updatexml()报错注入的思考">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/01/03/hello-world/" title="下一篇: Hello World">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2021 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    
+                
+                
+                    <span>| </span>
+                
+                
+                    
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                  
+                
+	
+            
+
+
+
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+
+  </div>
+</body>
+</html>

