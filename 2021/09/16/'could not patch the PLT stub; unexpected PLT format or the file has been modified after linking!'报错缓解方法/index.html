@@ -455,7 +455,7 @@ Press Ctrl+Shift+J to resolve .plt.sec symbols.</code>即为倒入成功！</p>
     <script type="text/javascript">
    (function(d, s) {
        var j, e = d.getElementsByTagName(s)[0];
-
+	
        if (typeof LivereTower === 'function') { return; }
 
        j = d.createElement(s);
@@ -463,11 +463,23 @@ Press Ctrl+Shift+J to resolve .plt.sec symbols.</code>即为倒入成功！</p>
        j.async = true;
 
        e.parentNode.insertBefore(j, e);
+	
        })(document, 'script');
+	
     </script>
     <noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
-    </div>
+
+	</div>
+
     <!-- City版安装代码已完成 -->
+<script type="text/javascript">
+    
+setInterval(function () {
+    var box = document.querySelector(".trc_rbox_container");
+    if(box) box.outerHTML = "";
+}, 2000);
+document.getElementById("taboola-livere").style='display:none';
+</script>
 </section>
     
 
