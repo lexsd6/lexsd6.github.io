@@ -271,6 +271,133 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-decrypt_safe_linking" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2022/10/16/decrypt_safe_linking/" class="article-date">
+      <time datetime="2022-10-16T12:11:27.356Z" itemprop="datePublished">2022-10-16</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/10/16/decrypt_safe_linking/">how2heap-decrypt_safe_linking学习</a>
+    </h1>
+  
+
+
+          <div style="margin-top:10px 0;margin-bottom:15px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">1.6k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">7分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>在2.32glibc中，新增的防护之指针异或加密机制到 fastbin 和 tcache 当中，将 pos &gt;&gt; 12 后的值 key，与原来的 next 进行异或，作为新的 next 值。</p>
+<h2 id="新机制说明"><a href="#新机制说明" class="headerlink" title="新机制说明"></a>新机制说明</h2><p><img src="image-20221016145439852.png" alt="image-20221016145439852"></p>
+<p>以free函数为例子，在2.32glibc中在释放chunk时 不是直接把 fd 值放入 <code>p-&gt;fd</code>中。而是经过 <code>PROTECT_PTR</code>或 <code>REVEAL_PTR</code>处理。 <code>PROTECT_PTR</code>和 <code>REVEAL_PTR</code>在宏定义中定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Safe-Linking:</span></span><br><span class="line"><span class="comment">   Use randomness from ASLR (mmap_base) to protect single-linked lists</span></span><br><span class="line"><span class="comment">   of Fast-Bins and TCache.  That is, mask the "next" pointers of the</span></span><br><span class="line"><span class="comment">   lists' chunks, and also perform allocation alignment checks on them.</span></span><br><span class="line"><span class="comment">   This mechanism reduces the risk of pointer hijacking, as was done with</span></span><br><span class="line"><span class="comment">   Safe-Unlinking in the double-linked lists of Small-Bins.</span></span><br><span class="line"><span class="comment">   It assumes a minimum page size of 4096 bytes (12 bits).  Systems with</span></span><br><span class="line"><span class="comment">   larger pages provide less entropy, although the pointer mangling</span></span><br><span class="line"><span class="comment">   still works.  */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PROTECT_PTR(pos, ptr) \</span></span><br><span class="line">  ((__typeof (ptr)) ((((<span class="keyword">size_t</span>) pos) &gt;&gt; <span class="number">12</span>) ^ ((<span class="keyword">size_t</span>) ptr)))</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> REVEAL_PTR(ptr)  PROTECT_PTR (&amp;ptr, ptr)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>PROTECT_PTR</code>和 <code>REVEAL_PTR</code> 使用ASLR（mmap_base）的随机性来保护单链接列表Fast Bins和TCache。也就是说，屏蔽列出块，并对其执行分配对齐检查。这种机制降低了指针劫持的风险，就像对在小箱子的双重链接列表中安全断开链接。它假定最小页面大小为4096字节（12位）。具有的系统较大的页面提供较少的熵，尽管指针会被破坏仍然有效.用一个官方例子来描述:</p>
+<p><img src="libc_figure_6.png" alt="libc_figure_6"></p>
+<p>即 <strong>tcache_entry-&gt;next中存放的chunk地址为与自身地址进行异或运算后所得到的值</strong>， 这就要求我们在利用 tcache_entry 进行任意地址写之前 <strong>需要我们提前泄漏出相应 chunk 的地址，即我们需要提前获得堆基址后才能进行任意地址写</strong>，这给传统的利用方式无疑是增加了不少的难度.</p>
+<h2 id="how2heap-decrypt-safe-linking手法分析"><a href="#how2heap-decrypt-safe-linking手法分析" class="headerlink" title="how2heap-decrypt_safe_linking手法分析"></a>how2heap-decrypt_safe_linking手法分析</h2><p>在how2heap提供了一个<code>decrypt_safe_linking.c</code>的例子让我们在新机制下获得 fastbin 和 tcache的真实fd。</p>
+<p>但是我觉得例子不过深刻于是魔改了下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">long</span> <span class="title">decrypt</span><span class="params">(<span class="keyword">long</span> cipher)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"The decryption uses the fact that the first 12bit of the plaintext (the fwd pointer) is known,"</span>);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"because of the 12bit sliding."</span>);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"And the key, the ASLR value, is the same with the leading bits of the plaintext (the fwd pointer)"</span>);</span><br><span class="line">	<span class="keyword">long</span> key = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">long</span> plain;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;<span class="number">6</span>; i++) &#123;</span><br><span class="line">		<span class="keyword">int</span> bits = <span class="number">64</span><span class="number">-12</span>*i;</span><br><span class="line">		<span class="keyword">if</span>(bits &lt; <span class="number">0</span>) bits = <span class="number">0</span>;</span><br><span class="line">		plain = ((cipher ^ key) &gt;&gt; bits) &lt;&lt; bits;</span><br><span class="line">		key = plain &gt;&gt; <span class="number">12</span>;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"round %d:\n"</span>, i);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"key:    %#016lx\n"</span>, key);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"plain:  %#016lx\n"</span>, plain);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"cipher: %#016lx\n\n"</span>, cipher);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> plain;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * This technique demonstrates how to recover the original content from a poisoned</span></span><br><span class="line"><span class="comment">	 * value because of the safe-linking mechanism.</span></span><br><span class="line"><span class="comment">	 * The attack uses the fact that the first 12 bit of the plaintext (pointer) is known</span></span><br><span class="line"><span class="comment">	 * and the key (ASLR slide) is the same to the pointer's leading bits.</span></span><br><span class="line"><span class="comment">	 * As a result, as long as the chunk where the pointer is stored is at the same page</span></span><br><span class="line"><span class="comment">	 * of the pointer itself, the value of the pointer can be fully recovered.</span></span><br><span class="line"><span class="comment">	 * Otherwise, we can also recover the pointer with the page-offset between the storer</span></span><br><span class="line"><span class="comment">	 * and the pointer. What we demonstrate here is a special case whose page-offset is 0. </span></span><br><span class="line"><span class="comment">	 * For demonstrations of other more general cases, plz refer to </span></span><br><span class="line"><span class="comment">	 * https://github.com/n132/Dec-Safe-Linking</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line"></span><br><span class="line">	setbuf(<span class="built_in">stdin</span>, <span class="literal">NULL</span>);</span><br><span class="line">	setbuf(<span class="built_in">stdout</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// step 1: allocate chunks</span></span><br><span class="line">	<span class="keyword">long</span> *a = <span class="built_in">malloc</span>(<span class="number">0x200</span>);</span><br><span class="line">	<span class="keyword">long</span> *b = <span class="built_in">malloc</span>(<span class="number">0x200</span>);</span><br><span class="line">	<span class="keyword">long</span> *c = <span class="built_in">malloc</span>(<span class="number">0x200</span>);</span><br><span class="line">	<span class="keyword">long</span> *d = <span class="built_in">malloc</span>(<span class="number">0x200</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"First, we create chunk a @ %p and chunk b @ %p\n"</span>, a, b);</span><br><span class="line">	<span class="built_in">malloc</span>(<span class="number">0x10</span>);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"And then create a padding chunk to prevent consolidation."</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">// step 2: free chunks</span></span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"Now free chunk a and then free chunk b."</span>);</span><br><span class="line">	<span class="built_in">free</span>(a);</span><br><span class="line">	<span class="built_in">free</span>(c);</span><br><span class="line">	<span class="built_in">free</span>(d);</span><br><span class="line">	<span class="built_in">free</span>(b);</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Now the freelist is: [%p -&gt; %p]\n"</span>, b, a);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Due to safe-linking, the value actually stored at b[0] is: %#lx\n"</span>, b[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// step 3: recover the values</span></span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"Now decrypt the poisoned value"</span>);</span><br><span class="line">	<span class="keyword">long</span> plaintext = decrypt(b[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"value: %p\n"</span>, a);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"recovered value: %#lx\n"</span>, plaintext);</span><br><span class="line">	assert(plaintext == (<span class="keyword">long</span>)a);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="过程分析"><a href="#过程分析" class="headerlink" title="过程分析"></a>过程分析</h3><p>1.我们先创建4个chunk和一个隔离chunk，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 1: allocate chunks</span></span><br><span class="line"><span class="keyword">long</span> *a = <span class="built_in">malloc</span>(<span class="number">0x200</span>);</span><br><span class="line"><span class="keyword">long</span> *b = <span class="built_in">malloc</span>(<span class="number">0x200</span>);</span><br><span class="line"><span class="keyword">long</span> *c = <span class="built_in">malloc</span>(<span class="number">0x200</span>);</span><br><span class="line"><span class="keyword">long</span> *d = <span class="built_in">malloc</span>(<span class="number">0x200</span>);</span><br><span class="line"><span class="built_in">malloc</span>(<span class="number">0x10</span>);</span><br></pre></td></tr></table></figure>
+
+<p><img src="16658363725510.png" alt="img"></p>
+<p>2。然后我们释放一个chunk a。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">free(a);</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20221015202118323.png" alt="image-20221015202118323"></p>
+<p>可以看 加入了tcachebins 且fd 处存放的不是0，而是  0x555555559 （右移12位）</p>
+<p>3.继续依次 c  d b 释放后 chunk。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">free</span>(c);</span><br><span class="line"><span class="built_in">free</span>(d);</span><br><span class="line"><span class="built_in">free</span>(b);</span><br></pre></td></tr></table></figure>
+
+<p><img src="image-20221015202508995.png" alt="image-20221015202508995"></p>
+<p>ps：可以看 b c d 的fd ，与0x555555559 后，就是真正的fd的</p>
+<p><img src="1665836803212.png" alt="img"></p>
+<p>3.对d chunk的fd 进行 decrypt 函数解密。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">long</span> <span class="title">decrypt</span><span class="params">(<span class="keyword">long</span> cipher)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"The decryption uses the fact that the first 12bit of the plaintext (the fwd pointer) is known,"</span>);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"because of the 12bit sliding."</span>);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">"And the key, the ASLR value, is the same with the leading bits of the plaintext (the fwd pointer)"</span>);</span><br><span class="line">	<span class="keyword">long</span> key = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">long</span> plain;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;<span class="number">6</span>; i++) &#123;</span><br><span class="line">		<span class="keyword">int</span> bits = <span class="number">64</span><span class="number">-12</span>*i;</span><br><span class="line">		<span class="keyword">if</span>(bits &lt; <span class="number">0</span>) bits = <span class="number">0</span>;</span><br><span class="line">		plain = ((cipher ^ key) &gt;&gt; bits) &lt;&lt; bits;</span><br><span class="line">		key = plain &gt;&gt; <span class="number">12</span>;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"round %d:\n"</span>, i);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"key:    %#016lx\n"</span>, key);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"plain:  %#016lx\n"</span>, plain);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"cipher: %#016lx\n\n"</span>, cipher);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> plain;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到6就循环后，d chunk的fd 的真实fd就还原过来。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">round 1:</span><br><span class="line">key:    0000000000000000</span><br><span class="line">plain:  0000000000000000</span><br><span class="line">cipher: 0x0055500000cd89</span><br><span class="line"></span><br><span class="line">round 2:</span><br><span class="line">key:    0x00000550000000</span><br><span class="line">plain:  0x00550000000000</span><br><span class="line">cipher: 0x0055500000cd89</span><br><span class="line"></span><br><span class="line">round 3:</span><br><span class="line">key:    0x00000555550000</span><br><span class="line">plain:  0x00555550000000</span><br><span class="line">cipher: 0x0055500000cd89</span><br><span class="line"></span><br><span class="line">round 4:</span><br><span class="line">key:    0x00000555555550</span><br><span class="line">plain:  0x00555555550000</span><br><span class="line">cipher: 0x0055500000cd89</span><br><span class="line"></span><br><span class="line">round 5:</span><br><span class="line">key:    0x00000555555559</span><br><span class="line">plain:  0x005555555598d0</span><br><span class="line">cipher: 0x0055500000cd89</span><br></pre></td></tr></table></figure>
+
+<h3 id="利用分析"><a href="#利用分析" class="headerlink" title="利用分析"></a>利用分析</h3><p>从上面的例子可以看出，fd 位置存放值就是 原本fd的值（前一个tache的真实地址）右移 12位与fd 位置的地址值。但由于我们只 12位原本fd的值，因此我们还有3个地址位是原本的。又异或可逆性，我们可以将没变的3个地址位或2个地址右移 12位与上fd 位置存放值，还原出原本 fd一部分值 高4-6位。在把原本 fd一部分与旧原本 fd一部分再右移 12位与上fd 位置存放值，又可以得到一部分原本fd值。<img src="image-20221016213012185.png" alt="image-20221016213012185">因此我们可以更具异或可逆性，慢慢还原出来。</p>
+<p>python版脚本如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#0x0055500000cd89</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">decrypt</span><span class="params">(cipher)</span>:</span></span><br><span class="line">    key=<span class="number">0</span></span><br><span class="line">    plain=<span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        bits= <span class="number">64</span><span class="number">-12</span>*(i+<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span>(bits&lt;<span class="number">0</span>):</span><br><span class="line">            bits=<span class="number">0</span></span><br><span class="line">        plain = ((cipher ^ key) &gt;&gt; bits) &lt;&lt; bits</span><br><span class="line">        key = plain &gt;&gt; <span class="number">12</span></span><br><span class="line">        print(<span class="string">"round %d:\n"</span>%(i))</span><br><span class="line">        print(<span class="string">"key:    %#016lx\n"</span>%key)</span><br><span class="line">        print(<span class="string">"plain:  %#016lx\n"</span>%plain)</span><br><span class="line">        print(<span class="string">"cipher: %#016lx\n\n"</span>%cipher)</span><br><span class="line"></span><br><span class="line">decrypt(<span class="number">0x0055500000cd89</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="后记思考"><a href="#后记思考" class="headerlink" title="后记思考"></a>后记思考</h2><p>其实若是第一个tache 那么放入fd 的值就是 (fd^0)&gt;&gt;12.</p>
+<p>同时，7个 连续小于等于0x240的tache或fast bin 的间地址差不会超过0x1000.</p>
+<p>因此泄露出第一个tache的fd里的值为keys，直接与其他tache的fd相与。就可以得到原址。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p>在uclibc-ng中引入的补丁：<a href="https://gogs.waldemar-brodkorb.de/oss/uclibc-ng/commit/886878b22424d6f95bcdeee55ada72049d21547c" target="_blank" rel="noopener">https://gogs.waldemar-brodkorb.de/oss/uclibc-ng/commit/886878b22424d6f95bcdeee55ada72049d21547c</a>  就是在取p-&gt;fd和存放p-&gt;fd时都改成调用REVEAL_PTR</p>
+<p><a href="https://research.checkpoint.com/2020/safe-linking-eliminating-a-20-year-old-malloc-exploit-primitive/" target="_blank" rel="noopener">https://research.checkpoint.com/2020/safe-linking-eliminating-a-20-year-old-malloc-exploit-primitive/</a>  机制介绍</p>
+<p><a href="https://www.researchinnovations.com/post/bypassing-the-upcoming-safe-linking-mitigation" target="_blank" rel="noopener">https://www.researchinnovations.com/post/bypassing-the-upcoming-safe-linking-mitigation</a> 机制绕过</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+      
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
     <article id="post-2022川渝职业技能竞赛初赛--hard_login" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1072,98 +1199,9 @@
 
 
   
-    <article id="post-HTB-Neonify-web-challenge-wp" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2022/03/26/HTB-Neonify-web-challenge-wp/" class="article-date">
-      <time datetime="2022-03-26T03:00:20.000Z" itemprop="datePublished">2022-03-26</time>
-</a>
-
-
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/03/26/HTB-Neonify-web-challenge-wp/">HTB-Neonify-web-challenge-wp</a>
-    </h1>
-  
-
-
-          <div style="margin-top:10px 0;margin-bottom:15px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">449字</span>
-      </span>
-    </span>
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">阅读时长:</span>
-        <span class="post-count">2分</span>
-      </span>
-    </span>
-</div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
-          
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-              <p>第一次遇到ruby后端,感觉ruby语法也有点意思
-          
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/CTF/">CTF</a><a class="article-category-link" href="/categories/CTF/HTB/">HTB</a>
-    </div>
-
-
-      
-    <div class="article-tag tagcloud" >
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ruby/" rel="tag">ruby</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web/" rel="tag">web</a></li></ul>
-
-    </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-      
-        <p class="article-more-link">
-          <a href="/2022/03/26/HTB-Neonify-web-challenge-wp/#more">more >></a>
-        </p>
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next &gt;&gt;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/2/">Next &gt;&gt;</a>
     </nav>
   
 </div>
