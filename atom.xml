@@ -30,6 +30,12 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="web" scheme="lexsd6.github.io/tags/web/"/>
+    
+    <category term="mysql" scheme="lexsd6.github.io/tags/mysql/"/>
     
   </entry>
   
@@ -47,6 +53,10 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="python" scheme="lexsd6.github.io/tags/python/"/>
     
   </entry>
   
@@ -64,6 +74,12 @@
     
     
     
+    <category term="ELF" scheme="lexsd6.github.io/categories/ELF/"/>
+    
+    
+    <category term="code" scheme="lexsd6.github.io/tags/code/"/>
+    
+    <category term="Linux" scheme="lexsd6.github.io/tags/Linux/"/>
     
   </entry>
   
@@ -81,6 +97,12 @@
     
     
     
+    <category term="ELF" scheme="lexsd6.github.io/categories/ELF/"/>
+    
+    
+    <category term="code" scheme="lexsd6.github.io/tags/code/"/>
+    
+    <category term="Linux" scheme="lexsd6.github.io/tags/Linux/"/>
     
   </entry>
   
@@ -98,6 +120,10 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -115,6 +141,12 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="wp" scheme="lexsd6.github.io/tags/wp/"/>
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -132,6 +164,14 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="wp" scheme="lexsd6.github.io/tags/wp/"/>
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
+    
+    <category term="re" scheme="lexsd6.github.io/tags/re/"/>
     
   </entry>
   
@@ -149,6 +189,10 @@
     
     
     
+    <category term="tools" scheme="lexsd6.github.io/categories/tools/"/>
+    
+    
+    <category term="problem_resolve" scheme="lexsd6.github.io/tags/problem-resolve/"/>
     
   </entry>
   
@@ -166,6 +210,10 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -183,6 +231,10 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -200,6 +252,12 @@
     
     
     
+    <category term="unity" scheme="lexsd6.github.io/categories/unity/"/>
+    
+    
+    <category term="DragonBones" scheme="lexsd6.github.io/tags/DragonBones/"/>
+    
+    <category term="c#" scheme="lexsd6.github.io/tags/c/"/>
     
   </entry>
   
@@ -217,6 +275,12 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="wp" scheme="lexsd6.github.io/tags/wp/"/>
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -234,6 +298,12 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    <category term="HTB" scheme="lexsd6.github.io/categories/CTF/HTB/"/>
+    
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -251,6 +321,14 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    <category term="HTB" scheme="lexsd6.github.io/categories/CTF/HTB/"/>
+    
+    
+    <category term="web" scheme="lexsd6.github.io/tags/web/"/>
+    
+    <category term="python" scheme="lexsd6.github.io/tags/python/"/>
     
   </entry>
   
@@ -268,6 +346,14 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    <category term="HTB" scheme="lexsd6.github.io/categories/CTF/HTB/"/>
+    
+    
+    <category term="web" scheme="lexsd6.github.io/tags/web/"/>
+    
+    <category term="ruby" scheme="lexsd6.github.io/tags/ruby/"/>
     
   </entry>
   
@@ -285,6 +371,10 @@
     
     
     
+    <category term="HTB" scheme="lexsd6.github.io/categories/HTB/"/>
+    
+    
+    <category term="Machine" scheme="lexsd6.github.io/tags/Machine/"/>
     
   </entry>
   
@@ -302,6 +392,12 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="wp" scheme="lexsd6.github.io/tags/wp/"/>
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -319,6 +415,12 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="wp" scheme="lexsd6.github.io/tags/wp/"/>
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -336,6 +438,12 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    
+    <category term="wp" scheme="lexsd6.github.io/tags/wp/"/>
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
@@ -353,6 +461,12 @@
     
     
     
+    <category term="CTF" scheme="lexsd6.github.io/categories/CTF/"/>
+    
+    <category term="HTB" scheme="lexsd6.github.io/categories/CTF/HTB/"/>
+    
+    
+    <category term="pwn" scheme="lexsd6.github.io/tags/pwn/"/>
     
   </entry>
   
