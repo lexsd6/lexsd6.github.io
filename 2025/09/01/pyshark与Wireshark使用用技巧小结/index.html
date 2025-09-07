@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="lexsd6" />
+
+
+
+<meta name="description" content="PyShark 是一个Python库，它提供了一个方便的接口来使用Wireshark的命令行工具tshark进行包解析。它是基于Wireshark开发的，，你可以直接在Python中利用Wireshark强大的解析器处理捕获文件或实时数据流。但是网上对使用pyshark来分析http流量的说明文章太少，于是手动记录下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用pyshark分析HTTP流量技巧小结">
+<meta property="og:url" content="lexsd6.github.io/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="lexsd6&#39;s home">
+<meta property="og:description" content="PyShark 是一个Python库，它提供了一个方便的接口来使用Wireshark的命令行工具tshark进行包解析。它是基于Wireshark开发的，，你可以直接在Python中利用Wireshark强大的解析器处理捕获文件或实时数据流。但是网上对使用pyshark来分析http流量的说明文章太少，于是手动记录下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-01T01:59:36.000Z">
+<meta property="article:modified_time" content="2025-09-07T12:25:38.186Z">
+<meta property="article:author" content="lexsd6">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="lexsd6&#39;s home" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/title.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//lexsd6.github.io/js/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>使用pyshark分析HTTP流量技巧小结 | lexsd6&#39;s home</title>
+
+<script src="//lexsd6.github.io/js/jquery.min.js"></script>
+<script src="//lexsd6.github.io/js/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//lexsd6.github.io/js/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+
+
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/lexsd6.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">lexsd6</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DragonBones/" rel="tag">DragonBones</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Machine/" rel="tag">Machine</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c#</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/code/" rel="tag">code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/" rel="tag">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/" rel="tag">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libc/" rel="tag">libc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mics/" rel="tag">mics</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node-js/" rel="tag">node-js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/problem-resolve/" rel="tag">problem_resolve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/re/" rel="tag">re</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ruby/" rel="tag">ruby</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/translate/" rel="tag">translate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wp/" rel="tag">wp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94/" rel="tag">应急响应</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">一梦想成为五边形战士的老菜鸡</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">lexsd6</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/lexsd6.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">lexsd6</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle"> Clumsy birds have to start flying early</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:lexsd6@foxmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa QQ" target="_blank" href="tencent://message/?uin=2927507170&Menu=yes" title="QQ"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap">
+
+
+
+<article id="post-pyshark与Wireshark使用用技巧小结" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/" class="article-date">
+      <time datetime="2025-09-01T01:59:36.000Z" itemprop="datePublished">2025-09-01</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      使用pyshark分析HTTP流量技巧小结
+    </h1>
+  
+
+
+          <div style="margin-top:10px 0;margin-bottom:15px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">4k字</span>
+      </span>
+    </span>
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">阅读时长:</span>
+        <span class="post-count">17分</span>
+      </span>
+    </span>
+</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+          
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/tools/">tools</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud" >
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/" rel="tag">python</a></li></ul>
+
+    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>PyShark 是一个Python库，它提供了一个方便的接口来使用Wireshark的命令行工具tshark进行包解析。它是基于Wireshark开发的，，你可以直接在Python中利用Wireshark强大的解析器处理捕获文件或实时数据流。但是网上对使用pyshark来分析http流量的说明文章太少，于是手动记录下。</p>
+<a id="more"></a>
+
+<h2 id="pyshark的基础使用"><a href="#pyshark的基础使用" class="headerlink" title="pyshark的基础使用"></a>pyshark的基础使用</h2><h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1. 安装"></a>1. 安装</h3><h4 id="1‑1-先确保你已安装-Wireshark-tshark"><a href="#1‑1-先确保你已安装-Wireshark-tshark" class="headerlink" title="1‑1. 先确保你已安装 Wireshark / tshark"></a>1‑1. 先确保你已安装 Wireshark / tshark</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Debian/Ubuntu</span></span><br><span class="line">sudo apt-get install wireshark tshark</span><br><span class="line"></span><br><span class="line"><span class="comment"># macOS (Homebrew)</span></span><br><span class="line">brew install wireshark</span><br><span class="line"></span><br><span class="line"><span class="comment"># Windows</span></span><br><span class="line"><span class="comment"># 下载并安装 Wireshark，勾选 “tshark” 组件即可</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意</strong>：在 Linux 上，你可能需要把当前用户加入 <code>wireshark</code> 组或使用 <code>sudo</code> 执行 tshark。</p>
+</blockquote>
+<h4 id="1‑2-安装-PyShark"><a href="#1‑2-安装-PyShark" class="headerlink" title="1‑2. 安装 PyShark"></a>1‑2. 安装 PyShark</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install pyshark</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果你想要支持更高版本的 tshark，建议先更新 Wireshark，然后再安装/升级 pyshark。</p>
+</blockquote>
+<hr>
+<h3 id="2-基本概念"><a href="#2-基本概念" class="headerlink" title="2. 基本概念"></a>2. 基本概念</h3><table>
+<thead>
+<tr>
+<th>对象</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FileCapture</code></td>
+<td>从已有 <code>.pcap/.pcapng</code> 文件读取包</td>
+</tr>
+<tr>
+<td><code>LiveCapture</code></td>
+<td>在指定网络接口上实时捕获包</td>
+</tr>
+<tr>
+<td><code>Packet</code></td>
+<td>单个协议帧/数据包/数据报，提供访问字段的方法</td>
+</tr>
+<tr>
+<td><code>Layer</code></td>
+<td>协议层（Ethernet、IP、TCP 等），可通过属性或字典方式访问</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="3-基本使用"><a href="#3-基本使用" class="headerlink" title="3.基本使用"></a>3.基本使用</h3><h4 id="FileCapture与LiveCapture的读取方法"><a href="#FileCapture与LiveCapture的读取方法" class="headerlink" title="FileCapture与LiveCapture的读取方法"></a><code>FileCapture</code>与<code>LiveCapture</code>的读取方法</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pyshark</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line">pcap_path = Path(<span class="string">r"att.pcapng"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># ① 检查文件是否存在</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> pcap_path.is_file():</span><br><span class="line">    <span class="keyword">raise</span> FileNotFoundError(<span class="string">f"File <span class="subst">&#123;pcap_path&#125;</span> does not exist."</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># ②-1 创建捕获实例，使用 keep_packets=False 减少内存占用</span></span><br><span class="line">capture = pyshark.FileCapture(</span><br><span class="line">    str(pcap_path),</span><br><span class="line">    keep_packets=<span class="literal">False</span>,          <span class="comment"># 不缓存已读取的包</span></span><br><span class="line">    display_filter=<span class="string">'ip'</span>,         <span class="comment"># 只解析 IP 包（可根据需求调整）</span></span><br><span class="line">)</span><br><span class="line"><span class="comment">##PS：从网卡中直接读取流量包</span></span><br><span class="line"><span class="comment">#capture 2 = pyshark.LiveCapture(interface='en0', display_filter="tcp.analysis.retransmission")</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ③ 遍历并安全访问字段</span></span><br><span class="line"><span class="keyword">for</span> pkt <span class="keyword">in</span> capture:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        src_ip = pkt.ip.src  <span class="comment">#获得原地址</span></span><br><span class="line">        dst_ip = pkt.ip.dst  <span class="comment">#获得目的地址</span></span><br><span class="line">        protocol = pkt.transport_layer <span class="keyword">or</span> <span class="string">'Unknown'</span> <span class="comment">#传输层协议</span></span><br><span class="line">        print(<span class="string">f"Packet: <span class="subst">&#123;protocol&#125;</span> from <span class="subst">&#123;src_ip&#125;</span> to <span class="subst">&#123;dst_ip&#125;</span>"</span>)</span><br><span class="line">    <span class="keyword">except</span> AttributeError <span class="keyword">as</span> e:</span><br><span class="line">        <span class="comment"># 该包没有 IP 层，或者某字段缺失</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ④ 关闭资源（可选，因为捕获对象会在 GC 时自动关闭）</span></span><br><span class="line">capture.close()</span><br></pre></td></tr></table></figure>
+
+<p>​    代码说明，通过<code>pyshark.FileCapture</code>和<code>pyshark.LiveCapture</code> 获得的 <strong>capture</strong>的变量是一个FileCapture对象，我们可以里理解为被pyshark的流量包文件对象。而代码中<strong>pkt</strong>变量是一个<strong>Packet</strong>对象可以理解为流量包文件每一个的每一个流量包。而流量包的读取顺序则是和 Wireshark中<code>No.</code>的顺序是相似的(在通过 display_filter过滤后流量包的读取顺序再用索引下标读取的话pyshark会对流量包重新排序)。</p>
+<p>​    而且<code>pyshark.FileCapture</code>和<code>pyshark.LiveCapture</code> 通常情况下我们只需要<code>input_file</code>指定文件或<code>interface</code>指定对应网卡，就可以分析到流量包。但为了分析方便开发者加了扩展参数来自进行分析，我对<code>pyshark.FileCapture</code>和<code>pyshark.LiveCapture</code> 的常见的参数/扩展参数总结如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">作用</th>
+<th align="left">默认值</th>
+<th align="left">使用建议 / 注意事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>keep_packets</strong></td>
+<td align="left">是否在读取后保留已读的包对象。<br>True → 内存中保存所有 <code>Packet</code>；False → 只返回一个包，随后被 GC 回收。</td>
+<td align="left">True</td>
+<td align="left">大文件（GB+）时建议设为 False，以防内存爆炸。</td>
+</tr>
+<tr>
+<td align="left"><strong>input_file</strong></td>
+<td align="left">指定要读取的捕获文件或 XML<br>可直接传入路径字符串、Path 对象或已打开的文件句柄（<code>io.BufferedReader</code>）。</td>
+<td align="left">None (必须提供)</td>
+<td align="left">只在 <code>FileCapture</code> 中使用；若为文件句柄，tshark 会从当前位置开始读。</td>
+</tr>
+<tr>
+<td align="left"><strong>ring_file_size</strong></td>
+<td align="left">循环文件大小（kB）<br>当使用 <code>output_file</code> 或开启循环写入时，tshark 会把抓到的包写成一系列 “环形” 文件。</td>
+<td align="left">1024 kB (1 MiB)</td>
+<td align="left">对高流量捕获建议增大；过小会导致文件频繁切换、磁盘 I/O 增加。</td>
+</tr>
+<tr>
+<td align="left"><strong>num_ring_files</strong></td>
+<td align="left">循环文件数量<br>保留的文件数，tshark 会在此数目后循环覆盖旧文件。</td>
+<td align="left">1</td>
+<td align="left">典型场景：想把最近 5 MiB 数据保存下来，只需 <code>num_ring_files=5</code>。</td>
+</tr>
+<tr>
+<td align="left"><strong>ring_file_name</strong></td>
+<td align="left">循环文件基础名<br>实际写出的文件会以 <code>&lt;name&gt;.0</code>, <code>&lt;name&gt;.1</code>, … 命名。</td>
+<td align="left"><code>/tmp/pyshark.pcap</code></td>
+<td align="left">在 Windows 建议改为 <code>C:\\temp\\pyshark.pcap</code>，避免路径中的斜杠被误解析。</td>
+</tr>
+<tr>
+<td align="left"><strong>interface</strong></td>
+<td align="left">抓包的网卡名称<br>如果不指定，tshark 会自动选第一个可用接口。</td>
+<td align="left">第一个可用接口</td>
+<td align="left">对多网卡机器一定要明确写 <code>interface=&#39;eth0&#39;</code> 或者 <code>en0</code>（macOS）。</td>
+</tr>
+<tr>
+<td align="left"><strong>bpf_filter</strong></td>
+<td align="left">BPF 过滤器（Berkeley Packet Filter）<br>在捕获层面就筛选掉不需要的包，速度快。</td>
+<td align="left">None</td>
+<td align="left">示例：<code>bpf_filter=&#39;tcp port 80&#39;</code>；注意：BPF 与 Wireshark 的显示过滤不同。</td>
+</tr>
+<tr>
+<td align="left"><strong>display_filter</strong></td>
+<td align="left">Wireshark 显示过滤（tshark 层面的 <code>-Y</code>）<br>在解析后再筛选，功能更强大但开销较大。</td>
+<td align="left">None</td>
+<td align="left">示例：<code>display_filter=&#39;http.request&#39;</code>；如果你只需要 IP/TCP/UDP 信息，可把它留空或使用 BPF。</td>
+</tr>
+<tr>
+<td align="left"><strong>only_summaries</strong></td>
+<td align="left">仅生成包摘要<br>不解析完整协议层，速度快且内存占用低。</td>
+<td align="left">False</td>
+<td align="left">对日志收集、流量计数非常合适；但无法获取字段值，只能拿到 <code>pkt.summary</code>。</td>
+</tr>
+<tr>
+<td align="left"><strong>disable_protocol</strong></td>
+<td align="left">禁用某个协议的检测（tshark &gt; 2）<br>可加速解析，尤其是你知道不需要某些大协议时。</td>
+<td align="left">None</td>
+<td align="left">用法：<code>disable_protocol=&#39;ssl&#39;</code>；如果禁用了错误协议，后续访问会报错。</td>
+</tr>
+<tr>
+<td align="left"><strong>decryption_key</strong></td>
+<td align="left">对加密流量进行解密<br>用于 Wi-Fi 或 VPN 等加密捕获。</td>
+<td align="left">None</td>
+<td align="left">需要对应 <code>encryption_type</code>；若未正确设置，tshark 会忽略此字段。</td>
+</tr>
+<tr>
+<td align="left"><strong>encryption_type</strong></td>
+<td align="left">指定加密标准<br>必须是 <code>&#39;WEP&#39;</code>, <code>&#39;WPA-PWD&#39;</code>, 或 <code>&#39;WPA-PWK&#39;</code>（默认 WPA-PWK）。</td>
+<td align="left"><code>&#39;WPA-PWK&#39;</code></td>
+<td align="left">与 <code>decryption_key</code> 配合使用；若不匹配，解密失败。</td>
+</tr>
+<tr>
+<td align="left"><strong>tshark_path</strong></td>
+<td align="left">tshark 可执行文件的完整路径<br>如果系统 PATH 中没有 <code>tshark</code> 或你想指定特定版本。</td>
+<td align="left">自动搜索</td>
+<td align="left">在 Windows 上常用：<code>r&#39;C:\Program Files\Wireshark\tshark.exe&#39;</code>。</td>
+</tr>
+<tr>
+<td align="left"><strong>output_file</strong></td>
+<td align="left">把抓到的数据写入文件（可与 <code>ring_file_*</code> 配合）<br>即使你不想保存，也可以把它设为 <code>None</code> 或省略。</td>
+<td align="left">None</td>
+<td align="left">若同时指定了 <code>ring_file_name</code>，tshark 会将数据写成环形；否则直接写一个普通 pcap 文件。</td>
+</tr>
+</tbody></table>
+<h4 id="Packet对象"><a href="#Packet对象" class="headerlink" title="Packet对象"></a><strong>Packet</strong>对象</h4><p>再说回<strong>Packet</strong>对象，一个Packet本质上就对应一个流量包，在pyshark中提供了如下基础方法:</p>
+<ul>
+<li><strong><code>layers</code></strong>: 获取数据包Packe所有的协议</li>
+<li><strong><code>get_multiple_layers(layer_name)</code></strong>: 获取数据包中指定名称的多个层（例如，一个数据包中可能有多个IP层）</li>
+<li><strong><code>get_raw_packet()</code></strong>: 获取原始的字节数据包</li>
+<li><strong><code>highest_layer</code></strong>: 返回数据包的最高协议层（例如，应用层协议名称）</li>
+<li><strong><code>pretty_print()</code></strong>: 以美观的格式打印数据包详情</li>
+<li><strong><code>show()</code></strong>: 类似于 <code>pretty_print()</code>，用于显示数据包详情</li>
+<li><strong><code>sniff_time</code></strong>: 数据包被捕获的时间戳</li>
+<li><strong><code>transport_layer</code></strong>: 返回传输层协议（如TCP或UDP）</li>
+</ul>
+<h4 id="Layer对象"><a href="#Layer对象" class="headerlink" title="Layer对象"></a><strong>Layer</strong>对象</h4><p>这样我们从<strong>Packet</strong>对象获得到<strong>Layer</strong>对象，<strong>Layer</strong>对象对应会根据协议的不同，给我们提供不同的方法。比如<strong>TCP Layer</strong>协议对象会给我们提供：</p>
+<ul>
+<li><strong><code>srcport</code></strong>: 源端口号</li>
+<li><strong><code>dstport</code></strong>: 目标端口号</li>
+<li><strong><code>port</code></strong>: 可能是源端口或目标端口（取决于上下文）</li>
+<li><strong><code>seq</code></strong>: 序列号（可能经过相对处理）</li>
+<li><strong><code>seq_raw</code></strong>: 原始序列号</li>
+<li><strong><code>ack</code></strong>: 确认号（可能经过相对处理）</li>
+<li><strong><code>ack_raw</code></strong>: 原始确认号</li>
+<li><strong><code>nxtseq</code></strong>: 下一个序列号</li>
+<li><strong><code>stream</code></strong>: TCP流索引（等同于Wireshark中的<code>tcp.stream</code>）</li>
+<li><strong><code>checksum</code></strong>: 校验和</li>
+<li><strong><code>checksum_status</code></strong>: 校验和状态</li>
+<li><strong><code>len</code></strong>: TCP段长度</li>
+<li><strong><code>hdr_len</code></strong>: TCP头部长度</li>
+<li><strong><code>time_relative</code></strong>: 相对于第一个数据包的时间</li>
+<li><strong><code>time_delta</code></strong>: 与前一个数据包的时间差</li>
+<li><strong><code>analysis</code></strong>: 分析信息</li>
+<li><strong><code>completeness</code></strong>: 连接完整性状态</li>
+</ul>
+<p>而<strong>IP Layer</strong> 协议会给我们提供<strong>ipv4</strong>相关网络成相关的协议的方法（ps:如果是ipv6 则是IPV6 Layer ，在pyshark中这里有区分的）：</p>
+<ul>
+<li><strong><code>src</code></strong>: 源IP地址</li>
+<li><strong><code>dst</code></strong>: 目标IP地址</li>
+<li><strong><code>addr</code></strong>: 可能是源或目标IP地址（取决于上下文）</li>
+<li><strong><code>dst_host</code></strong>: 目标主机地址</li>
+<li><strong><code>version</code></strong>: IP版本（通常是4或6）</li>
+<li><strong><code>hdr_len</code></strong>: IP头部长度</li>
+<li><strong><code>dsfield</code></strong>: 区分服务字段（DS Field）</li>
+<li><strong><code>dsfield_dscp</code></strong>: 差分服务代码点（DSCP）</li>
+<li><strong><code>dsfield_ecn</code></strong>: 显式拥塞通知（ECN）</li>
+<li><strong><code>len</code></strong>: IP数据包总长度</li>
+<li><strong><code>id</code></strong>: 标识字段（用于分片和重组）</li>
+<li><strong><code>flags</code></strong>: 标志位</li>
+</ul>
+<h2 id="pyshark分析http流量"><a href="#pyshark分析http流量" class="headerlink" title="pyshark分析http流量"></a>pyshark分析http流量</h2><h3 id="HTTP基础信息读取"><a href="#HTTP基础信息读取" class="headerlink" title="HTTP基础信息读取"></a>HTTP基础信息读取</h3><p>同样pyshark的提供了<code>HTTP Layer</code>的方法来对http流量进行分析。常见的方法如下：</p>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>属性方法</th>
+<th>结果示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>请求方法</strong></td>
+<td><code>request_method</code></td>
+<td><code>GET</code>, <code>POST</code></td>
+</tr>
+<tr>
+<td><strong>完整 URI</strong></td>
+<td><code>request_full_uri</code></td>
+<td><code>https://example.com/api?x=1</code></td>
+</tr>
+<tr>
+<td><strong>URI 片段</strong></td>
+<td><code>request_uri</code></td>
+<td><code>/api?x=1</code></td>
+</tr>
+<tr>
+<td><strong>HTTP 版本</strong></td>
+<td><code>request_version</code> / <code>response_version</code></td>
+<td><code>HTTP/1.1</code></td>
+</tr>
+<tr>
+<td><strong>状态码</strong></td>
+<td><code>response_code</code></td>
+<td><code>200</code></td>
+</tr>
+<tr>
+<td><strong>响应文本</strong></td>
+<td><code>response_phrase</code></td>
+<td><code>OK</code></td>
+</tr>
+<tr>
+<td><strong>内容类型</strong></td>
+<td><code>content_type</code></td>
+<td><code>application/json</code></td>
+</tr>
+<tr>
+<td><strong>Cookie</strong></td>
+<td><code>cookie_pair</code> / <code>set_cookie</code></td>
+<td><code>sessionid=abc123; ...</code></td>
+</tr>
+</tbody></table>
+<p>在抓取 HTTP 流量时，需要注意 <strong>请求包</strong> 与 <strong>响应包</strong> 的区别。PyShark 在读取 HTTP 包时，只是粗略地保留了一些属性，并没有为它们做出专门的区分。因此，如果你在遍历包时对一个请求包使用了仅存在于响应包中的属性（例如 <code>response_code</code>、<code>response_phrase</code>），就会导致报错。</p>
+<p>解决办法很简单：</p>
+<ul>
+<li><strong>请求包</strong> 具有 <code>request_method</code> 属性；</li>
+<li><strong>响应包</strong> 具有 <code>response_code</code> 属性。</li>
+</ul>
+<p>先根据这两个标识判断包的类型，再使用对应的属性进行处理，就能避免错误。</p>
+<p>另一个常见需求是提取 HTTP 包中的主体数据：</p>
+<ul>
+<li>对于请求包，获取的是请求体（body）；</li>
+<li>对于响应包，获取的是返回体（body）。</li>
+</ul>
+<p>在处理时同样需要先区分包类型，然后再调用相应的属性或方法来读取主体内容。</p>
+<p>常见的方法是对读取<code>file_data</code> 来进行处理，但是file_data默认是十六进制的数据需要对数据进行处理。但<code>file_data</code> 默认是16进制字符，对于pkt[‘DATA-TEXT-LINES’]的layer来获得body内容，而且代码只需要如下小部分，但是pkt[‘DATA-TEXT-LINES’]一班只在返回包里存在：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> hasattr(pkt, <span class="string">'DATA-TEXT-LINES'</span>):</span><br><span class="line">          body = str(pkt[<span class="string">'DATA-TEXT-LINES'</span>])</span><br><span class="line">          print(<span class="string">'data：\n'</span>+(body))</span><br></pre></td></tr></table></figure>
+
+<p>最后，为了方便理解我写了一个按照顺序遍历http流量的样例。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">import</span> pyshark</span><br><span class="line"><span class="keyword">import</span> urllib.parse, binascii</span><br><span class="line"><span class="comment"># ---------- 配置 ----------</span></span><br><span class="line">PCAP_FILE = <span class="string">r"C:/Users/LEXS/Desktop/att.pcapng"</span>   <span class="comment"># 你的 pcap 路径</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------- 读取流量包 ----------</span></span><br><span class="line">caps = pyshark.FileCapture(PCAP_FILE,display_filter=<span class="string">'http'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> pkt <span class="keyword">in</span> caps:</span><br><span class="line">    <span class="comment"># 1️⃣ 判断是请求还是响应</span></span><br><span class="line">    <span class="keyword">if</span> hasattr(pkt.http, <span class="string">'request_method'</span>):         </span><br><span class="line">        print(<span class="string">"\n--- HTTP REQUEST ---"</span>)</span><br><span class="line">        print(<span class="string">f"Method : <span class="subst">&#123;pkt.http.request_method&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"URI    : <span class="subst">&#123;pkt.http.request_uri&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"Version: <span class="subst">&#123;pkt.http.request_version&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"Host   : <span class="subst">&#123;getattr(pkt.http, <span class="string">'host'</span>, <span class="string">'&lt;none&gt;'</span>)&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"User‑Agent: <span class="subst">&#123;getattr(pkt.http, <span class="string">'user_agent'</span>, <span class="string">''</span>)&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"cookie: <span class="subst">&#123;getattr(pkt.http, <span class="string">'cookie'</span>, <span class="string">''</span>)&#125;</span>"</span>)</span><br><span class="line">        <span class="keyword">if</span> hasattr(pkt.http, <span class="string">'file_data'</span>):</span><br><span class="line">            body = urllib.parse.unquote_plus(binascii.unhexlify(pkt.http.file_data.replace(<span class="string">":"</span>, <span class="string">""</span>)).decode(<span class="string">'utf-8'</span>)) </span><br><span class="line">            print(<span class="string">'data：\n'</span>+(body))</span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">    <span class="keyword">elif</span> hasattr(pkt.http, <span class="string">'response_code'</span>):         <span class="comment"># 响应包</span></span><br><span class="line">        print(<span class="string">"\n--- HTTP RESPONSE ---"</span>)</span><br><span class="line">        print(<span class="string">f"Status : <span class="subst">&#123;pkt.http.response_code&#125;</span> <span class="subst">&#123;pkt.http.response_phrase&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"Version: <span class="subst">&#123;pkt.http.response_version&#125;</span>"</span>)</span><br><span class="line">        print(<span class="string">f"Server : <span class="subst">&#123;getattr(pkt.http, <span class="string">'server'</span>, <span class="string">'&lt;none&gt;'</span>)&#125;</span>"</span>)</span><br><span class="line">        <span class="keyword">if</span> hasattr(pkt.http, <span class="string">'file_data'</span>):</span><br><span class="line">            body = urllib.parse.unquote_plus(binascii.unhexlify(pkt.http.file_data.replace(<span class="string">":"</span>, <span class="string">""</span>)).decode(<span class="string">'utf-8'</span>)) </span><br><span class="line">            print(<span class="string">'data：\n'</span>+(body))</span><br></pre></td></tr></table></figure>
+
+<h3 id="HTTP请求包与响应包匹配问题"><a href="#HTTP请求包与响应包匹配问题" class="headerlink" title="HTTP请求包与响应包匹配问题"></a>HTTP请求包与响应包匹配问题</h3><p>​    细心的同学可以发现在上面按照顺序遍历的http流量时会出现一个问题，我们在区分请求包与响应包是通过<code>request_method</code>和<code>response_code</code>两个特征在进行遍历流量包的。在一般情况下，我们发出的去的一个流量包应该对应一个返回包，会想下面这样一请求一回复：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">--- HTTP REQUEST ---</span><br><span class="line">Method : GET</span><br><span class="line">URI    : &#x2F;store&#x2F;</span><br><span class="line">Version: HTTP&#x2F;1.1</span><br><span class="line">Host   : 123.56.176.94</span><br><span class="line">User‑Agent: sqlmap&#x2F;1.8.12#stable (https:&#x2F;&#x2F;sqlmap.org)</span><br><span class="line">cookie: id&#x3D;1%27+AND+ORD%28MID%28%28SELECT+IFNULL%28CAST%28password+AS+NCHAR%29%2C0x20%29+FROM+store.users+ORDER+BY+%60user%60+LIMIT+0%2C1%29%2C14%2C1%29%29%3E54+AND+%27wfQx%27%3D%27wfQx; security&#x3D;high; PHPSESSID&#x3D;tlse8ootcss5qp5c41n0spjf42</span><br><span class="line"></span><br><span class="line">--- HTTP RESPONSE ---</span><br><span class="line">Status : 404 Not Found</span><br><span class="line">Version: HTTP&#x2F;1.1</span><br><span class="line">Server : nginx&#x2F;1.27.4</span><br><span class="line">data：.........</span><br><span class="line">--- HTTP REQUEST ---</span><br><span class="line">Method : POST</span><br><span class="line">URI    : &#x2F;store&#x2F;cookie-input.php</span><br><span class="line">Version: HTTP&#x2F;1.1</span><br><span class="line">Host   : 123.56.176.94</span><br><span class="line">User‑Agent: sqlmap&#x2F;1.8.12#stable (https:&#x2F;&#x2F;sqlmap.org)</span><br><span class="line">cookie: id&#x3D;1%27+AND+ORD%28MID%28%28SELECT+IFNULL%28CAST%28password+AS+NCHAR%29%2C0x20%29+FROM+store.users+ORDER+BY+%60user%60+LIMIT+0%2C1%29%2C14%2C1%29%29%3E54+AND+%27wfQx%27%3D%27wfQx; security&#x3D;high; PHPSESSID&#x3D;tlse8ootcss5qp5c41n0spjf42</span><br><span class="line">data：</span><br><span class="line">id&#x3D;1&#39; AND ORD(MID((SELECT IFNULL(CAST(password AS NCHAR),0x20) FROM store.users ORDER BY &#96;user&#96; LIMIT 0,1),14,1))&gt;51 AND &#39;wfQx&#39;&#x3D;&#39;wfQx&amp;Submit&#x3D;Submit</span><br><span class="line"></span><br><span class="line">--- HTTP RESPONSE ---</span><br><span class="line">Status : 200 OK</span><br><span class="line">Version: HTTP&#x2F;1.1</span><br><span class="line">Server : nginx&#x2F;1.27.4</span><br><span class="line">data：........</span><br></pre></td></tr></table></figure>
+
+<p>但是也会发生下面这种http只有请求包没有返回包的情况：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">--- HTTP REQUEST ---</span><br><span class="line">Method : POST</span><br><span class="line">URI    : &#x2F;store&#x2F;cookie-input.php</span><br><span class="line">Version: HTTP&#x2F;1.1</span><br><span class="line">Host   : 123.56.176.94</span><br><span class="line">User‑Agent: sqlmap&#x2F;1.8.12#stable (https:&#x2F;&#x2F;sqlmap.org)</span><br><span class="line">cookie: id&#x3D;1%27+AND+ORD%28MID%28%28SELECT+IFNULL%28CAST%28password+AS+NCHAR%29%2C0x20%29+FROM+store.users+ORDER+BY+%60user%60+LIMIT+3%2C1%29%2C8%2C1%29%29%3E51+AND+%27WZKg%27%3D%27WZKg; security&#x3D;high; PHPSESSID&#x3D;tlse8ootcss5qp5c41n0spjf42</span><br><span class="line">ip.src: 192.168.1.4</span><br><span class="line">ip.dst: 123.56.176.94</span><br><span class="line">data：</span><br><span class="line">id&#x3D;1&#39; AND ORD(MID((SELECT IFNULL(CAST(password AS NCHAR),0x20) FROM store.users ORDER BY &#96;user&#96; LIMIT 3,1),8,1))&gt;52 AND &#39;WZKg&#39;&#x3D;&#39;WZKg&amp;Submit&#x3D;Submit</span><br><span class="line"></span><br><span class="line">--- HTTP REQUEST ---</span><br><span class="line">Method : GET</span><br><span class="line">URI    : &#x2F;store&#x2F;</span><br><span class="line">Version: HTTP&#x2F;1.1</span><br><span class="line">Host   : 123.56.176.94</span><br><span class="line">User‑Agent: sqlmap&#x2F;1.8.12#stable (https:&#x2F;&#x2F;sqlmap.org)</span><br><span class="line">cookie: id&#x3D;1%27+AND+ORD%28MID%28%28SELECT+IFNULL%28CAST%28password+AS+NCHAR%29%2C0x20%29+FROM+store.users+ORDER+BY+%60user%60+LIMIT+3%2C1%29%2C8%2C1%29%29%3E52+AND+%27WZKg%27%3D%27WZKg; security&#x3D;high; PHPSESSID&#x3D;tlse8ootcss5qp5c41n0spjf42</span><br><span class="line">ip.src: 192.168.1.4</span><br><span class="line">ip.dst: 123.56.176.94</span><br><span class="line"></span><br><span class="line">--- HTTP REQUEST ---</span><br><span class="line">Method : POST</span><br><span class="line">URI    : &#x2F;store&#x2F;cookie-input.php</span><br><span class="line">Version: HTTP&#x2F;1.1</span><br><span class="line">Host   : 123.56.176.94</span><br><span class="line">User‑Agent: sqlmap&#x2F;1.8.12#stable (https:&#x2F;&#x2F;sqlmap.org)</span><br><span class="line">cookie: id&#x3D;1%27+AND+ORD%28MID%28%28SELECT+IFNULL%28CAST%28password+AS+NCHAR%29%2C0x20%29+FROM+store.users+ORDER+BY+%60user%60+LIMIT+3%2C1%29%2C8%2C1%29%29%3E52+AND+%27WZKg%27%3D%27WZKg; security&#x3D;high; PHPSESSID&#x3D;tlse8ootcss5qp5c41n0spjf42</span><br><span class="line">ip.src: 192.168.1.4</span><br><span class="line">ip.dst: 123.56.176.94</span><br><span class="line">data：</span><br><span class="line">id&#x3D;1&#39; AND ORD(MID((SELECT IFNULL(CAST(password AS NCHAR),0x20) FROM store.users ORDER BY &#96;user&#96; LIMIT 3,1),9,1))&gt;47 AND &#39;WZKg&#39;&#x3D;&#39;WZKg&amp;Submit&#x3D;Submit</span><br><span class="line"></span><br><span class="line">--- HTTP RESPONSE ---</span><br><span class="line">Status : 200 OK</span><br><span class="line">Version: HTTP&#x2F;1.1</span><br><span class="line">Server : nginx&#x2F;1.27.4</span><br><span class="line">ip.src: 123.56.176.94</span><br><span class="line">ip.dst: 192.168.1.4</span><br><span class="line">data：</span><br></pre></td></tr></table></figure>
+
+<p>​    可以看到极端情况下，http的请求包在发出后不一定得到匹配的回复。这时如何如果我们盲目进行根据<code>request_method</code>和<code>response_code</code>两个特征和遍历顺序匹配，就会导致访问<code>/store/cookie-input.php</code>的请求包却匹配到<code>/store/</code>的响应包，从而得到一个错误结果。但是不要忘了，http 大部分情况下，是基于TCP协议实现的。而在TCP layer 中提供了<strong><code>stream</code></strong>方法，即 TCP流索引（等同于Wireshark中的<code>tcp.stream</code>）我们可以遍历流量包将所有我们需要的HTTP流量的请求包的tcp.stream记录，再找出对应相关tcp.stream的响应包，即可以得到一个HTTP请求包与响应包。如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">import</span> pyshark</span><br><span class="line"><span class="keyword">import</span> urllib.parse, binascii</span><br><span class="line"><span class="comment"># ---------- 配置 ----------</span></span><br><span class="line">PCAP_FILE = <span class="string">r"att.pcapng"</span>   <span class="comment"># 你的 pcap 路径</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------- 读取流量包 ----------</span></span><br><span class="line">caps = pyshark.FileCapture(PCAP_FILE,display_filter=<span class="string">'http'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http_pkt=&#123;&#125;</span><br><span class="line"></span><br><span class="line">next_response=<span class="literal">None</span></span><br><span class="line"><span class="keyword">for</span> pkt <span class="keyword">in</span> caps:</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> hasattr(pkt.http, <span class="string">'request_method'</span>) :</span><br><span class="line">        <span class="keyword">if</span>    pkt.http.request_uri == <span class="string">'/store/'</span> :   <span class="comment">#获得对应url请求的流量包</span></span><br><span class="line">            cookie=urllib.parse.unquote_plus(getattr(pkt.http, <span class="string">'cookie'</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">#print(cookie+'---'+pkt.tcp.stream)</span></span><br><span class="line">            http_pkt[pkt.tcp.stream]=&#123;<span class="string">'request_pkt'</span>:<span class="literal">None</span>,<span class="string">'response_pkt'</span>:<span class="literal">None</span>&#125;    <span class="comment">#我们可以</span></span><br><span class="line">            http_pkt[pkt.tcp.stream][<span class="string">'request_pkt'</span>]=pkt</span><br><span class="line">            next_response=pkt.tcp.stream  <span class="comment">#记录要匹配的tcp.stream</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">elif</span> hasattr(pkt.http, <span class="string">'response_code'</span>) <span class="keyword">and</span> next_response==pkt.tcp.stream: <span class="comment">#根据记录tcp.stream寻找对应响应包</span></span><br><span class="line">            http_pkt[pkt.tcp.stream][<span class="string">'response_pkt'</span>]=pkt</span><br><span class="line"></span><br><span class="line">print(http_pkt)</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就能从流量中，只匹配出访问了<code>/store/</code>url 的请求包与对应的响应包。</p>
+<p>然后用AI润色下：</p>
+<p>```python<br>#!/usr/bin/env python3</p>
+<h1 id="coding-utf-8"><a href="#coding-utf-8" class="headerlink" title="-- coding: utf-8 --"></a>-<em>- coding: utf-8 -</em>-</h1><p>import pyshark<br>import urllib.parse<br>from pathlib import Path</p>
+<p>PCAP_FILE = r”att.pcapng”</p>
+<p>def load_packets(pcap_path):<br>    “””把所有 HTTP 包一次性读进内存（按需可改成迭代）”””<br>    with pyshark.FileCapture(<br>            pcap_path,<br>            display_filter=”http”,<br>            keep_packets=False) as caps:<br>        return list(caps)</p>
+<p>def main():<br>    packets = load_packets(PCAP_FILE)</p>
+<pre><code># 用 stream id 作为键，保存对应的 request / response
+http_pairs = {}          # {stream_id: {&quot;request&quot;: pkt, &quot;response&quot;: pkt}}
+
+for pkt in packets:
+    if not hasattr(pkt.http, &apos;layer_name&apos;):
+        continue   # 跳过非 HTTP 层
+
+    stream_id = pkt.tcp.stream  # 这里保持字符串，PyShark 默认就是 str
+
+    # ---------- 请求 ----------
+    if hasattr(pkt.http, &apos;request_method&apos; and pkt.http.request_uri == &apos;/store/) :   #只记录访问/store/的流量包
+        cookie_raw = getattr(pkt.http, &apos;cookie&apos;, &apos;&apos;)
+        cookie = urllib.parse.unquote_plus(cookie_raw)
+        print(f&quot;[{stream_id}] request cookie: {cookie}&quot;)
+
+        http_pairs.setdefault(stream_id, {})[&apos;request&apos;] = pkt
+        continue
+
+    # ---------- 响应 ----------
+    if hasattr(pkt.http, &apos;response_code&apos;):
+        if stream_id in http_pairs :
+            if  &apos;request&apos; not in http_pairs[stream_id]:
+                print(f&quot;[{stream_id}] 发现响应但没有对应请求，跳过&quot;)
+                continue
+            else  :  #只匹配到记录的请求包的对应响应包
+                http_pairs.setdefault(stream_id, {})[&apos;response&apos;] = pkt
+
+# ---------- 输出 ----------
+for stream, pair in http_pairs.items():
+    req = pair.get(&apos;request&apos;)
+    res = pair.get(&apos;response&apos;)
+
+    print(&quot;\n=== Stream:&quot;, stream, &quot;===&quot;)
+    if req:
+        print(f&quot;  Request: {req.http.request_method} {req.http.request_uri}&quot;)
+    else:
+        print(&quot;  &lt;no request captured&gt;&quot;)
+
+    if res:
+        print(f&quot;  Response: {res.http.response_code} {res.http.response_phrase}&quot;)
+    else:
+        print(&quot;  &lt;no response captured&gt;&quot;)</code></pre><p>if <strong>name</strong> == “<strong>main</strong>“:<br>    m</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/">使用pyshark分析HTTP流量技巧小结</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">lexsd6</a></p>
+        <p><span>发布时间:</span>2025-09-01, 09:59:36</p>
+        <p><span>最后更新:</span>2025-09-07, 20:25:38</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/" title="使用pyshark分析HTTP流量技巧小结">lexsd6.github.io/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/</a>
+            <span class="copy-path" data-clipboard-text="原文: lexsd6.github.io/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/　　作者: lexsd6" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2025/06/19/%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E6%B5%81%E9%87%8F%E7%89%B9%E5%BE%81%E5%88%86%E6%9E%90-%E5%B8%B8%E8%A7%81%E6%94%BB%E5%87%BB%E4%BA%8B%E4%BB%B6%20tomcat/">
+                    第六章-流量特征分析-常见攻击事件-tomcat-玄机靶场
+                </a>
+            </div>
+        
+    </nav>
+
+
+
+  
+
+  <!-- code.copy.start -->
+	 <!-- 
+<script src="/js/clipboard.js"></script>
+  -->
+	 <!-- 
+<script src="/js/jquery.min.js"></script>
+ -->
+	 <!-- 
+<script src="/js/clipboard_use.js"></script>
+ -->
+	<script type="text/javascript" src="/js/clipboard.js"></script>
+ 	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/clipboard_use.js"></script>
+
+    <!-- code.copy.end -->
+</article>
+
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#pyshark的基础使用"><span class="toc-text">pyshark的基础使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-安装"><span class="toc-text">1. 安装</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1‑1-先确保你已安装-Wireshark-tshark"><span class="toc-text">1‑1. 先确保你已安装 Wireshark &#x2F; tshark</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1‑2-安装-PyShark"><span class="toc-text">1‑2. 安装 PyShark</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-基本概念"><span class="toc-text">2. 基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-基本使用"><span class="toc-text">3.基本使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#FileCapture与LiveCapture的读取方法"><span class="toc-text">FileCapture与LiveCapture的读取方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Packet对象"><span class="toc-text">Packet对象</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Layer对象"><span class="toc-text">Layer对象</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pyshark分析http流量"><span class="toc-text">pyshark分析http流量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP基础信息读取"><span class="toc-text">HTTP基础信息读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP请求包与响应包匹配问题"><span class="toc-text">HTTP请求包与响应包匹配问题</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#coding-utf-8"><span class="toc-text">-- coding: utf-8 --</span></a>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-4 i,
+        .toc-level-4 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"使用pyshark分析HTTP流量技巧小结　| lexsd6's home　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <section class="livere" id="comments">
+    <!-- 来必力City版安装代码 -->
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDYyMC8zMTA5MQ==">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+	
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+	
+       })(document, 'script');
+	
+    </script>
+    <noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+
+	</div>
+
+    <!-- City版安装代码已完成 -->
+<script type="text/javascript">
+    
+setInterval(function () {
+    var box = document.querySelector(".trc_rbox_container");
+    if(box) box.outerHTML = "";
+}, 2000);
+document.getElementById("taboola-livere").style='display:none';
+</script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2025/06/19/%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E6%B5%81%E9%87%8F%E7%89%B9%E5%BE%81%E5%88%86%E6%9E%90-%E5%B8%B8%E8%A7%81%E6%94%BB%E5%87%BB%E4%BA%8B%E4%BB%B6%20tomcat/" title="下一篇: 第六章-流量特征分析-常见攻击事件-tomcat-玄机靶场">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2025/09/01/pyshark%E4%B8%8EWireshark%E4%BD%BF%E7%94%A8%E7%94%A8%E6%8A%80%E5%B7%A7%E5%B0%8F%E7%BB%93/">使用pyshark分析HTTP流量技巧小结</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/19/%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E6%B5%81%E9%87%8F%E7%89%B9%E5%BE%81%E5%88%86%E6%9E%90-%E5%B8%B8%E8%A7%81%E6%94%BB%E5%87%BB%E4%BA%8B%E4%BB%B6%20tomcat/">第六章-流量特征分析-常见攻击事件-tomcat-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/04/27/CobaltStrike%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">基于玄机靶场CobaltStrike流量分析题目的学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/04/06/%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BA%A2%E6%98%8E%E8%B0%B7-%E5%BC%82%E5%B8%B8%E8%A1%8C%E4%B8%BA%E6%BA%AF%E6%BA%90-wp/">第五届红明谷-异常行为溯源-WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/02/28/%E6%9F%90%E5%8F%98%E5%BC%82Webshell%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">某变异Webshell流量分析-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/12/27/House%20of%20apple2%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">House of apple2 学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90-mysql-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第二章日志分析-mysql-应急响应-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-linux%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-%E9%9A%90%E8%97%8F/">第三章 权限维持-linux权限维持-隐藏-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90-redis%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第二章日志分析-redis应急响应-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-Linux%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第一章-应急响应-Linux入侵排查-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94-webshell%E6%9F%A5%E6%9D%80-%E7%8E%84%E6%9C%BA%E9%9D%B6%E5%9C%BA/">第一章-应急响应-webshell查杀-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%B8%80%E7%AB%A0/">第一章-应急响应-Linux 日志分析-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/07/10/%E7%AC%AC%E4%BA%8C%E7%AB%A0-/">第二章-日志分析-apache日志分析-玄机靶场</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/02/15/%E4%BB%8EHTB%20_Arms_roped%E5%88%9D%E8%AF%86arm%E6%9E%B6%E6%9E%84/">从HTB _Arms_roped初识arm架构和qemu</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/10/07/Python2%20%E7%8E%AF%E5%A2%83%E5%9C%A8ubuntu22.04%20%E9%85%8D%E7%BD%AE/">在ubuntu22.04配置Python2环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/09/22/msql%E6%95%B0%E6%8D%AE%E5%BA%93-udf-%E6%8F%90%E6%9D%83%E5%A7%BF%E5%8A%BF%E5%AD%A6%E4%B9%A0/">msql数据库-udf-提权姿势学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/04/20/python-sandbox%20bypass%20'()'%20to%20%20runing%20function/">Python-sandbox bypass '(' and ')' to  calling function</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/29/ELF%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90--Program%20header/">ELF文件解析--Program header</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/01/07/ELF%E6%96%87%E4%BB%B6%E5%A4%B4%E8%A7%A3%E6%9E%90%E5%AD%A6%E4%B9%A0/">ELF文件解析--ELF header 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/16/decrypt_safe_linking/">how2heap-decrypt_safe_linking学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/02/2022%E5%B7%9D%E6%B8%9D%E8%81%8C%E4%B8%9A%E6%8A%80%E8%83%BD%E7%AB%9E%E8%B5%9B%E5%88%9D%E8%B5%9B--hard_login/">2022川渝职业技能竞赛初赛--hard_login</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/14/%E5%B7%9D%E6%B8%9D%E4%B8%AA%E4%BA%BA%E8%B5%9B-wp/">2022川渝个人赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/26/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/">搜索引擎语法学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/17/how2heap-fastbin_reverse_into_tcache-%E5%AD%A6%E4%B9%A0/">how2heap-fastbin_reverse_into_tcache-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/06/15/how2heap-house_of_botcake-%E5%AD%A6%E4%B9%A0/">how2heap-house_of_botcake-学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/05/16/%E5%9C%A8unity%E4%B8%AD%E4%BD%BF%E7%94%A8DragonBones%E9%AA%A8%E9%AA%BC/">在unity中使用DragonBones骨骼的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/07/RITSEC-CTF-2022%20-PWN-hangpwn/">RITSEC-CTF-2022-PWN-hangpwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/03/HTB-Login%20Simulator-pwn-challenge-wp/">HTB-Login Simulator-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-baby_ninja_jinja-web-challenge-wp/">HTB-baby_ninja_jinja-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/26/HTB-Neonify-web-challenge-wp/">HTB-Neonify-web-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/03/08/HTB-Pandora-wp/">HTB-Pandora-Machine-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/02/22/HSC2021-CTF/">HSC2021-CTF-pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/31/sctf2021-pwn-dataleak/">sctf2021-pwn-dataleak-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/04/%E4%B8%9C%E8%BD%AF/">东软2021CTF--PWN--wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/12/03/cosy-casino-pwn-challenge-wp/">HTB-cosy_casino-pwn-challenge-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/27/2021%E5%B9%B4%E6%98%A5%E7%A7%8B%E6%9D%AF%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E8%81%94%E8%B5%9B%E7%A7%8B%E5%AD%A3%E8%B5%9B%E5%8B%87%E8%80%85%E5%B1%B1%E5%B3%B0/">2021年春秋杯网络安全联赛秋季赛勇者山峰-WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/07/Largebin%20Attack%20for%20Glibc%202.31%20%E5%AD%A6%E4%B9%A0/">Large bin Attack for Glibc 2.31 学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/03/%E8%A7%A3%E5%86%B3yelee%E6%A8%A1%E6%9D%BF%E4%B8%8Blive2d%E7%9C%8B%E6%9D%BF%E5%A8%98%E5%92%8Cbusuanzi%E4%B8%8D%E8%92%9C%E5%AD%90%E8%AE%A1%E6%95%B0%E5%86%B2%E7%AA%81/">解决yelee模板下live2d看板娘和busuanzi不蒜子计数冲突</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/11/02/PWN%20Hunting%20challenge%20%E2%80%94%20HTB/">Hunting— HTB  PWN  challenge</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/10/20/xman%E7%9A%84leve5%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E6%B3%95(mprotect)%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%88%A9%E7%94%A8/">xman的leve5另一种解法(mprotect)学习与利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/21/ctfshow-%E6%9C%88%E9%A5%BC%E6%9D%AF-pwn-wp/">ctfshow-月饼杯2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/16/'could%20not%20patch%20the%20PLT%20stub;%20unexpected%20PLT%20format%20or%20the%20file%20has%20been%20modified%20after%20linking!'%E6%8A%A5%E9%94%99%E7%BC%93%E8%A7%A3%E6%96%B9%E6%B3%95/">\`could not patch the PLT stub; unexpected PLT format or the file has been modified after linking!\`报错缓解方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/03/5%E7%A7%8D%E5%AD%97%E7%AC%A6%E6%9E%84%E9%80%A0php_shellcode/">5种字符'(^.9)'构造php_shellcode</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/08/17/ractf2021-pwn-ctf/">ractf2021-pwn-ctf</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/28/imaginaryctf2021--pwn-wp/">imaginaryctf2021-pwn-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/12/%E9%AB%98%E7%89%88%E6%9C%AClibc(2.29-2.32)%20off%20by%20null%E5%88%A9%E7%94%A8%E5%A7%BF%E5%8A%BF%E6%80%BB%E7%BB%93/">高版本libc(2.29-2.32) off by null利用姿势笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/06/26/2021qwb%20pwn%20wp/">2021qwb-pwn-初赛-wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/28/ISCC2021%20PWN%20WP/">ISCC2021 PWN部分 WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/22/ret2dl-resolve%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%E5%B0%8F%E8%AE%B0/">ret2dl-resolve利用方法小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/20/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%B8%8ESROP%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">系统调用与SROP方法学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/02/heap%E6%B3%84%E9%9C%B2%E7%9C%9F%E5%AE%9E%E5%9C%B0%E5%9D%80tirck/">pwn堆题泄露libc真实地址小tirck</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/28/CTF%202021%20PWN%20babyheap%20%20%E5%A4%8D%E7%8E%B0%E8%AE%B0/">2021*CTF_PWN_babyheap复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/25/%E5%85%B3%E4%BA%8E%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%A9%E7%94%A8%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(9)/">关于格式化字符串利用——学pwn小记(9)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/17/Tcache%20attack%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(8)/">Tcache attack初学习——学pwn小记(8)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/09/%E4%BB%8E%E5%AF%B9b00k%E9%A2%98%E7%9B%AEwp%E5%AD%A6%E4%B9%A0%E5%88%9D%E4%B9%A0off-by-one%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(7)/">从对b00k题目学习中初习off-by-one——学pwn小记(7)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/08/actf--wp/">ångstromCTF 2021--wp与复现记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/25/%E4%BF%AE%E6%94%B9ELF%E6%96%87%E4%BB%B6libc%E4%B8%BA%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC/">修改ELF文件libc为指定版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/14/%E5%8A%AB%E6%8C%81hook%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(6)/">劫持hook函数——学pwn小记(6)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/11/fastbin%E4%BA%8C%E6%AC%A1%E9%87%8A%E6%94%BE%E2%80%94%E2%80%94%E5%AD%A6pwn%E5%B0%8F%E8%AE%B0(5)/">fastbin二次释放——学pwn小记(5)</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/02/15/%E7%BD%91%E9%BC%8E%E6%9D%AF%202018-Comment%20%20%E5%A4%8D%E7%8E%B0%E7%AC%94%E8%AE%B0/">网鼎杯 2018-Comment  复现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/31/%E5%85%B3%E4%BA%8Esql%E6%B3%A8%E5%85%A5bypass%E6%80%BB%E7%BB%93/">关于sql注入bypass总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/08/%E5%AE%89%E6%B4%B5%E6%9D%AF2019%E5%A4%8D%E7%8E%B0/">安洵杯2019复现</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/07/xman%20pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">xman pwn题复现——学pwn小记（4）</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/31/flask.request%E7%9A%84%E5%86%85%E7%BD%AE%E5%B1%9E%E6%80%A7%E6%80%BB%E7%BB%93/">flask.request的内置属性总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/30/%E5%AF%B9php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%BD%92%E7%BA%B3/">对php伪协议的归纳</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/21/HWCTF-%E5%8D%8E%E4%B8%BA%E4%BA%91%E5%9C%BAWP/">HWCTF-华为云场WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/16/linux%20%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E6%95%B4%E7%90%86/">linux 内置参数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/27/%E5%85%B3%E4%BA%8Ejinja%E7%89%B9%E6%80%A7%E5%AF%B9ssti%E7%9A%84bypass%E7%9A%84%E5%BD%B1%E5%93%8D/">关于jinja2特性对ssti的bypass的影响</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/16/%E5%85%B3%E4%BA%8Ephp%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E6%95%B4%E7%90%86/">php执行与文件系统处理函数整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/15/%E7%AC%AC%E4%BA%94%E5%B1%8A%E4%B8%8A%E6%B5%B7%E5%B8%82%E5%A4%A7%E5%AD%A6%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%A4%A7%E8%B5%9B-wp/">第五届上海市大学生网络安全大赛-初赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/11/12/ctf-show_%E5%8E%9F%E8%B0%85%E6%9D%AFwp/">ctf-show_原谅杯wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/26/ctf-show%201024%E6%9D%AF/">ctf-show 1024杯</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/15/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(3)/">Linux_x64下的ret2bilc与ret2csu--学习pwn小记(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/14/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp/第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/22/%E7%AC%AC%E5%8D%81%E4%B8%89%E5%B1%8A%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-%E5%88%9B%E6%96%B0%E5%AE%9E%E8%B7%B5%E8%83%BD%E5%8A%9B%E8%B5%9B%E8%A5%BF%E5%8D%97%E8%B5%9B%E5%8C%BA%E9%80%89%E6%8B%94%E8%B5%9Bwp/">第十三届全国大学生信息安全竞赛-创新实践能力赛西南赛区选拔赛wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(2)/">学习pwn小记(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/%E5%AF%B9linux%20%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E6%80%BB%E7%BB%93/">对linux 命令执行的总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/09/%E5%AD%A6%E4%B9%A0pwn%E5%B0%8F%E8%AE%B0(1)/">学习pwn小记(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/12/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">关于SQL注入小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/26/%E5%AE%89%E6%81%92DASCTF%207%E6%9C%88%E8%B5%9BWP/">安恒DASCTF 7月赛WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/15/rgbCTF--wp/">sctf2020 pythonbox题目复现小记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/18/NahamCon%20CTF%20WP/">NahamCon CTF WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/31/%E5%AF%B9%E4%BA%8E%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/">对于文件包含漏洞的知识梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/26/%E5%85%B3%E4%BA%8Ephp%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于php反序列化字符逃逸的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/23/%E5%A6%82%E4%BD%95%E8%AE%A9%E6%96%87%E4%BB%B6%E9%87%8CPHP%E4%BB%A3%E7%A0%81%E8%A2%AB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E6%9E%90%E6%89%A7%E8%A1%8C/">如何让文件里PHP代码被服务器解析执行</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/21/%E8%99%8E%E7%AC%A6CTF2020--EasyLogin%20%20%20Write%20%20up/">虎符CTF2020--EasyLogin WP</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/python%20%E5%85%B3%E4%BA%8E%E6%B2%99%E7%9B%92%E9%80%83%E9%80%B8%E7%9A%84%E6%80%9D%E8%80%83/">关于python ssti的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/%E5%85%B3%E4%BA%8Eupdatexml()%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%80%9D%E8%80%83/">关于updatexml()报错注入的思考</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/10/cocos2d%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E6%B1%89%E5%8C%96--Writing%20a%20cocos2d%20application/">cocos2d官方文档汉化--Writing a cocos2d application</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+
+
+
+
+  
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+        	                <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("01/03/2019 12:39:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019-2025 lexsd6
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+
+    <div class="visit">
+        
+            <span id="busuanzi_container_site_pv" style='display:inline'>
+                <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                </span>
+            </span>
+        
+        
+            <span>| </span>
+        
+        
+            <span id="busuanzi_container_page_pv" style='display:inline'>
+                <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                </span>
+            </span>
+        
+    </div>
+
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//lexsd6.github.io/js/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 20;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+  </div>
+
+
+</body>
+</html>
